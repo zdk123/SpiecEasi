@@ -1,0 +1,18 @@
+\name{neff}
+\alias{neff}
+\title{N_effective: Compute the exponential of the shannon entropy. linearizes shannon entropy, for a better diveristy metric (effective number of species)}
+\usage{
+neff(x)
+}
+\arguments{
+  \item{x}{data vector}
+}
+\value{
+N_eff in base e
+}
+\description{
+N_effective: Compute the exponential of the shannon
+entropy. linearizes shannon entropy, for a better diveristy
+metric (effective number of species)
+}
+
