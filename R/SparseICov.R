@@ -1,31 +1,31 @@
-#' Speic-esi pipeline
+#' Spiec-Easi pipeline
 #' Run the whole analysis, from data transformation, iCov estimation and model selection.
 #' Inputs are a non-normalized OTU table and pipeline options.
 #' @export
-speic.esi <- function(obj, ...) {
-    UseMethod('speic.esi', obj)
+spiec.easi <- function(obj, ...) {
+    UseMethod('spiec.easi', obj)
 }
 
-#' Speic-esi pipeline
-#' @method speic.esi phyloseq
+#' Spiec-Easi pipeline
+#' @method spiec.easi phyloseq
 #' @import phyloseq
 #' @export
-speic.esi.phyloseq <- function(obj, ...) {
+spiec.easi.phyloseq <- function(obj, ...) {
     OTU <- otu_table(obj)@.Data
     if (otu_table(obj)@taxa_are_rows) OTU <- t(OTU)
-    speic.esi.default(OTU, ...)
+    spiec.easi.default(OTU, ...)
 }
 
 
-#' Speic-esi pipeline
+#' Spiec-Easi pipeline
 #' @param data non-normalized count OTU/data table with samples on rows and features/OTUs in columns
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann)
 #' @param sel.criterion character string specifying criterion/method for model selection accepts 'stars' [default], 'ric', 'ebic'
 #' @param icov.select.params list of further arguments to icov.select
 #' @param ... further arguments to sparseiCov
-#' @method speic.esi default
+#' @method spiec.easi default
 #' @export
-speic.esi.default <- function(data, method='glasso', sel.criterion='stars', verbose=TRUE, 
+spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', verbose=TRUE, 
                         icov.select=TRUE, icov.select.params=list(), ...) {
 
     args <- list(...)
