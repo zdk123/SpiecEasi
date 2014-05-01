@@ -1,0 +1,15 @@
+\name{adj2igraph}
+\alias{adj2igraph}
+\title{Convert an adjacency matrix (ie - from the \code{sparseiCov} function) to an igraph object suitable for plotting via phyloseq's \code{plot_network}.}
+\usage{
+adj2igraph(Adj, names = 1:ncol(Adj), rmEmptyNodes = FALSE)
+}
+\arguments{
+  \item{Adj}{an Adjacency matrix}
+}
+\description{
+Convert an adjacency matrix (ie - from the
+\code{sparseiCov} function) to an igraph object suitable
+for plotting via phyloseq's \code{plot_network}.
+}
+

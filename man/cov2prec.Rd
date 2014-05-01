@@ -1,0 +1,17 @@
+\name{cov2prec}
+\alias{cov2prec}
+\title{Covariance matrix to its matrix inverse (Precision matrix)}
+\usage{
+cov2prec(Cov, tol = 1e-04)
+}
+\arguments{
+  \item{Cov}{symmetric covariance matrix (can be
+  correlation also)}
+
+  \item{tol}{tolerance to define a zero eigenvalue (ie - is
+  Prec positive definite)}
+}
+\description{
+Covariance matrix to its matrix inverse (Precision matrix)
+}
+

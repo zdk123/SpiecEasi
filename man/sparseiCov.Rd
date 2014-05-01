@@ -2,7 +2,8 @@
 \alias{sparseiCov}
 \title{Sparse/penalized estimators of covariance matrices}
 \usage{
-sparseiCov(data, method, npn = FALSE, verbose = FALSE, ...)
+sparseiCov(data, method, npn = FALSE, verbose = FALSE, cov.output = TRUE,
+  ...)
 }
 \arguments{
   \item{data}{data matrix with features/OTUs in the columns

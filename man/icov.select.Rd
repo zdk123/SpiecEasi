@@ -4,7 +4,7 @@
 \usage{
 icov.select(est, criterion = "stars", stars.thresh = 0.05,
   ebic.gamma = 0.5, stars.subsample.ratio = NULL, rep.num = 20,
-  ncores = 1, normfun = function(x) x)
+  ncores = 1, normfun = function(x) x, verbose = FALSE)
 }
 \arguments{
   \item{est}{an estimate/model as produced by the
