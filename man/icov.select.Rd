@@ -1,6 +1,7 @@
 \name{icov.select}
 \alias{icov.select}
-\title{Model selection for picking the right \code{lambda} penalty.}
+\title{Model selection for picking the right \code{lambda} penalty.
+This is identical to huge::huge.stars except that the subsampling loop is replaced with an mclapply function to add parallelization capabilities.}
 \usage{
 icov.select(est, criterion = "stars", stars.thresh = 0.05,
   ebic.gamma = 0.5, stars.subsample.ratio = NULL, rep.num = 20,
@@ -33,9 +34,9 @@ icov.select(est, criterion = "stars", stars.thresh = 0.05,
   renormalized}
 }
 \description{
-This is identical to huge::huge.stars except that the
-subsampling loop is replaced with an mclapply function to
-add parallelization capabilities.
+Model selection for picking the right \code{lambda}
+penalty. This is identical to huge::huge.stars except that
+the subsampling loop is replaced with an mclapply function
+to add parallelization capabilities.
 }
-\keyword{export}
 
