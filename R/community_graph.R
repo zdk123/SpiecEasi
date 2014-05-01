@@ -49,7 +49,6 @@ make_precision_mat <- function(method, D, u, v, ...) {
 #'  Has internal rules for converting various graph topologies into the associated
 #' adjancency and, therefore, precision matrix
 #'
-
 #' @export
 graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, targetCondition=100, epsBin=1e-2,
                         numBinSearch=100) {

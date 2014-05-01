@@ -126,7 +126,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @param ncores number of cores to use. Need multiple processers if \code{ncores > 1}
 #' @param normfun normalize internally if data should be renormalized
 #' @importFrom parallel mclapply
-#' @keywords export
+#' @export
 icov.select <- function (est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5, 
     stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
     gcinfo(FALSE)
