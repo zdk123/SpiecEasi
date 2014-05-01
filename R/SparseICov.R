@@ -114,7 +114,6 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 
 
 #' Model selection for picking the right \code{lambda} penalty.
-#' 
 #' This is identical to huge::huge.stars except that the subsampling loop is replaced with an mclapply function to add parallelization capabilities.
 #' 
 #' @param est an estimate/model as produced by the sparseiCov function
@@ -127,7 +126,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @param normfun normalize internally if data should be renormalized
 #' @importFrom parallel mclapply
 #' @export
-icov.select <- function (est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5, 
+icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5, 
     stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
     gcinfo(FALSE)
     if (est$cov.input) {
