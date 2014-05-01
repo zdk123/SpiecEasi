@@ -10,5 +10,12 @@ Description: Estimate networks from the precision matrix of compositional
 Depends:
     R (>= 3.0.0),
     huge (>= 1.2.6)
+Suggests:
+    MASS,
+    VGAM,
+    Matrix,
+    parallel,
+    boot,
+    phyloseq
 License: getOptions('devtools.desc.license')
 LazyData: true
