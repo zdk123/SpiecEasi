@@ -28,13 +28,13 @@ cov2prec <- function(Cov, tol=1e-4) {
 }
 
 
-#' Wrapper function for generating a Precision matrix
+#' DEPREICATED FUNCTION Wrapper function for generating a Precision matrix
 #'
 #' @param method graph generation method
 #' @param D graph dimension (number of OTUs)
 #' @param u some parameter that controls Prec values
 #' @param v some other parameter that controls Prec values
-#' @export
+#' @keywords internal
 make_precision_mat <- function(method, D, u, v, ...) {
     if (v <=0 || v >= 1) stop ("v must be between 0 and 1")
     Graph <- make_graph(method, D, ...)
@@ -137,7 +137,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
 }
 
 
-#' Convert a symmetric graph (extension of R matrix class)
+#' DEPRECATED FUNCTION Convert a symmetric graph (extension of R matrix class)
 #' 
 #' Has internal rules for converting various graph topologies into the associated
 #' adjancency and, therefore, precision matrix
@@ -195,41 +195,54 @@ make_graph <- function(method, D, e, enforce=TRUE, ...) {
     method <- switch(method, cluster = "cluster", erdos_renyi = "erdos_renyi", 
                        hub = "hub", scale_free = "scale_free", 
                        block = "block", band = "band", 
-                       stop(paste("Error: graph method ", method, "not supported")))
+                       stop(paste("Error: graph method", method, "not supported")))
     graphgen <- get(method)
     Graph    <- graphgen(D, e=e, ...)
     attr(Graph, "graph") <- method
     
     ## enforce edge number
     if (enforce) {
-        nedges <- edge_count(Graph)
-        diffE  <- nedges - e
-        ind2sub <- function(m, ind) {
-            r <- ((ind-1) %% m) + 1
-            c <- floor((ind-1) / m) + 1
-            return(c(r,c))
-        }
-        
-        if (diffE > 0) {
-            oneInds <- which(Graph == 1)
-            oneInds <- oneInds[sample(1:length(oneInds), abs(diffE))]
-            for (i in oneInds) {
-                gind <- ind2sub(D, i)
-                Graph[gind[1], gind[2]] <- Graph[gind[2], gind[1]] <- 0
-            }
-        } else if (diffE < 0) {
-            diag(Graph) <- 1   # fill diag with dummy 1s
-            zeroInds <- which(Graph == 0)
-            zeroInds <- zeroInds[sample(1:length(zeroInds), abs(diffE))]
-            for (i in zeroInds) {
-                gind <- ind2sub(D, i)
-                Graph[gind[1], gind[2]] <- Graph[gind[2], gind[1]] <- 1
-            }
-            diag(Graph) <- 0
-        }
+        Graph <- enforceE(Graph, e)
     }
     return(structure(Graph, class='graph'))
 }
+
+
+#' @keywords internal
+enforceE <- function(Graph, e) {
+
+    nedges <- edge_count(Graph)
+    D      <- nrow(Graph)
+    diffE  <- nedges - e
+    uniqMatInds <- function(inds, D) {
+        tmpInds <- arrayInd(inds, c(D,D))
+        unique(t(unique(apply(tmpInds,1,sort))))
+    }
+    if (diffE > 0) {
+        oneInds <- which(Graph == 1)
+        tmpInds <- uniqMatInds(oneInds, D)
+        randi   <- sample(1:nrow(tmpInds), abs(diffE))
+        for (i in randi) {
+            gind <- tmpInds[i,]
+            Graph[gind[1], gind[2]] <- Graph[gind[2], gind[1]] <- 0
+            
+        }
+    } else if (diffE < 0) {
+        diag(Graph) <- 1   # fill diag with dummy 1s
+        zeroInds <- which(Graph == 0)
+        tmpInds <- uniqMatInds(zeroInds, D)
+        randi   <- sample(1:nrow(tmpInds), abs(diffE))
+        for (i in randi) {
+            gind <- tmpInds[i,]
+            Graph[gind[1], gind[2]] <- Graph[gind[2], gind[1]] <- 1
+        }
+        diag(Graph) <- 0
+    }
+
+    if (diffE != 0) enforceE(Graph, e)
+    else Graph
+}
+
 
 #' keywords internal
 scale_free <- function(D, e, pfun) {
