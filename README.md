@@ -51,7 +51,7 @@ graph <- make_graph('cluster', d, e)
 Prec  <- graph2prec(graph)
 Cor   <- cov2cor(prec2cov(Prec))
 
-X <- synth_comm_from_counts(amgut1.filt.cs, mar=2, distr='zinegbin', Sigma=Cor, n=n, retParams=TRUE)
+X <- synth_comm_from_counts(amgut1.filt.cs, mar=2, distr='zinegbin', Sigma=Cor, n=n)
 ```
 
 the main SPIEC-EASI pipeline: Data transformation, sparse invserse covariance estimation and model selection
