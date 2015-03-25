@@ -158,20 +158,20 @@ fitdistr <- function (x, densfun, start, ...)  {
         m <- mean(x)
     return(list(par=list(lambda=m)))
     }
-
+#    require(stats4)
     res <- optim(start, loglikfn, x=x, method='L-BFGS-B', lower=lower, upper=upper, control=list(factr=1e32, fnscale=1e-6), hessian=FALSE, ...)
-#    res <- mle(loglikfn, start=as.list(start), x=x, method='L-BFGS-B', lower=lower, upper=upper, ...)
+#    res <- mle(loglikfn, start=as.list(start), method='L-BFGS-B', lower=lower, upper=upper, x=x, ...)
     return(res)
 }
 
 
 #' @keywords internal
 #' @importFrom VGAM dzinegbin
-logLikzinb <- function(param, x, ...) {
+logLikzinb <- function(param,x,...) {
     pstr0 <- param['pstr0']
     munb  <- param['munb']
     size  <- param['size']
-    o <- (-sum(VGAM::dzinegbin(x, munb=munb, pstr0=pstr0, size=size, log=TRUE, ...)))^2
+    o <- (-sum(VGAM::dzinegbin(x, munb=munb, pstr0=pstr0, size=size, log=TRUE, ...)))
  #   print(o)
     o
 }
