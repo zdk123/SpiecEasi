@@ -11,7 +11,7 @@
 #' @return community 
 #' @export
 synth_comm_from_counts <- function(comm, mar=2, distr, Sigma=cov(comm),
-                                   params, n=ncol(comm), retParams=FALSE, ...) {
+                                   params, n=nrow(comm), retParams=FALSE, ...) {
     D <- nrow(comm)
     if (missing(params))  params <- get_comm_params(comm, mar, distr, ...)
     paramat <- do.call('rbind', params)
@@ -97,7 +97,7 @@ fitdistr <- function (x, densfun, start, ...)  {
         zind    <- na.omit(whichz[1:max])
         tempx   <- x[-zind]
         pstr0  <- length(which(x == 0)) / length(x)
-        pstr0  <- ifelse(pstr0 == 0, 0, abs(pstr0 - exp(-mean(tempx))))   # correct for approx expected zeros in a poisson (important for small rates)
+        pstr0  <- abs(pstr0 - exp(-mean(tempx)))   # correct for approx expected zeros in a poisson (important for small rates)
         estimate <- mean(x) / (1 - pstr0)
         vars <- ((1 - pstr0) * (estimate^2 + estimate)) - ((1-pstr0) * estimate)^2
         sds  <- sqrt(vars)
@@ -124,22 +124,25 @@ fitdistr <- function (x, densfun, start, ...)  {
         zind  <- na.omit(whichz[1:max])
         tempx <- x[-zind]
         pstr0 <- length(which(x == 0)) / length(x)
-        pstr0 <- ifelse(pstr0 == 0, 0, abs(pstr0 - exp(-mean(tempx))))   # correct for approx expected zeros, if there are any
-        m     <- mean(x)
-        v    <- var(x)/10
+        if (pstr0 != 0)
+            pstr0 <- abs(pstr0 - exp(-mean(tempx)))   # correct for approx expected zeros, if there are any
+        m  <- mean(x)
+        v  <- var(x)
         if (pstr0 == 0) {
-            size <- ifelse ((v > m), m^2/(v - m), 100)
-            estimate <- m/2
+            if (v > n) size <- m^2/(v - m)
+            else size <- 100
+            estimate <- m
         } else {
+            v <- var(tempx)
+            m <- mean(tempx)
             estimate <- m / (1 - pstr0)
-            if (v < m) size <- 1e-3
-            else size <- estimate  / ((v/m) - 1 - (pstr0 * estimate))
+            if (v < m) size <- 1e2
+            else size <- (m^2/(v-m)) * ((1-pstr0) * estimate)
         }
-
+        lower <- c(1e-2, 1e-2, 0)
+        upper <- c(1e4, 1e4, .99)
         start <- c(size = size, munb = estimate, pstr0 = pstr0)
         start <- start[!is.element(names(start), dots)]
-        lower <- c(1e-4, 1e-4, 0)
-        upper <- c(1e4, 1e4, .99)
         loglikfn <- match.fun(logLikzinb)
      } 
     else if (distname == 'negbin') {
@@ -150,7 +153,7 @@ fitdistr <- function (x, densfun, start, ...)  {
                 else 100
         start <- list(size = size, mu = m)
         start <- start[!is.element(names(start), dots)]
-        lower <- c(1e-4, 1e-4)
+        lower <- c(1e-2, 1e-2)
         upper <- c(1e4, 1e4)
         loglikfn <- match.fun(logLiknb)
     }
@@ -158,9 +161,10 @@ fitdistr <- function (x, densfun, start, ...)  {
         m <- mean(x)
     return(list(par=list(lambda=m)))
     }
-#    require(stats4)
-    res <- optim(start, loglikfn, x=x, method='L-BFGS-B', lower=lower, upper=upper, control=list(factr=1e32, fnscale=1e-6), hessian=FALSE, ...)
-#    res <- mle(loglikfn, start=as.list(start), method='L-BFGS-B', lower=lower, upper=upper, x=x, ...)
+    start <- pmax(start, lower)
+    start <- pmin(start, upper)
+    names(upper) <- names(lower) <- names(start)
+    res <- optim(start, loglikfn, x=x, method='L-BFGS-B', lower=lower, upper=upper, control=list(fnscale=1e-12, maxit=1e3), hessian=FALSE, ...)
     return(res)
 }
 
@@ -168,17 +172,17 @@ fitdistr <- function (x, densfun, start, ...)  {
 #' @keywords internal
 #' @importFrom VGAM dzinegbin
 logLikzinb <- function(param,x,...) {
+    param <- abs(param)
     pstr0 <- param['pstr0']
     munb  <- param['munb']
     size  <- param['size']
-    o <- (-sum(VGAM::dzinegbin(x, munb=munb, pstr0=pstr0, size=size, log=TRUE, ...)))
- #   print(o)
-    o
+    (-sum(VGAM::dzinegbin(x, munb=munb, pstr0=pstr0, size=size, log=TRUE, ...)))
 }
 
 #' @keywords internal
 #' @importFrom stats dnbinom
-logLiknb <- function(param, x, ddistr, ...) {
+logLiknb <- function(param, x, ...) {
+    param <- abs(param)
     munb <- param['mu']
     size   <- param['size']
     (-sum(dnbinom(x, mu=munb, size=size, log=TRUE, ...)))
@@ -261,6 +265,5 @@ qqdplot <- function(y, distr, param, plot=TRUE, ...) {
         return(x)
     }
 }
-
 
 

@@ -9,11 +9,11 @@ Description: Estimate networks from the precision matrix of compositional
  microbial abundance data
 Depends: 
  R (>= 3.0.0),
- huge (>= 1.2.6)
-Suggests: 
+ huge (>= 1.2.6),
  MASS,
  VGAM,
- Matrix,
+ Matrix
+Suggests: 
  parallel,
  boot,
  phyloseq,

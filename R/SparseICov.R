@@ -139,7 +139,6 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
             criterion = "ric"
         if (est$method == "ct" && is.null(criterion)) 
             criterion = "stars"
-        if (est$method == "glasso" && is.null(criterion)) 
             criterion = "ebic"
         n = nrow(est$data)
         d = ncol(est$data)
