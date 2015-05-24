@@ -1,3 +1,5 @@
+#' synth_comm_from_counts
+#'
 #' from count data (ex HMP) fit parameters to OTU margins
 #' and simulate a new community with those properties
 #'
@@ -164,7 +166,7 @@ fitdistr <- function (x, densfun, start, ...)  {
     start <- pmax(start, lower)
     start <- pmin(start, upper)
     names(upper) <- names(lower) <- names(start)
-    res <- optim(start, loglikfn, x=x, method='L-BFGS-B', lower=lower, upper=upper, control=list(fnscale=1e-12, maxit=1e3), hessian=FALSE, ...)
+    res <- optim(start, loglikfn, x=x, method='L-BFGS-B', lower=lower, upper=upper, control=list(fnscale=1e12, factr=1e-2, maxit=1e4), hessian=TRUE, ...)
     return(res)
 }
 

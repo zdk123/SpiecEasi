@@ -136,9 +136,8 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
     }
     if (!est$cov.input) {
         if (est$method == "mb" && is.null(criterion)) 
-            criterion = "ric"
-        if (est$method == "ct" && is.null(criterion)) 
             criterion = "stars"
+        if (est$method == "ct" && is.null(criterion)) 
             criterion = "ebic"
         n = nrow(est$data)
         d = ncol(est$data)
@@ -262,7 +261,6 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
             mergeArray <- simplify2array(merge)
             merge <- apply(mergeArray, 1:3, sum)
             est$merge <- lapply(1:dim(merge)[3], function(i) merge[,,i])
-            
             if (verbose) {
                 mes = "Conducting Subsampling....done.                 "
                 cat(mes, "\r")

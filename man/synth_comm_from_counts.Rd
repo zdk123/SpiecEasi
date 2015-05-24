@@ -2,8 +2,7 @@
 % Please edit documentation in R/fitdistr.R
 \name{synth_comm_from_counts}
 \alias{synth_comm_from_counts}
-\title{from count data (ex HMP) fit parameters to OTU margins
-and simulate a new community with those properties}
+\title{synth_comm_from_counts}
 \usage{
 synth_comm_from_counts(comm, mar = 2, distr, Sigma = cov(comm), params,
   n = nrow(comm), retParams = FALSE, ...)

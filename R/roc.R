@@ -1,8 +1,21 @@
-stars.roc <- function(optmerge, theta, verbose = TRUE, ll) {
+#' stars.roc, stars.pr
+#'
+#' Plot a ROC (reciever operator characteristic) or a Precision-Recall curve
+#' along the stars 'confidence path'. Each edge is a number in [0,1],
+#' which is on the fraction of inferred graphs over subsamples in which that edge
+#' appeared in stars.
+#'
+#' @param optmerge the optimal 'merge' matrix selected by stars
+#' @param theta the true graph or precision matrix
+#' @param verbose display messages
+#' @param ll number of points for the plot
+#' @export
+stars.roc <- function(optmerge, theta, verbose = TRUE, ll=15) {
     huge::huge.roc(merge2path(optmerge, ll), theta, verbose)
 }
 
-stars.pr <- function(optmerge, theta, verbose = TRUE, ll) {
+#' @rdname stars.roc
+stars.pr <- function(optmerge, theta, verbose = TRUE, ll=15) {
     huge.pr(merge2path(optmerge, ll+1), theta, verbose)
 }
 
@@ -54,7 +67,7 @@ huge.pr <- function (path, theta, verbose = TRUE) {
     tmp1 = ROC$prec[ord.p]
     tmp2 = ROC$rec[ord.p]
     par(mfrow = c(1, 1))
-    plot(tmp1, tmp2, type = "b", main = "ROC Curve", xlab = "Precision", 
+    plot(tmp1, tmp2, type = "b", main = "PR Curve", xlab = "Precision", 
         ylab = "Recall", ylim = c(0, 1))
     ROC$AUC = sum(diff(tmp1) * (tmp2[-1] + tmp2[-length(tmp2)]))/2
     rm(ord.p, tmp1, tmp2)
