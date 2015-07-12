@@ -3,7 +3,7 @@
 #' @param Adj an Adjacency matrix
 #' @export
 adj2igraph <- function(Adj, names=1:ncol(Adj), rmEmptyNodes=FALSE) {
-    g <- graph.adjacency(Adj)
+    g <- graph.adjacency(Adj, mode = "undirected", weigthed = TRUE)
 
     if (rmEmptyNodes) {
         ind <- which(degree(g) < 1)
