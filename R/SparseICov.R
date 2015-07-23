@@ -127,7 +127,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @importFrom parallel mclapply
 #' @export
 icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5, 
-    stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
+    stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE, preschedule=FALSE) {
     gcinfo(FALSE)
     if (est$cov.input) {
         cat("Model selection is not available when using the covariance matrix as input.")
@@ -255,7 +255,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
                 rm(ind.sample)
                 gc()
                 return(simplify2array( lapply(tmp, as.matrix)))
-              }, mc.cores=ncores)
+              }, mc.cores=ncores, mc.preschedule=preschedule)
           #  }
            # merge <- lapply(merge, as.matrix)
             mergeArray <- simplify2array(merge)
