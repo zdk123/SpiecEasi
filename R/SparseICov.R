@@ -230,7 +230,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
 
         #    for (i in 1:rep.num) {
            # merge <- parallel::mclapply(1:rep.num, function(i)
-               {
+               #{
 #                if (verbose) {
 #                  mes <- paste(c("Conducting Subsampling....in progress:", 
 #                    floor(100 * i/rep.num), "%"), collapse = "")
