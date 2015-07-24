@@ -127,7 +127,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @importFrom parallel mclapply
 #' @export
 icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5, 
-    stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE, preschedule=FALSE) {
+    stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
     gcinfo(FALSE)
     if (est$cov.input) {
         cat("Model selection is not available when using the covariance matrix as input.")
@@ -229,7 +229,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
 #            for (i in 1:nlambda) merge[[i]] <- Matrix(0, d, d)
 
         #    for (i in 1:rep.num) {
-            merge <- parallel::mclapply(1:rep.num, function(i)
+           # merge <- parallel::mclapply(1:rep.num, function(i)
                {
 #                if (verbose) {
 #                  mes <- paste(c("Conducting Subsampling....in progress:", 
@@ -238,6 +238,8 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
 #                  flush.console()
 #                }
 #                merge <- replicate(nlambda, Matrix(0, d,d))
+            registerDoMC(ncores)
+            merge<-foreach(i=1:rep.num, .combine="c") %dopar% {
                 ind.sample = sample(c(1:n), floor(n * stars.subsample.ratio), 
                   replace = FALSE)
                 if (est$method == "mb") 
@@ -255,7 +257,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
                 rm(ind.sample)
                 gc()
                 return(simplify2array( lapply(tmp, as.matrix)))
-              }, mc.cores=ncores, mc.preschedule=preschedule)
+              }#, mc.cores=ncores)
           #  }
            # merge <- lapply(merge, as.matrix)
             mergeArray <- simplify2array(merge)
