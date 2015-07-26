@@ -127,7 +127,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @importFrom parallel mclapply
 #' @export
 icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5, 
-                        stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE, preschedule=FALSE) {
+                        stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
   gcinfo(FALSE)
   if (est$cov.input) {
     cat("Model selection is not available when using the covariance matrix as input.")
@@ -254,12 +254,12 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
         
         rm(ind.sample)
         gc()
-        return(simplify2array( lapply(tmp, as.matrix)))
-      }, mc.cores=ncores, mc.preschedule=preschedule)
+        return(tmp)
+      }, mc.cores=ncores)
       #  }
       # merge <- lapply(merge, as.matrix)
-      mergeArray <- simplify2array(merge)
-      merge <- apply(mergeArray, 1:3, sum)
+      merge<-lapply(merge, function(x) simplify2array(lapply(x, as.matrix)) )
+      merge<-Reduce("+",merge)
       est$merge <- lapply(1:dim(merge)[3], function(i) merge[,,i])
       if (verbose) {
         mes = "Conducting Subsampling....done.                 "
@@ -296,5 +296,4 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
 dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
 #' @keywords internal
 dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)
-
 
