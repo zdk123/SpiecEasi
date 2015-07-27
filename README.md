@@ -68,6 +68,49 @@ stars.pr(se.est$merge[[se.est$opt.index]], graph)
 
 The above example does not cover all possible options and parameters. For example, other generative network models are available, the lambda.min.ratio (the scaling factor that determines the minimum sparsity/lambda parameter) shown here might not be right for your dataset, and its possible that you'll want more repetitions for stars selection.
 
-I will update this README with more 'advanced' usage.
+
+## Analysis of American Gut data ##
+
+
+Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the \lstinline[basicstyle=\ttfamily]|spiec.easi| function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter \lstinline[basicstyle=\ttfamily]|icov.select.params|. If you have more than one processor available, you can also supply a number to \lstinline[basicstyle=\ttfamily]|ncores|. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
+
+```r
+se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2, 
+                            nlambda=20, icov.select.params=list(rep.num=50))
+se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
+                            nlambda=20, icov.select.params=list(rep.num=50))
+sparcc.amgut <- sparcc(amgut1.filt)
+## Define arbitrary threshold for SparCC correlation matrix for the graph
+sparcc.graph <- abs(sparcc.amgut$Cor) >= 0.3
+## Create igraph objects
+ig.mb <- graph.adjacency(se.mb.amgut$refit, mode='undirected')
+ig.gl <- graph.adjacency(se.gl.amgut$refit, mode='undirected')
+ig.sparcc <- graph.adjacency(sparcc.graph, mode='undirected', diag=FALSE)
+
+## set size of vertex proportional to clr-mean
+vsize <- rowMeans(clr(amgut1.filt, 1))+6
+am.coord <- layout.fruchterman.reingold(ig.mb)
+
+par(mfrow=c(1,3))
+plot(ig.mb, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="MB")
+plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
+plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
+```
+
+
+Lets look at the degree statistics from the networks inferred by each method.
+
+```r
+dd.gl <- degree.distribution(ig.gl)
+dd.mb <- degree.distribution(ig.mb)
+dd.sparcc <- degree.distribution(ig.sparcc)
+
+plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b', 
+      ylab="Frequency", xlab="Degree", main="Degree Distributions")
+points(0:(length(dd.gl)-1), dd.gl, col="red" , type='b')
+points(0:(length(dd.mb)-1), dd.mb, col="forestgreen", type='b')
+legend("topright", c("MB", "glasso", "sparcc"), 
+        col=c("forestgreen", "red", "black"), pch=1, lty=1)
+```
 
 
