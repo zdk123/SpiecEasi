@@ -229,7 +229,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
       #            for (i in 1:nlambda) merge[[i]] <- Matrix(0, d, d)
       
       #    for (i in 1:rep.num) {
-      merge <- parallel::mclapply(1:rep.num, function(i)
+      premerge <- parallel::mclapply(1:rep.num, function(i)
       {
         #                if (verbose) {
         #                  mes <- paste(c("Conducting Subsampling....in progress:", 
@@ -258,9 +258,12 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
       }, mc.cores=ncores)
       #  }
       # merge <- lapply(merge, as.matrix)
-      merge<-lapply(merge, function(x) simplify2array(lapply(x, as.matrix)) )
-      merge<-Reduce("+",merge)
-      est$merge <- lapply(1:dim(merge)[3], function(i) merge[,,i])
+#      merge <- lapply(merge, simplify2array)
+#      est$merge <- lapply(1:dim(merge)[3], function(i) merge[,,i]/rep.num)
+
+      merge <- Reduce(function(l1, l2) lapply(1:length(l1), 
+                    function(i) l1[[i]] + l2[[i]]), premerge, accumulate=FALSE)
+
       if (verbose) {
         mes = "Conducting Subsampling....done.                 "
         cat(mes, "\r")
@@ -268,10 +271,10 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
         flush.console()
       }
       est$variability = rep(0, nlambda)
+      est$merge <- vector('list', nlambda)
       for (i in 1:nlambda) {
-        est$merge[[i]] = est$merge[[i]]/rep.num
-        est$variability[i] = 4 * sum(est$merge[[i]] * 
-                                       (1 - est$merge[[i]]))/(d * (d - 1))
+        est$merge[[i]]  <- merge[[i]]/rep.num
+        est$variability[i] <- 4 * sum(est$merge[[i]] * (1 - est$merge[[i]]))/(d * (d - 1))
       }
       est$opt.index = max(which.max(est$variability >= 
                                       stars.thresh)[1] - 1, 1)
