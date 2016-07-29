@@ -1,6 +1,18 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+```{r, echo = FALSE, eval=TRUE}
+opts_knit$set(
+  upload.fun = function(file) imgur_upload(file, "ce3138fd1186b7d"), 
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = FALSE
+saveout   = runchunks
 
+if (!runchunks) load('.README.RData')
+```
 SpiecEasi
 =========
 
@@ -16,8 +28,7 @@ I assume that all auxillary packages are already installed - for example huge, M
 
 From an interactive R session:
 
-
-```r
+```{r, eval=FALSE}
 library(devtools)
 install_github("zdk123/SpiecEasi")
 library(SpiecEasi)
@@ -37,8 +48,7 @@ Lets simulate some multivariate data under zero-inflated negative binomial model
 
 Obviously, for real data, skip 1-4.
 
-
-```r
+```{r, eval=runchunks}
 data(amgut1.filt)
 depths <- rowSums(amgut1.filt)
 amgut1.filt.n <- t(apply(amgut1.filt, 1, norm_to_total))
@@ -49,8 +59,7 @@ n <- nrow(amgut1.filt.cs)
 e <- d
 ```
 Synthesize the data
-
-```r
+```{r, eval=runchunks}
 set.seed(10010)
 graph <- make_graph('cluster', d, e)
 Prec  <- graph2prec(graph)
@@ -60,14 +69,12 @@ X <- synth_comm_from_counts(amgut1.filt.cs, mar=2, distr='zinegbin', Sigma=Cor, 
 ```
 
 the main SPIEC-EASI pipeline: Data transformation, sparse invserse covariance estimation and model selection
-
-```r
+```{r, eval=runchunks}
 se.est <- spiec.easi(X, method='mb', lambda.min.ratio=1e-2, nlambda=15)
 ```
 
 examine ROC over lambda path and PR over the stars index for the selected graph
-
-```r
+```{r, eval=FALSE, fig.width=5, fig.height=5}
 huge::huge.roc(se.est$path, graph, verbose=FALSE)
 stars.pr(getOptMerge(se.est), graph, verbose=FALSE)
 # stars selected final network under: se.est$refit
@@ -81,8 +88,7 @@ The above example does not cover all possible options and parameters. For exampl
 
 Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the \lstinline[basicstyle=\ttfamily]|spiec.easi| function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter \lstinline[basicstyle=\ttfamily]|icov.select.params|. If you have more than one processor available, you can also supply a number to \lstinline[basicstyle=\ttfamily]|ncores|. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
 
-
-```r
+```{r, eval=runchunks}
 se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2, 
                             nlambda=20, icov.select.params=list(rep.num=50))
 se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
@@ -99,8 +105,7 @@ ig.sparcc <- graph.adjacency(sparcc.graph, mode='undirected')
 ```
 
 Visualize using igraph plotting:
-
-```r
+```{r, eval=TRUE, fig.width=15, fig.height=7}
 ## set size of vertex proportional to clr-mean
 vsize <- rowMeans(clr(amgut1.filt, 1))+6
 am.coord <- layout.fruchterman.reingold(ig.mb)
@@ -111,14 +116,11 @@ plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
 plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
 ```
 
-![plot of chunk unnamed-chunk-8](http://i.imgur.com/gYzjuYB.png)
-
 We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations
 can be used directly, while SpiecEasi networks need to be massaged a bit. Note though that since SPIEC-EASI
 is based on penalized estimators, the edge weights are not directly comparable to SparCC.
 
-
-```r
+```{r, eval=TRUE, fig.width=8, fig.height=5}
 elist.gl <- summary(Matrix::triu(se.gl.amgut$opt.cov*se.gl.amgut$refit, k=1))
 elist.mb <- summary(symBeta(getOptBeta(se.mb.amgut), mode='maxabs'))
 elist.sparcc <- summary(sparcc.graph*sparcc.amgut$Cor)
@@ -128,12 +130,9 @@ hist(elist.gl[,3], add=TRUE, col='red', alpha=.5)
 hist(elist.mb[,3], add=TRUE, col='forestgreen', alpha=.4)
 ```
 
-![plot of chunk unnamed-chunk-9](http://i.imgur.com/EdWoewk.png)
-
 Lets look at the degree statistics from the networks inferred by each method.
 
-
-```r
+```{r, eval=TRUE, fig.width=9, fig.height=6}
 dd.gl <- degree.distribution(ig.gl)
 dd.mb <- degree.distribution(ig.mb)
 dd.sparcc <- degree.distribution(ig.sparcc)
@@ -146,7 +145,9 @@ legend("topright", c("MB", "glasso", "sparcc"),
         col=c("forestgreen", "red", "black"), pch=1, lty=1)
 ```
 
-![plot of chunk unnamed-chunk-10](http://i.imgur.com/fswhXkH.png)
 
+```{r, echo = FALSE, eval=TRUE}
 
-
+if (saveout) 
+ save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se.est, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".README.RData")
+```

@@ -1,3 +1,18 @@
+#' get opt merge
+#'
+#' Get the optimal merge matrix StARS is run.
+#'
+#' @param est output from \code{spiec.easi} or \code{icov.select}
+#' @return Weighted, symmetric matrix of edge probability estimates.
+getOptMerge <- function(est) {
+    if (class(est) == "select" && est$criterion == "stars") {
+        return(est$merge[[est$opt.index]])
+    } else 
+        stop("Run spiec-easi with criterion=\"stars\"")
+
+}
+
+
 #' get opt beta
 #'
 #' Get the optimal beta matrix when MB neighborhood selection is run with StARS
@@ -28,7 +43,7 @@ getOptBeta <- function(est) {
 #' @return a symmetric coefficient matrix
 symBeta <- function(beta, mode='ave') {
     if (mode=='ave') {
-        return((beta+t(beta))/2)
+        symbeta <- (beta+t(beta))/2
    } else if (mode == "maxabs") {
         upt <- Matrix::triu(beta)
         lot <- t(Matrix::tril(beta))
@@ -37,13 +52,14 @@ symBeta <- function(beta, mode='ave') {
         lotind <- Matrix::which(maxt == abs(lot))
         if (length(uptind != 0)) maxt[uptind] <- maxt[uptind]*sign(upt[uptind])
         if (length(lotind != 0)) maxt[lotind] <- maxt[lotind]*sign(lot[lotind])
-        return(maxt + t(maxt))
+        symbeta <-  maxt + t(maxt)
     } else if (mode == "upper") {
         upt <- Matrix::triu(beta)
-        return (upt + t(upt))
+        symbeta <-  upt + t(upt)
     } else if (mode == "lower") {
         lot <- Matrix::tril(beta)
-        return (lot + t(lot))
+        symbeta <- lot + t(lot)
     } else 
         stop ("mode not recognized")
+    as(symbeta, 'symmetricMatrix')
 }

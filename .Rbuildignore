@@ -1,0 +1,5 @@
+^.*\.BatchJobs.*\.R$
+^README\.Rmd$
+^README\.log$
+^figure$
+^\.travis\.yml$
