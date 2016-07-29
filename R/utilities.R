@@ -4,6 +4,7 @@
 #'
 #' @param est output from \code{spiec.easi} or \code{icov.select}
 #' @return Weighted, symmetric matrix of edge probability estimates.
+#' @export
 getOptMerge <- function(est) {
     if (class(est) == "select" && est$criterion == "stars") {
         return(est$merge[[est$opt.index]])
@@ -19,6 +20,7 @@ getOptMerge <- function(est) {
 #'
 #' @param est output from \code{spiec.easi} or \code{icov.select}
 #' @return Weighted, non-symmetric matrix of model coefficients.
+#' @export
 getOptBeta <- function(est) {
     if (class(est) == "select" && est$method == "mb") {
         return(est$beta[[est$opt.index]])
@@ -41,6 +43,7 @@ getOptBeta <- function(est) {
 #'  \item lower:  Take the values from the lower triangle
 #'}
 #' @return a symmetric coefficient matrix
+#' @export
 symBeta <- function(beta, mode='ave') {
     if (mode=='ave') {
         symbeta <- (beta+t(beta))/2
