@@ -63,7 +63,11 @@ rmvzipois <- function(n, mu, Sigma, lambdas, ps, ...) {
 
     normd  <- rmvnorm(n, rep(0, d), Cor)
     unif   <- pnorm(normd)
-    data <- t(VGAM::qzipois(t(unif), lambdas, pstr0=ps, ...))
+    data <- t(apply(unif, 1, function(probs) {
+              VGAM::qzipois(probs, lambdas, pstr0=ps, ...)
+            }))
+
+
     data <- .fixInf(data)
     return(data)
 }
@@ -176,7 +180,9 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
     d   <- length(munbs)
     normd  <- rmvnorm(n, rep(0, d), Sigma=Cor)
     unif   <- pnorm(normd)
-    data <- t(VGAM::qzinegbin(t(unif), munb=munbs, size=ks, pstr0=ps, ...))
+    data <- t(apply(unif, 1, function(probs) {
+              VGAM::qzinegbin(probs, munb=munbs, size=ks, pstr0=ps, ...)
+            }))
     data <- .fixInf(data)
     return(data)
 }
