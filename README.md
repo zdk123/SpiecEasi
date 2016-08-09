@@ -100,53 +100,11 @@ ig.sparcc <- graph.adjacency(sparcc.graph, mode='undirected')
 
 Visualize using igraph plotting:
 
-```r
-## set size of vertex proportional to clr-mean
-vsize <- rowMeans(clr(amgut1.filt, 1))+6
-am.coord <- layout.fruchterman.reingold(ig.mb)
-
-par(mfrow=c(1,3))
-plot(ig.mb, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="MB")
-plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
-plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
-```
-
-![plot of chunk unnamed-chunk-8](http://i.imgur.com/gYzjuYB.png)
-
-We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations
-can be used directly, while SpiecEasi networks need to be massaged a bit. Note though that since SPIEC-EASI
-is based on penalized estimators, the edge weights are not directly comparable to SparCC.
 
 
-```r
-elist.gl <- summary(Matrix::triu(se.gl.amgut$opt.cov*se.gl.amgut$refit, k=1))
-elist.mb <- summary(symBeta(getOptBeta(se.mb.amgut), mode='maxabs'))
-elist.sparcc <- summary(sparcc.graph*sparcc.amgut$Cor)
-
-hist(elist.sparcc[,3], main="", xlab="edge weights")
-hist(elist.gl[,3], add=TRUE, col='red', alpha=.5)
-hist(elist.mb[,3], add=TRUE, col='forestgreen', alpha=.4)
-```
-
-![plot of chunk unnamed-chunk-9](http://i.imgur.com/EdWoewk.png)
-
-Lets look at the degree statistics from the networks inferred by each method.
 
 
-```r
-dd.gl <- degree.distribution(ig.gl)
-dd.mb <- degree.distribution(ig.mb)
-dd.sparcc <- degree.distribution(ig.sparcc)
 
-plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b', 
-      ylab="Frequency", xlab="Degree", main="Degree Distributions")
-points(0:(length(dd.gl)-1), dd.gl, col="red" , type='b')
-points(0:(length(dd.mb)-1), dd.mb, col="forestgreen", type='b')
-legend("topright", c("MB", "glasso", "sparcc"), 
-        col=c("forestgreen", "red", "black"), pch=1, lty=1)
-```
-
-![plot of chunk unnamed-chunk-10](http://i.imgur.com/fswhXkH.png)
 
 
 

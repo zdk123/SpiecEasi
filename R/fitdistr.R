@@ -56,15 +56,19 @@ get_comm_params <- function(comm, mar=2, distr, ...) {
 #' @param x data vector
 #' @param densfun string giving distribution function name
 #' @param start starting guess for the parameters (recommended leaving this out)
+#' @param control control parameters to optim
 #' @param ... further arguments to densfun
 #' @importFrom VGAM dzinegbin dzipois
 #' @importFrom stats dnbinom
 #' @export
-fitdistr <- function (x, densfun, start, ...)  {
+fitdistr <- function (x, densfun, start, control, ...)  {
     if (class(x) != "numeric") stop("Error: input must be numeric vector")
     Call <- match.call(expand.dots = TRUE)
     if (missing(start)) 
         start <- NULL
+    if (missing(control)) 
+        control <- list(fnscale=1e12, factr=1e-2, maxit=10)
+
     dots <- names(list(...))
     dots <- dots[!is.element(dots, c("upper", "lower"))]
     if (missing(x) || length(x) == 0L || mode(x) != "numeric") 
@@ -73,7 +77,7 @@ fitdistr <- function (x, densfun, start, ...)  {
         stop("'x' contains missing or infinite values")
     if (missing(densfun) || !(is.function(densfun) || is.character(densfun))) 
         stop("'densfun' must be supplied as a function or name")
-    control <- list()
+
     n <- length(x)
     if (is.character(densfun)) {
         distname <- tolower(densfun)
@@ -116,7 +120,7 @@ fitdistr <- function (x, densfun, start, ...)  {
         v <- var(x)
         start <- list(shape = m^2/v, rate = m/v)
         start <- start[!is.element(names(start), dots)]
-        control <- list(parscale = c(1, start$rate))
+        control <- c(control, list(parscale = c(1, start$rate)))
     }
     else if (distname == "zinegbin" && is.null(start)) {
         whichz  <- which(x == 0.0)
@@ -166,7 +170,8 @@ fitdistr <- function (x, densfun, start, ...)  {
     start <- pmax(start, lower)
     start <- pmin(start, upper)
     names(upper) <- names(lower) <- names(start)
-    res <- optim(start, loglikfn, x=x, method='L-BFGS-B', lower=lower, upper=upper, control=list(fnscale=1e12, factr=1e-2, maxit=1e4), hessian=TRUE, ...)
+    res <- optim(start, loglikfn, x=x, method='L-BFGS-B', lower=lower, upper=upper,
+                 control=control, ...)
     return(res)
 }
 

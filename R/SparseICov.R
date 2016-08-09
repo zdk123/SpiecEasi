@@ -29,7 +29,7 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', ver
                                icov.select=TRUE, icov.select.params=list(), ...) {
   
   args <- list(...)
-  if (verbose) message("Normalizing/clr transformation of data with pseudocount")
+  if (verbose) message("Normalizing/clr transformation of data with pseudocount ...")
   data.clr <- t(clr(data+1, 1))
   if (verbose) message(paste("Inverse Covariance Estimation with", method, "...", sep=" "))
   est      <- do.call('sparseiCov', c(list(data=data.clr, method=method), args))
@@ -69,8 +69,10 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', ver
 #' @examples
 #' # simulate data with 1 negative correlation
 #'  set.seed(10010)
-#'  Sigma <- diag(50)*2
-#'  Sigma[1,2] <- Sigma[2,1] <- -.9
+#'  Theta <- matrix(0, 50, 50)
+#'  Theta[1,2] <- Theta[2,1] <- 1
+#'  Sigma <- -.45*Theta
+#'  diag(Sigma) <- 1
 #'  data  <- exp(rmvnorm(50, runif(50, 0, 2), Sigma))
 #'
 #' # normalize
@@ -82,26 +84,25 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', ver
 #'  est.f    <- sparseiCov(data.f, method='glasso')
 #'  est.log  <- sparseiCov(log(data), method='glasso')
 #'
-#' # visualize results
-#'  par(mfrow=c(1,3))
-#'  image(as.matrix(est.log$path[[3]][1:5,1:5]))
-#'  image(as.matrix(est.clr$path[[3]][1:5,1:5]))
-#'  image(as.matrix(est.f$path[[3]][1:5,1:5]))
+#' # evaluate results
+#' huge::huge.roc(est.clr$path, Theta)
+#' huge::huge.roc(est.log$path, Theta)
+#' huge::huge.roc(est.f$path,   Theta)
+#'
 sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE, ...) {
   
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
-  
+
   args <- list(...)
-  
-  method <- switch(method, glasso = "glasso", mb = "mb",
-                   stop("Method not supported"))
-  
+
+  method <- switch(method, glasso = "glasso", mb = "mb", stop("Method not supported"))
+
   if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
-  
+
   if (method %in% c("glasso")) {
     do.call(huge::huge, c(args, list(x=data, method=method, verbose=verbose, 
                                      cov.output = cov.output)))
-    
+
   } else if (method %in% c('mb')) {
     est <- do.call(huge::huge.mb, c(args, list(x=data, verbose=verbose)))
     est$method <- 'mb'
@@ -109,7 +110,6 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
     est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
     return(est)
   }
-  
 }
 
 
@@ -130,7 +130,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
                         stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
   gcinfo(FALSE)
   if (est$cov.input) {
-    cat("Model selection is not available when using the covariance matrix as input.")
+    message("Model selection is not available when using the covariance matrix as input.")
     class(est) = "select"
     return(est)
   }
@@ -144,8 +144,8 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
     nlambda = length(est$lambda)
     if (criterion == "ric") {
       if (verbose) {
-        cat("Conducting rotation information criterion (ric) selection....")
-        flush.console()
+        message("Conducting rotation information criterion (ric) selection....")
+#        flush.console()
       }
       if (n > rep.num) {
         nr = rep.num
@@ -162,27 +162,27 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
       rm(out)
       gc()
       if (verbose) {
-        cat("done\n")
-        flush.console()
+        message("done\n")
+#        flush.console()
       }
       if (verbose) {
-        cat("Computing the optimal graph....")
-        flush.console()
+        message("Computing the optimal graph....")
+#        flush.console()
       }
       if (est$opt.lambda > max(cor(est$data))) 
         est$refit = Matrix(0, d, d)
       else {
         if (est$method == "mb") 
-          est$refit = huge.mb(est$data, lambda = est$opt.lambda, 
+          est$refit = huge::huge.mb(est$data, lambda = est$opt.lambda, 
                               sym = est$sym, idx.mat = est$idx.mat, verbose = FALSE)$path[[1]]
         if (est$method == "glasso") {
           if (!is.null(est$cov)) {
-            tmp = huge.glasso(est$data, lambda = est$opt.lambda, 
+            tmp = huge::huge.glasso(est$data, lambda = est$opt.lambda, 
                               scr = est$scr, cov.output = TRUE, verbose = FALSE)
             est$opt.cov = tmp$cov[[1]]
           }
           if (is.null(est$cov)) 
-            tmp = huge.glasso(est$data, lambda = est$opt.lambda, 
+            tmp = huge::huge.glasso(est$data, lambda = est$opt.lambda, 
                               verbose = FALSE)
           est$refit = tmp$path[[1]]
           est$opt.icov = tmp$icov[[1]]
@@ -190,22 +190,21 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
           gc()
         }
         if (est$method == "ct") 
-          est$refit = huge.ct(est$data, lambda = est$opt.lambda, 
+          est$refit = huge::huge.ct(est$data, lambda = est$opt.lambda, 
                               verbose = FALSE)$path[[1]]
       }
       est$opt.sparsity = sum(est$refit)/d/(d - 1)
       if (verbose) {
         cat("done\n")
-        flush.console()
+#        flush.console()
       }
     }
     if (criterion == "ebic" && est$method == "glasso") {
       if (verbose) {
         cat("Conducting extended Bayesian information criterion (ebic) selection....")
-        flush.console()
+#        flush.console()
       }
-      est$ebic.score = -n * est$loglik + log(n) * est$df + 
-        4 * ebic.gamma * log(d) * est$df
+      est$ebic.score = -n * est$loglik + log(n) * est$df + 4 * ebic.gamma * log(d) * est$df
       est$opt.index = which.min(est$ebic.score)
       est$refit = est$path[[est$opt.index]]
       est$opt.icov = est$icov[[est$opt.index]]
@@ -214,8 +213,8 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
       est$opt.lambda = est$lambda[est$opt.index]
       est$opt.sparsity = est$sparsity[est$opt.index]
       if (verbose) {
-        cat("done\n")
-        flush.console()
+        message("done\n")
+#        flush.console()
       }
     }
     if (criterion == "stars") {
@@ -228,9 +227,14 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
       
       #            for (i in 1:nlambda) merge[[i]] <- Matrix(0, d, d)
       
+      if (verbose) {
+        mes = "Conducting Subsampling....."
+        message(mes, appendLF = FALSE)
+#        cat("\n")
+#        flush.console()
+      }
       #    for (i in 1:rep.num) {
-      premerge <- parallel::mclapply(1:rep.num, function(i)
-      {
+      premerge <- parallel::mclapply(1:rep.num, function(i) {
         #                if (verbose) {
         #                  mes <- paste(c("Conducting Subsampling....in progress:", 
         #                    floor(100 * i/rep.num), "%"), collapse = "")
@@ -241,17 +245,17 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
         ind.sample = sample(c(1:n), floor(n * stars.subsample.ratio), 
                             replace = FALSE)
         if (est$method == "mb") 
-          tmp = huge.mb(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
+          tmp = huge::huge.mb(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
                         scr = est$scr, idx.mat = est$idx.mat, sym = est$sym, 
                         verbose = FALSE)$path
         if (est$method == "ct") 
-          tmp = huge.ct(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
+          tmp = huge::huge.ct(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
                         verbose = FALSE)$path
         if (est$method == "glasso") 
-          tmp = huge.glasso(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
+          tmp = huge::huge.glasso(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
                             scr = est$scr, verbose = FALSE)$path
         #                for (j in 1:nlambda) merge[[j]] <- merge[[j]] + tmp[[j]]
-        
+
         rm(ind.sample)
         gc()
         return(tmp)
@@ -261,14 +265,13 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
 #      merge <- lapply(merge, simplify2array)
 #      est$merge <- lapply(1:dim(merge)[3], function(i) merge[,,i]/rep.num)
 
-      merge <- Reduce(function(l1, l2) lapply(1:length(l1), 
+      merge <- Reduce(function(l1, l2) lapply(1:length(l1),
                     function(i) l1[[i]] + l2[[i]]), premerge, accumulate=FALSE)
 
       if (verbose) {
-        mes = "Conducting Subsampling....done.                 "
-        cat(mes, "\r")
-        cat("\n")
-        flush.console()
+        message("done")
+#        cat("\n")
+#        flush.console()
       }
       est$variability = rep(0, nlambda)
       est$merge <- vector('list', nlambda)
@@ -294,9 +297,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
 }
 
 
-
 #' @keywords internal
 dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
 #' @keywords internal
 dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)
-

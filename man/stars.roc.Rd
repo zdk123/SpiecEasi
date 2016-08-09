@@ -5,9 +5,9 @@
 \alias{stars.roc}
 \title{stars.roc, stars.pr}
 \usage{
-stars.roc(optmerge, theta, verbose = TRUE, ll = 15)
+stars.roc(optmerge, theta, verbose = TRUE, plot = TRUE, ll = 15)
 
-stars.pr(optmerge, theta, verbose = TRUE, ll = 15)
+stars.pr(optmerge, theta, verbose = TRUE, plot = TRUE, ll = 15)
 }
 \arguments{
 \item{optmerge}{the optimal 'merge' matrix selected by stars}

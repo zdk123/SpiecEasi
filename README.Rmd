@@ -99,9 +99,9 @@ sparcc.graph <- abs(sparcc.amgut$Cor) >= 0.3
 diag(sparcc.graph) <- 0
 sparcc.graph <- Matrix(sparcc.graph, sparse=TRUE)
 ## Create igraph objects
-ig.mb <- graph.adjacency(se.mb.amgut$refit, mode='undirected')
-ig.gl <- graph.adjacency(se.gl.amgut$refit, mode='undirected')
-ig.sparcc <- graph.adjacency(sparcc.graph, mode='undirected')
+ig.mb <- adj2igraph(se.mb.amgut$refit)
+ig.gl <- adj2igraph(se.gl.amgut$refit)
+ig.sparcc <- adj2igraph(sparcc.graph)
 ```
 
 Visualize using igraph plotting:
@@ -117,17 +117,19 @@ plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparc
 ```
 
 We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations
-can be used directly, while SpiecEasi networks need to be massaged a bit. Note though that since SPIEC-EASI
-is based on penalized estimators, the edge weights are not directly comparable to SparCC.
+can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI
+is based on penalized estimators, the edge weights are not directly comparable to SparCC (or Pearson/Spearman
+correlation coefficients)
 
 ```{r, eval=TRUE, fig.width=8, fig.height=5}
-elist.gl <- summary(Matrix::triu(se.gl.amgut$opt.cov*se.gl.amgut$refit, k=1))
+library(Matrix)
+elist.gl <- summary(triu(cov2cor(se.gl.amgut$opt.cov)*se.gl.amgut$refit, k=1))
 elist.mb <- summary(symBeta(getOptBeta(se.mb.amgut), mode='maxabs'))
 elist.sparcc <- summary(sparcc.graph*sparcc.amgut$Cor)
 
 hist(elist.sparcc[,3], main="", xlab="edge weights")
-hist(elist.gl[,3], add=TRUE, col='red', alpha=.5)
-hist(elist.mb[,3], add=TRUE, col='forestgreen', alpha=.4)
+hist(elist.mb[,3], add=TRUE, col='forestgreen')
+hist(elist.gl[,3], add=TRUE, col='red')
 ```
 
 Lets look at the degree statistics from the networks inferred by each method.
@@ -146,8 +148,21 @@ legend("topright", c("MB", "glasso", "sparcc"),
 ```
 
 
-```{r, echo = FALSE, eval=TRUE}
+## Working with phyloseq ##
 
+SpiecEasi includes some convience wrappers to work directly with `phyloseq` objects.
+```{r, eval=TRUE, warning=FALSE}
+library(phyloseq)
+## Load round 2 of American gut project
+data('amgut2.filt.phy')
+se.mb.amgut2 <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
+                           nlambda=20, icov.select.params=list(rep.num=50))
+ig2.mb <- adj2igraph(se.mb.amgut2$refit, names=taxa_names(amgut2.filt.phy))
+plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
+```
+
+
+```{r, echo = FALSE, eval=TRUE}
 if (saveout) 
  save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se.est, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".README.RData")
 ```

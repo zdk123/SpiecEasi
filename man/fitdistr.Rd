@@ -4,7 +4,7 @@
 \alias{fitdistr}
 \title{Fit parameters of a marginal distribution to some data vector}
 \usage{
-fitdistr(x, densfun, start, ...)
+fitdistr(x, densfun, start, control, ...)
 }
 \arguments{
 \item{x}{data vector}
@@ -12,6 +12,8 @@ fitdistr(x, densfun, start, ...)
 \item{densfun}{string giving distribution function name}
 
 \item{start}{starting guess for the parameters (recommended leaving this out)}
+
+\item{control}{control parameters to optim}
 
 \item{...}{further arguments to densfun}
 }

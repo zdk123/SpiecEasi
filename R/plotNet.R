@@ -1,16 +1,35 @@
-#' Convert an adjacency matrix (ie - from the \code{sparseiCov} function) to an igraph object suitable for plotting via phyloseq's \code{plot_network}.
-#' 
+#' Adjacency to igraph
+#'
+#' Convert an adjacency matrix (ie - from the \code{sparseiCov} function) to an igraph object
+#'
 #' @param Adj an Adjacency matrix
+#' @param rmEmptyNodes should unconnected nodes be removed from the graph
+#' @param diag Flag to include self-loops (diagonal of adjacency matrix)
+#' @param edge.attr named list of attributes for graph edges
+#' @param vertex.attr named list of attributes for graph vertices
 #' @export
-adj2igraph <- function(Adj, names=1:ncol(Adj), rmEmptyNodes=FALSE) {
-    g <- graph.adjacency(Adj, mode = "undirected", weighted = TRUE)
+adj2igraph <- function(Adj, rmEmptyNodes=FALSE, diag=FALSE, edge.attr=list(),
+                       vertex.attr=list(name=1:ncol(Adj))) {
+    g <- igraph::graph.adjacency(Adj, mode = "undirected", weighted = TRUE, diag=diag)
 
-    if (rmEmptyNodes) {
-        ind <- which(degree(g) < 1)
-        g <- delete.vertices(g, ind)
-        names <- names[-ind]
+    if (length(vertex.attr) > 0) {
+        for (i in 1:length(vertex.attr)) {
+            attr <- names(vertex.attr)[i]
+            g <- set.vertex.attribute(g, attr, index=V(g), vertex.attr[[i]])
+        }
     }
 
-    V(g)$name <- names
+    if (length(edge.attr) > 0) {
+        for (i in 1:length(edge.attr)) {
+            attr <- names(edge.attr)[i]
+            g <- set.edge.attribute(g, attr, index=E(g), edge.attr[[i]])
+        }
+    }
+
+    if (rmEmptyNodes) {
+        ind <- V(g)$name[which(igraph::degree(g) < 1)]
+        g <- igraph::delete.vertices(g, ind)
+#        names <- names[-ind]
+    }
     g
 }

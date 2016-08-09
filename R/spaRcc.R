@@ -1,7 +1,13 @@
-#' sparcc wrapper
+#' SparCC
+#'
+#' reimplementation of SparCC in R
+#'
+#' @param data count data
+#' @param iter number of iterations to compute median correlation
+#' @param inner_iter number of iterations for the inner loop
 #' @export
 sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
-## reimplementation of SparCC in R
+## 
 #  without all the 'frills'
     sparccs <- 
      lapply(1:iter, function(i) 
@@ -18,24 +24,41 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
     list(Cov=covMed, Cor=corMed)
 }
 
-
+#' SparCC bootstraps
+#' 
+#' Bootstrapped Sparcc to get empirical and null distributions for correlations
+#'
+#' @param data count data matrix
+#' @param sparcc.params named list of parameters passed to sparcc
+#' @param statisticboot optional argument to override default bootstrap function
+#' @param statisticperm optional argument to override default permute function
+#' @return sparccboot object. Pass to \code{pval.sparccboot} to get empirical p-values
 #' @export
 #' @importFrom boot boot
-sparccboot <- function(data, sparcc.params=list(),
-                             statisticboot=function(data, indices) triu(do.call("sparcc", 
-                                           c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor),
-                             statisticperm=function(data, indices) triu(do.call("sparcc", 
-                                           c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor),
-                      R, ncpus=1, ...) {
+sparccboot <- function(data, sparcc.params=list(), statisticboot, statisticperm, R, ncpus=1, ...) {
+    if (missing(statisticboot)) {
+        statisticboot <- function(data, indices)
+            triu(do.call("sparcc", c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor)
+    }
+    if (missing(statisticperm)) {
+        statisticperm <- function(data, indices)
+            triu(do.call("sparcc", c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor)
+    }
+
     res     <- boot::boot(data, statisticboot, R=R, parallel="multicore", ncpus=ncpus, ...)
     null_av <- boot::boot(data, statisticperm, sim='permutation', R=R, parallel="multicore", ncpus=ncpus)
     class(res) <- 'list'
     structure(c(res, list(null_av=null_av)), class='sparccboot')
 }
 
-
+#' get pvals
+#'
+#' Compute empirical p-values from \code{sparccboot} output
+#'
+#' @param x output from sparccboot
+#' @param sided compute two sided p-values (one-sided not currently supported)
 #' @export
-pval.sparccboot <- function(x, sided='both', mar=2) {
+pval.sparccboot <- function(x, sided='both') {
 # calculate 1 or 2 way pseudo p-val from boot object
 # Args: a boot object
     if (sided != "both") stop("only two-sided currently supported")
@@ -140,7 +163,7 @@ basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
     }
     Ti     <- matrix(rowSums(T))
     CovVec <- matrix(rowSums(CovMat - diag(diag(CovMat)))) # row sum of off diagonals
-    M.I <- tryCatch(solve(M), error=function(e) ginv(M))
+    M.I <- tryCatch(solve(M), error=function(e) MASS::ginv(M))
     Vbase <- M.I %*% (Ti + 2*CovVec)
     Vbase[Vbase < Vmin] <- Vmin
     list(Vbase=Vbase, M=M)

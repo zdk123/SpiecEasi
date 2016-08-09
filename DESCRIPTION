@@ -9,8 +9,8 @@ Description: Estimate networks from the precision matrix of compositional
     microbial abundance data
 Depends:
     R (>= 3.0.0),
-    huge (>= 1.2.6),
 Imports:
+    huge,
     MASS,
     VGAM,
     Matrix
