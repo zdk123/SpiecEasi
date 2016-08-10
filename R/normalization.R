@@ -98,12 +98,12 @@ alr.data.frame <- function(x.f, mar=2, ...) {
     alr(as.matrix(x.f), mar, ...)
 }
 
-#' @keywords internal
+#' @export
 triu <- function(x) x[upper.tri(x)]
-#' @keywords internal
+#' @export
 tril <- function(x) x[lower.tri(x)]
 
-#' @keywords internal
+#' @export
 triu2diag <- function(x, diagval=0) {
     e <- length(x)
     n <- .5 * (sqrt(8*e + 1)+1)

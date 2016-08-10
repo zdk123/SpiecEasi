@@ -15,19 +15,19 @@ adj2igraph <- function(Adj, rmEmptyNodes=FALSE, diag=FALSE, edge.attr=list(),
     if (length(vertex.attr) > 0) {
         for (i in 1:length(vertex.attr)) {
             attr <- names(vertex.attr)[i]
-            g <- set.vertex.attribute(g, attr, index=V(g), vertex.attr[[i]])
+            g <- igraph::set.vertex.attribute(g, attr, index=igraph::V(g), vertex.attr[[i]])
         }
     }
 
     if (length(edge.attr) > 0) {
         for (i in 1:length(edge.attr)) {
             attr <- names(edge.attr)[i]
-            g <- set.edge.attribute(g, attr, index=E(g), edge.attr[[i]])
+            g <- igraph::set.edge.attribute(g, attr, index=igraph::E(g), edge.attr[[i]])
         }
     }
 
     if (rmEmptyNodes) {
-        ind <- V(g)$name[which(igraph::degree(g) < 1)]
+        ind <- igraph::V(g)$name[which(igraph::degree(g) < 1)]
         g <- igraph::delete.vertices(g, ind)
 #        names <- names[-ind]
     }
