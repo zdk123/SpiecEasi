@@ -19,6 +19,8 @@ sparseiCov(data, method, npn = FALSE, verbose = FALSE,
 \item{cov.output}{return the covariance matrix as well.}
 
 \item{...}{further arguments to huge/estimation functions. See details.}
+
+\item{lambda}{numeric lambda path}
 }
 \description{
 This function estimates the sparse inverse covariance matrix/matrices

@@ -143,12 +143,10 @@ NULL
 spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                         verbose=TRUE, pulsar.select=TRUE, pulsar.params=list(),
                         icov.select=pulsar.select,
-                        icov.select.params=pulsar.params, ...) {
+                        icov.select.params=pulsar.params,
+                        lambda.log=TRUE, ...) {
 
   args <- list(...)
-
-  .data.checks(data)
-
   if (verbose) msg <- .makeMessage("Applying data transformations...")
   else msg <- .makeMessage('')
 
@@ -168,16 +166,71 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                     args$method <- method
                     X <- .spiec.easi.norm(data)
                     if (is.null(args[['lambda.max']]))
-                      args$lambda.max <- pulsar::getMaxCov(cor(X))
+                      args$lambda.max <- getMaxCov(cor(X))
                   },
 
+        slr    = {
+                    # if (!require('irlba'))
+                      # stop('irlba package required')
+                    if (length(args$r) > 1) { #TODO: add beta vector option
+                      tmp <- lapply(args$r, function(r) {
+                        if (verbose)
+                          message(sprintf("SPIEC-EASI SLR, with rank r=%s", r))
+                        args$r <- r
+                        args2 <- c(list(data=data, method='slr',
+                            sel.criterion=sel.criterion, verbose=verbose,
+                            pulsar.params=pulsar.params,
+                            pulsar.select=pulsar.select), args)
+                        do.call(spiec.easi, args2)
+                      })
+                      names(tmp) <- paste0("rank", args$r)
+                      return(tmp)
+                    }
+                    message(msg, appendLF=verbose)
+                    estFun <- "sparseLowRankiCov"
+                    X <- .spiec.easi.norm(data)
+                    if (is.null(args[['lambda.max']]))
+                      args$lambda.max <- getMaxCov(cov(X))
+                  },
+
+        coat   = {
+                    message(msg, appendLF=verbose)
+                    estFun <- "coat"
+                    X <- .spiec.easi.norm(data)
+                    if (is.null(args[['lambda.max']]))
+                      args$lambda.max <- getMaxCov(X)
+                  },
+
+        ising  = {
+                    if (inherits(data, 'list'))
+                      stop('method "ising" does not support list data')
+
+                    message(msg, appendLF=verbose)
+                    estFun <- "neighborhood.net"
+                    args$method <- method
+                    X <- sign(data) ;
+                    if (is.null(args[['lambda.max']]))
+                      args$lambda.max <- max(abs(t(scale(X)) %*% X)) / nrow(X)
+                  },
+
+        poisson= {
+                  if (inherits(data, 'list'))
+                    stop('method "poisson" does not support list data')
+
+                    message(msg, appendLF=verbose)
+                    estFun <- "neighborhood.net"
+                    args$method <- method
+                    X <- data ;
+                    if (is.null(args[['lambda.max']]))
+                      args$lambda.max <- max(abs(t(scale(X)) %*% X)) / nrow(X)
+                  }
     )
 
   if (is.null(args[[ "lambda" ]])) {
     if (is.null(args[[ "lambda.min.ratio" ]])) args$lambda.min.ratio <- 1e-3
     if (is.null(args[[ "nlambda" ]])) args$nlambda <- 20
-    args$lambda <- pulsar::getLamPath(args$lambda.max, args$lambda.max*args$lambda.min.ratio,
-                              args$nlambda, log=TRUE)
+    args$lambda <- getLamPath(args$lambda.max, args$lambda.max*args$lambda.min.ratio,
+                              args$nlambda, log=lambda.log)
     args$lambda.min.ratio <- args$nlambda <- args$lambda.max <- NULL
   }
 
@@ -218,10 +271,8 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
       pulsar.params$lb.stars <- pulsar.params$ub.stars <- TRUE
     if (is.null(pulsar.params[[ "thresh" ]])) pulsar.params$thresh <- 0.05
 
-    obj <- list(call=call)
-    class(obj) <- 'pulsar'
     call <- do.call('update',
-              c(pulsar.params, list(object=obj, evaluate=FALSE)))
+              c(pulsar.params, list(object=list(call=call), evaluate=FALSE)))
 
     if (verbose)
       message(sprintf("Selecting model with %s using ", fun), sel.criterion, "...")
@@ -239,15 +290,6 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
   )
   if (pulsar.select) {
     fit$select <- est
-#    list(
-#     merge     = est$stars$merge,
-#     summary   = est$stars$summary,
-#     opt.index = opt.index,
-#     lb.index  = est$stars$lb.index,
-#     ub.index  = est$stars$ub.index
-#    )
-#     fit$refit <- if (sel.criterion=="gstars") fit$refit$gcd else fit$refit$stars
-#     attr(fit$refit, 'names') <- sel.criterion
   }
   fit$lambda <- args$lambda
   fit$fun    <- call(estFun)[[1]]

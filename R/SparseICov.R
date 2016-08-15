@@ -5,6 +5,7 @@
 #' huge package functions.
 #'
 #' @param data data matrix with features/OTUs in the columns and samples in the rows. Should be transformed by clr for meaningful results, if the data is compositional
+#' @param lambda numeric lambda path
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann)
 #' @param npn perform Nonparanormal (npn) transformation before estimation?
 #' @param verbose print progress to standard out
@@ -47,13 +48,9 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
 
   args <- list(...)
+  method <- switch(method, glasso = "glasso", mb = "mb", stop("Method not supported"))
 
-  method <- switch(method, glasso = "glasso", mb = "mb",
-                   stop("Method not supported"))
-
-  if (is.null(args$lambda.min.ratio))
-    args$lambda.min.ratio <- 1e-3
-
+  if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
   est <- do.call(huge::huge, c(args, list(x=data,
                                           method=method,
                                           verbose=verbose,
@@ -69,3 +66,79 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   # }
   return(est)
 }
+}
+
+
+#' Neighborhood net estimates
+#'
+neighborhood.net <- function(Z, lambda, method="ising", ncores=1, sym='or', ...) {
+    p <- ncol(Z)
+    l <- length(lambda)
+    args <- list(...)
+      match.fun(switch(method,
+        ising   ={ nbFun <- glm.neighborhood ; args$link <- 'binomial' },
+        poisson ={ nbFun <- glm.neighborhood ; args$link <- 'poisson' },
+        loglin  ={ nbFun <- llgm.neighborhood}
+      ))
+    estFun <- function(i) {
+      betamat      <- matrix(0, p, l)
+      betamat[-i,] <- do.call(nbFun, c(list(Z[,-i], Z[,i,drop=FALSE], lambda), args))
+      betamat
+    }
+
+    est <- parallel::mcmapply(estFun, 1:p, mc.cores=ncores, SIMPLIFY='array')
+    beta <- vector('list', length(lambda))
+    path <- vector('list', length(lambda))
+    for (i in 1:dim(est)[2]) {
+        tmp       <- as(est[,i,], 'dgCMatrix')
+        beta[[i]] <- tmp
+        tmp       <- as(tmp, 'lgCMatrix')
+        path[[i]] <- if (sym == "or") sign(tmp | t(tmp)) else sign(tmp & t(tmp))
+    }
+    list(beta=beta, path=path)
+}
+
+
+#' @importFrom glmnet glmnet
+glm.neighborhood <- function(X, Y, lambda, link='binomial') {
+    return(as.matrix(Bmat <- glmnet::glmnet(X, Y, family=link, lambda=lambda)$beta))
+##    lapply(1:ncol(Bmat), function(i) Bmat[,i,drop=FALSE])
+}
+
+# #' @useDynLib SpiecEasi LPGM_neighborhood
+# llgm.neighborhood <- function(X, Y, lambda, startb=0, th=1e-6, intercept=FALSE) {
+#   n = nrow(X); p = ncol(X);
+#   p_new = p
+#   nlams <- length(lambda)
+#   X <- scale(X)
+#   # NOTE: here check if intercept, change X and
+#   if(intercept){
+#     Xorig = X;
+#     X = cbind(t(t(rep(1,n))),Xorig);
+#     p_new = ncol(X);
+#   }
+#
+#   if(length(startb) == 1 & startb == 0){startb = rep(0, p_new)}
+#
+#   alphasin = rep(0, nlams)
+#   Bmatin = matrix(0,p,nlams);
+#
+#   out <- .C("LPGM_neighborhood",
+#             X=as.double(t(X)), Y=as.double(Y), startb=as.double(startb),
+#             lambda=as.double(lambda), n=as.integer(n), p=as.integer(p_new), nlams=as.integer(length(lambda)),
+#             alphas=as.double(alphasin), Bmat=as.double(Bmatin), PACKAGE="SpiecEasi")
+#
+#   alphas = out$alphas
+#   if(is.null(out$Bmat)) {
+#     Bmat = NULL
+#   } else {
+#     Bmat = matrix(out$Bmat, nrow=nrow(Bmatin), byrow=TRUE)
+#     Bmat <- Bmat*(abs(Bmat)>th)
+#   }
+#   return(Bmat)
+# }
+
+#' @keywords internal
+dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
+#' @keywords internal
+dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)
