@@ -93,18 +93,80 @@ sparcc.graph <- abs(sparcc.amgut$Cor) >= 0.3
 diag(sparcc.graph) <- 0
 sparcc.graph <- Matrix(sparcc.graph, sparse=TRUE)
 ## Create igraph objects
-ig.mb <- graph.adjacency(se.mb.amgut$refit, mode='undirected')
-ig.gl <- graph.adjacency(se.gl.amgut$refit, mode='undirected')
-ig.sparcc <- graph.adjacency(sparcc.graph, mode='undirected')
+ig.mb <- adj2igraph(se.mb.amgut$refit)
+ig.gl <- adj2igraph(se.gl.amgut$refit)
+ig.sparcc <- adj2igraph(sparcc.graph)
 ```
 
 Visualize using igraph plotting:
 
+```r
+library(igraph)
+## set size of vertex proportional to clr-mean
+vsize <- rowMeans(clr(amgut1.filt, 1))+6
+am.coord <- layout.fruchterman.reingold(ig.mb)
+
+par(mfrow=c(1,3))
+plot(ig.mb, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="MB")
+plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
+plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
+```
+
+![plot of chunk unnamed-chunk-8](http://i.imgur.com/gV2qUHk.png)
+
+We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations
+can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI
+is based on penalized estimators, the edge weights are not directly comparable to SparCC (or Pearson/Spearman
+correlation coefficients)
 
 
+```r
+library(Matrix)
+elist.gl <- summary(triu(cov2cor(se.gl.amgut$opt.cov)*se.gl.amgut$refit, k=1))
+elist.mb <- summary(symBeta(getOptBeta(se.mb.amgut), mode='maxabs'))
+elist.sparcc <- summary(sparcc.graph*sparcc.amgut$Cor)
+
+hist(elist.sparcc[,3], main="", xlab="edge weights")
+hist(elist.mb[,3], add=TRUE, col='forestgreen')
+hist(elist.gl[,3], add=TRUE, col='red')
+```
+
+![plot of chunk unnamed-chunk-9](http://i.imgur.com/txiYWvo.png)
+
+Lets look at the degree statistics from the networks inferred by each method.
 
 
+```r
+dd.gl <- degree.distribution(ig.gl)
+dd.mb <- degree.distribution(ig.mb)
+dd.sparcc <- degree.distribution(ig.sparcc)
 
+plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b', 
+      ylab="Frequency", xlab="Degree", main="Degree Distributions")
+points(0:(length(dd.gl)-1), dd.gl, col="red" , type='b')
+points(0:(length(dd.mb)-1), dd.mb, col="forestgreen", type='b')
+legend("topright", c("MB", "glasso", "sparcc"), 
+        col=c("forestgreen", "red", "black"), pch=1, lty=1)
+```
+
+![plot of chunk unnamed-chunk-10](http://i.imgur.com/qHUPIPE.png)
+
+
+## Working with phyloseq ##
+
+SpiecEasi includes some convience wrappers to work directly with `phyloseq` objects.
+
+```r
+library(phyloseq)
+## Load round 2 of American gut project
+data('amgut2.filt.phy')
+se.mb.amgut2 <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
+                           nlambda=20, icov.select.params=list(rep.num=50))
+ig2.mb <- adj2igraph(se.mb.amgut2$refit,  vertex.attr=list(name=taxa_names(amgut2.filt.phy)))
+plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
+```
+
+![plot of chunk unnamed-chunk-11](http://i.imgur.com/8u1hACa.png)
 
 
 

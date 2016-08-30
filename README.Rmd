@@ -88,7 +88,7 @@ The above example does not cover all possible options and parameters. For exampl
 
 Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the \lstinline[basicstyle=\ttfamily]|spiec.easi| function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter \lstinline[basicstyle=\ttfamily]|icov.select.params|. If you have more than one processor available, you can also supply a number to \lstinline[basicstyle=\ttfamily]|ncores|. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
 
-```{r, eval=runchunks}
+```{r, eval=runchunks, message=FALSE, warning=FALSE}
 se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2, 
                             nlambda=20, icov.select.params=list(rep.num=50))
 se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
@@ -105,7 +105,8 @@ ig.sparcc <- adj2igraph(sparcc.graph)
 ```
 
 Visualize using igraph plotting:
-```{r, eval=TRUE, fig.width=15, fig.height=7}
+```{r, eval=TRUE, fig.width=15, fig.height=7, message=FALSE}
+library(igraph)
 ## set size of vertex proportional to clr-mean
 vsize <- rowMeans(clr(amgut1.filt, 1))+6
 am.coord <- layout.fruchterman.reingold(ig.mb)
@@ -151,13 +152,13 @@ legend("topright", c("MB", "glasso", "sparcc"),
 ## Working with phyloseq ##
 
 SpiecEasi includes some convience wrappers to work directly with `phyloseq` objects.
-```{r, eval=TRUE, warning=FALSE}
+```{r, eval=TRUE, warning=FALSE, message=FALSE}
 library(phyloseq)
 ## Load round 2 of American gut project
 data('amgut2.filt.phy')
 se.mb.amgut2 <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
                            nlambda=20, icov.select.params=list(rep.num=50))
-ig2.mb <- adj2igraph(se.mb.amgut2$refit, names=taxa_names(amgut2.filt.phy))
+ig2.mb <- adj2igraph(se.mb.amgut2$refit,  vertex.attr=list(name=taxa_names(amgut2.filt.phy)))
 plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
