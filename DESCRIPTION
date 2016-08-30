@@ -30,5 +30,7 @@ Suggests:
    testthat
 biocViews:
 License: GPL (>= 2)
+LinkingTo: Rcpp, RcppArmadillo
+License: getOptions('devtools.desc.license')
 LazyData: true
 RoxygenNote: 6.1.1

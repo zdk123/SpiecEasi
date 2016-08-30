@@ -1,5 +1,11 @@
 coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=FALSE, ...) {
 
+    if (isSymmetric(data)) {
+        S <- data
+        adaptive <- FALSE
+    } else
+        S <- cov(data)
+
     if (adaptive) {
         theta <- getThetaMat(scale(data))
     } else
@@ -10,7 +16,7 @@ coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=FALSE, .
              soft  = soft.thresh,
              hard  = hard.thresh,
              adapt = adaptive.thresh)
-    S <- cov(data)
+
 
     if (length(lambda) > 1) {
         n <- length(lambda)
@@ -54,7 +60,7 @@ soft.thresh <- function(S, lam, shrinkDiag=FALSE) {
         if (!shrinkDiag) Matrix::diag(M) <- diag(S)
         return(M)
     } else if (inherits(S, 'denseMatrix')) {
-        return(soft.thresh(as(S, 'sparseMatrix'), lam, shrinkDiag))
+        return(soft.thresh(as(S, 'matrix'), lam, shrinkDiag))
     } else 
         stop('Class not recognized')
 }

@@ -149,9 +149,9 @@ symBeta <- function(beta, mode='ave') {
 
 
 #' @export
-triu <- function(x, k) x[upper.tri(x, !k)]
+triu <- function(x, k=0) x[upper.tri(x, !k)]
 #' @export
-tril <- function(x, k) x[lower.tri(x, !k)]
+tril <- function(x, k=0) x[lower.tri(x, !k)]
 
 #' @export
 triu2diag <- function(x, diagval=0) {

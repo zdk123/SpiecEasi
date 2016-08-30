@@ -57,7 +57,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
     degVec <- colSums(Graph)
 
     # add random edge weights uniformly from theta_min to theta_max
-    utri  <- triu(Theta)
+    utri  <- triu(Theta, k=1)
     nzind <- which(utri != 0)
 
     if (length(posThetaLims) > 2 || length(negThetaLims) > 2)
