@@ -1,15 +1,34 @@
-coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=FALSE, ...) {
+coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=TRUE, ret.icov=FALSE, ...) {
 
     if (isSymmetric(data)) {
         S <- data
-        adaptive <- FALSE
-    } else
+        adapt <- 2
+    } else {
         S <- cov(data)
-
+        adapt <- 1
+    }
     if (adaptive) {
-        theta <- getThetaMat(scale(data))
+      theta <- switch(adapt,
+                '1'=getThetaMat(data),
+                '2'=sqrt(S^2 + diag(S)%*%t(diag(S))) ## assume joint gaussian model
+               )
     } else
         theta <- 1
+
+    args <- list(...)
+    if (missing(lambda)) {
+      if (!is.null(args[[ "lambda.max" ]])) maxlam <- args$lambda.max
+      else maxlam <- pulsar::getMaxCov(abs(S)/theta)
+      if (is.null(args[[ "lambda" ]])) {
+        if (is.null(args[[ "lambda.min.ratio" ]])) args$lambda.min.ratio <- 1e-3
+        if (is.null(args[[ "nlambda" ]])) args$nlambda <- 10
+        lambda <- pulsar::getLamPath(maxlam, maxlam*args$lambda.min.ratio, args$nlambda, log=FALSE)
+        args$lambda.min.ratio <- NULL ; args$nlambda <- NULL
+      } else lambda <- args$lambda
+    }
+    args$lambda.min.ratio <- args$nlambda <- args$lambda <- args$lambda.max <- NULL
+
+
 
     threshfun <-
       switch(thresh,
@@ -22,21 +41,26 @@ coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=FALSE, .
         n <- length(lambda)
         path <- vector('list', n)
         cov  <- vector('list', n)
+        if (ret.icov) icov <- vector('list', n)
         Stmp <- S
         for (i in n:1) {
-            cov[[i]]  <- threshfun(Stmp, theta*lambda[i], shrinkDiag, ...)
+            cov[[i]]  <- threshfun(Stmp, theta*lambda[i], shrinkDiag)
+            if (ret.icov) icov[[i]] <- tryCatch(solve(cov[[i]]), error=function(e) MASS::ginv(cov[[i]]))
             path[[i]] <- spMat2Adj(cov[[i]])
             Stmp <- path[[i]]*S
             Matrix::diag(Stmp) <- diag(S)
         }
         est <- list(path=path, cov=cov)
     } else {
-        Stmp <- threshfun(S, theta*lambda, shrinkDiag, ...)
+        Stmp <- threshfun(S, theta*lambda, shrinkDiag)
+        if (ret.icov) icov <- tryCatch(solve(Stmp), error=function(e) MASS::ginv(Stmp))
         est <- list(
           cov  = Stmp,
           path = spMat2Adj(Stmp)
         )
     }
+    est$lambda <- lambda
+    if (ret.icov) est$icov <- icov
     est
 }
 

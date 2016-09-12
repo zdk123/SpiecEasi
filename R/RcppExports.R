@@ -9,6 +9,14 @@ SOFTTHRESH2 <- function(Sig, lambda, shrinkDiag = TRUE) {
     .Call('SpiecEasi_SOFTTHRESH2', PACKAGE = 'SpiecEasi', Sig, lambda, shrinkDiag)
 }
 
+svdPowSym <- function(U, d, V, A, k, q) {
+    invisible(.Call('SpiecEasi_svdPowSym', PACKAGE = 'SpiecEasi', U, d, V, A, k, q))
+}
+
+softSVT3 <- function(M, k, beta = 0) {
+    .Call('SpiecEasi_softSVT3', PACKAGE = 'SpiecEasi', M, k, beta)
+}
+
 softSVT2 <- function(M, k, beta = 0) {
     .Call('SpiecEasi_softSVT2', PACKAGE = 'SpiecEasi', M, k, beta)
 }

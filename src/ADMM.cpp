@@ -31,10 +31,42 @@ arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrink
 }
 
 // [[Rcpp::export]]
+void svdPowSym(arma::mat& U, arma::vec& d, arma::mat& V, arma::mat& A, int k, int q) {
+    int l = k;
+    int m = A.n_rows;
+    int n = A.n_cols;
+    arma::mat P = randu<mat>(m,k-1);
+    arma::mat Q, R;
+    qr(Q, R, (P.t()*A).t());
+    for (int j = 0; j<q; j++) {
+        qr(P, R, A*Q);
+        qr(Q, R, (P.t()*A).t());
+    }
+    svd_econ(U, d, V, A*Q);
+//    d = d.subvec(0,k-1);
+//    U = U.cols(0,k-1);
+}
+
+// [[Rcpp::export]]
+arma::mat softSVT3(arma::mat& M, int k, double beta=0) {
+    arma::mat U, V;
+    arma::vec d;
+    if (beta != 0)
+      k = M.n_cols;
+    svdPowSym(U, d, V, M, k, k+1);
+    if (beta == 0)
+      beta = d(k);
+    arma::vec tmpd = d - beta;
+    tmpd.elem(find(tmpd < 0)).zeros();
+    return U*diagmat(tmpd)*V;
+}
+
+
+// [[Rcpp::export]]
 arma::mat softSVT2(arma::mat& M, int k, double beta=0) {
     arma::mat U, V;
     arma::vec d;
-    svd(U, d, V, M);
+    svd_econ(U, d, V, M);
     if (beta == 0)
       beta = d(k);
     arma::vec tmpd = d - beta;
@@ -51,13 +83,15 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat
 
     int n = SigmaO.n_rows;
     if (mu == 0) mu = n;
-    arma::mat Lambda1 = arma::mat(Lambda), Lambda2 = arma::mat(Lambda), Lambda3 = arma::mat(Lambda);
     arma::vec r_norm(maxiter), eps_pri(maxiter);
+    arma::mat Lambda1 = Lambda.cols(0  , n-1  );
+    arma::mat Lambda2 = Lambda.cols(n  , n*2-1);
+    arma::mat Lambda3 = Lambda.cols(n*2, n*3-1);
     arma::mat R = Y.cols(0,n-1), L = Y.cols(n*2,n*3-1);
     arma::sp_mat S(Y.cols(n,n*2-1));
-    arma::mat RY(R), LY(L), RA(R), LA(L), TA(L);
-    arma::mat RO(R), SO(S), LO(L);
-    arma::mat SY(S), SA(S);
+    arma::mat RY(R), LY(L), SY(S);
+    arma::mat RO(size(R)), SO(size(S)), LO(size(L));
+    arma::mat RA(size(R)), SA(size(S)), LA(size(L)), TA(size(L));
     arma::mat X(size(Y));
 //    arma::mat Y_old(Y);
     arma::mat K, K2, KI;
@@ -72,8 +106,8 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat
       // update R
       K  = mu*SigmaO - RA;
       K2 = K*K + 4*mu*I;
-      KI = sqrtmNewt2(K2, I, newtol);
-//      KI = arma::sqrtmat_sympd(K*K + 4*mu*I);
+//      KI = sqrtmNewt2(K2, I, newtol);
+      arma::sqrtmat_sympd(KI, K2);
       R  = (KI-K)/2;
 
       // update S
@@ -119,9 +153,14 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat
 
     }
 
+    Lambda.cols(0  ,n-1  ) = Lambda1;
+    Lambda.cols(n  ,n*2-1) = Lambda2;
+    Lambda.cols(n*2,n*3-1) = Lambda3;
+
     return List::create(_["R"] = R,  _["S"] = S, _["L"] = L,
                         _["Y"] = Y,
-                        _["RA"] = RA, _["SA"] = SA, _["LA"] = LA,
+                        _["Lambda"] = Lambda,
+//                        _["RA"] = RA, _["SA"] = SA, _["LA"] = LA,
                         _["iter"] = iter+1, _["beta"] = beta, _["mu"]   = mu,
                         _["history"] = List::create(
                           _["r_norm"]  =  r_norm,

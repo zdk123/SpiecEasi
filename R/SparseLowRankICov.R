@@ -4,14 +4,15 @@ sparseLowRankiCov <- function(data, ncores=1, ...) {
   else SigmaO <- cov(data)
 
   args <- list(...)
-  maxlam <- 1
+  if (!is.null(args[[ "lambda.max" ]])) maxlam <- args$lambda.max
+  else maxlam <- 1
   if (is.null(args[[ "lambda" ]])) {
     if (is.null(args[[ "lambda.min.ratio" ]])) args$lambda.min.ratio <- 1e-3
     if (is.null(args[[ "nlambda" ]])) args$nlambda <- 10
     lambda <- getLamPath(maxlam, maxlam*args$lambda.min.ratio, args$nlambda, log=TRUE)
     args$lambda.min.ratio <- NULL ; args$nlambda <- NULL
   } else lambda <- args$lambda
-  args$lambda.min.ratio <- args$nlambda <- args$lambda <- NULL
+  args$lambda.min.ratio <- args$nlambda <- args$lambda <- args$lambda.max <- NULL
 
   if (is.null(args[[ "beta" ]])) {
     if (is.null(args[[ "r" ]])) 
@@ -21,34 +22,52 @@ sparseLowRankiCov <- function(data, ncores=1, ...) {
   n <- length(lambda)
   args$SigmaO <- SigmaO
 ###  args$r <- Lrank
-  lest <- parallel::mclapply(lambda, mc.cores=ncores, FUN=function(lam)
-                             do.call('admm2', c(list(lambda=lam), args)))
 
+#  lest <- parallel::mclapply(lambda, mc.cores=ncores, FUN=function(lam)
+#                             do.call('admm2', c(list(lambda=lam), args)))
+  p <- ncol(SigmaO)
+  I    <- diag(p)
+  args$opts <- c(args$opts, list(I=I))
+  args$opts$tol <- 1e-4
+  lest <- vector('list', n)
   path <- vector('list', n) ; icov <- vector('list', n) ; resid <- vector('list', n)
-  for (i in 1:n) {
-    tmp <- lest[[i]]$S
+  for (i in n:1) {
+    est <- do.call('admm2', c(list(lambda=lambda[i]), args))
+    tmp <- est$S
     icov [[i]] <- tmp
-    resid[[i]] <- lest[[i]]$L
+    resid[[i]] <- est$L
     tmp <- forceSymmetric(Matrix::triu(tmp,k=1))
     path [[i]] <- as(tmp, 'lsCMatrix')
+    args$opts$Lambda <- est$Lambda
+    args$opts$Y      <- est$Y
+    lest[[i]] <- est
+    args$opts$tol <- 1
+#    args$opts$eta <- max(.5, (p-(n-i))/p)
   }
   list(icov=icov, path=path, resid=resid, lambda=lambda)
 }
 
 
-admm2 <- function(SigmaO, lambda, beta, r, tol=1e-5, shrinkDiag=TRUE, opts) {
+admm2 <- function(SigmaO, lambda, beta, r, tol=1e-3, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
-  defopts <- list(mu=n, eta=4/5, muf=1e-6, maxiter=500, newtol=1e-4)
+  defopts <- list(mu=n, eta=75/100, muf=1e-4, maxiter=500, newtol=1e-4)
   if (!missing(opts)) for (o in names(opts)) defopts[[ o ]] <- opts [[ o ]]
   if (missing(beta)) beta <- 0
   if (missing(r))       r <- 0
   opts <- defopts
   over_relax_par <- 1.6
-  Id <- diag(n)
-  Lambda <- matrix(0, n, n)
-  Y <- cbind(Id, Id, Lambda)
 
-  ADMM(SigmaO=SigmaO, lambda=lambda, I=Id, Lambda=Lambda, Y=Y, beta=beta, r=r,
+  if (is.null(opts[[ 'I' ]]))
+    I <- diag(n)
+  else I <- opts$I
+  if (is.null(opts[[ 'Lambda' ]]))
+    Lambda <- matrix(0, n, n*3)
+  else Lambda <- opts$Lambda
+  if (is.null(opts[[ 'Y' ]]))
+    Y <- cbind(I, I, matrix(0, n, n))
+  else Y <- opts$Y
+
+  ADMM(SigmaO=SigmaO, lambda=lambda, I=I, Lambda=Lambda, Y=Y, beta=beta, r=r, shrinkDiag=shrinkDiag,
        maxiter=opts$maxiter, mu=opts$mu, eta=opts$eta, newtol=opts$newtol, muf=opts$muf)
 }
 
@@ -57,7 +76,7 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-5, shrinkDiag=TRUE, opts) {
 #' @exportPattern "^[[:lambda:]]+"
 admm <- function(SigmaO, lambda, beta, r, LPD=FALSE, eigsolve=FALSE, tol=1e-5, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
-  defopts <- list(mu=n, eta=4/5, muf=1e-6, maxiter=500, newtol=1e-4)
+  defopts <- list(mu=n, eta=99/100, muf=1e-4, maxiter=500, newtol=1e-4)
   if (!missing(opts)) for (o in names(opts)) defopts[[ o ]] <- opts [[ o ]]
   opts <- defopts
   ABSTOL <- tol
@@ -65,6 +84,7 @@ admm <- function(SigmaO, lambda, beta, r, LPD=FALSE, eigsolve=FALSE, tol=1e-5, s
   over_relax_par <- 1.6
   Ip <- sparseDiag(n)
   Id <- diag(n)
+  J <- matrix(1/n, n, n)
   R <- S <- Ip
   L  <- zeros(n,n)
   RY <- Id; SY <- Id; LY <- L
@@ -97,7 +117,6 @@ admm <- function(SigmaO, lambda, beta, r, LPD=FALSE, eigsolve=FALSE, tol=1e-5, s
     S  <- SOFTTHRESH(as(SA, 'matrix'), lambda*mu, shrinkDiag=shrinkDiag)
 #    S  <- forceSymmetric(S)
 #    LA <- forceSymmetric(LA)
-
     if (LPD) {
 #      if (iter>1) {
         eV   <- eigen(LA) ; U <- Re(eV$vectors) ; d <- Re(eV$values)
@@ -158,7 +177,7 @@ admm <- function(SigmaO, lambda, beta, r, LPD=FALSE, eigsolve=FALSE, tol=1e-5, s
 
   history <- list(objval=objval, r_norm=r_norm,eps_pri=eps_pri)
 # eigR = eigR, eigL = eigL,
-  list(R=R, S = S, L = L, RA=RA, mu=mu, obj = objval[iter], iter = iter, history=history)
+  list(R=R, S = S, L = L, RA=RA, LA=LA, SA=SA, mu=mu, obj = objval[iter], iter = iter, history=history)
 }
 
 zeros <- function(n, p=n, sparse=TRUE) {
@@ -200,19 +219,20 @@ objective <- function(R,SigmaO,eigR,S,eigL,lambda,beta) {
 }
 
 
-softsvdthresh <- function(M, tau, k=ncol(M)) {
+hardsvdthresh <- function(M, tau, k=ncol(M)) {
     Msvd <- svdPow(M, min(ncol(M), k+1), k+2)
 #    Msvd <- svd(M)
     if (k < ncol(M))
       tau <- Msvd$d[k+1]*1.01 #min(tau, Msvd$d[k+1])
-    tmpd <- sparseDiag(pmax(Msvd$d - tau, 0))
-    M <- Msvd$u %*% tmpd %*% t(Msvd$v)
+    ind <- which(Msvd$d - tau > 0)
+    tmpd <- sparseDiag(Msvd$d[ind])
+    M <- Msvd$u[,ind,drop=FALSE] %*% tmpd %*% t(Msvd$v[,ind,drop=FALSE])
     return(list(M=M, tau=tau, d=tmpd))
 }
 
 
 svdPow <- function(A, k, q) {
-    l <- k+10
+    l <- k
     m <- nrow(A)
     n <- ncol(A)
     P <- matrix(rnorm(m*l), nrow=m, ncol=l)
@@ -229,8 +249,8 @@ svdPow <- function(A, k, q) {
         R  <- qr.R(QR)
     }
     Asvd <- svd(A%*%Q)
-    list(u=Asvd$u[,1:k,drop=FALSE], 
-         d=Asvd$d[1:k,drop=FALSE], 
-         v=(Q%*%Asvd$v)[,1:k,drop=FALSE])
+    list(u=Asvd$u, #[,1:k,drop=FALSE], 
+         d=Asvd$d, #[1:k,drop=FALSE], 
+         v=(Q%*%Asvd$v), P=P, Q=Q) #[,1:k,drop=FALSE])
 }
 

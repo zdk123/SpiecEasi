@@ -32,6 +32,34 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// svdPowSym
+void svdPowSym(arma::mat& U, arma::vec& d, arma::mat& V, arma::mat& A, int k, int q);
+RcppExport SEXP SpiecEasi_svdPowSym(SEXP USEXP, SEXP dSEXP, SEXP VSEXP, SEXP ASEXP, SEXP kSEXP, SEXP qSEXP) {
+BEGIN_RCPP
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< arma::mat& >::type U(USEXP);
+    Rcpp::traits::input_parameter< arma::vec& >::type d(dSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type V(VSEXP);
+    Rcpp::traits::input_parameter< arma::mat& >::type A(ASEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< int >::type q(qSEXP);
+    svdPowSym(U, d, V, A, k, q);
+    return R_NilValue;
+END_RCPP
+}
+// softSVT3
+arma::mat softSVT3(arma::mat& M, int k, double beta);
+RcppExport SEXP SpiecEasi_softSVT3(SEXP MSEXP, SEXP kSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< arma::mat& >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    __result = Rcpp::wrap(softSVT3(M, k, beta));
+    return __result;
+END_RCPP
+}
 // softSVT2
 arma::mat softSVT2(arma::mat& M, int k, double beta);
 RcppExport SEXP SpiecEasi_softSVT2(SEXP MSEXP, SEXP kSEXP, SEXP betaSEXP) {
