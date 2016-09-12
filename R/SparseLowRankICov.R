@@ -1,3 +1,8 @@
+#' sparse plus low rank inverse covariance
+#'
+#' TODO: add description
+#'
+#' @export
 sparseLowRankiCov <- function(data, ncores=1, ...) {
 
   if (isSymmetric(data)) SigmaO <- data
@@ -47,7 +52,8 @@ sparseLowRankiCov <- function(data, ncores=1, ...) {
   list(icov=icov, path=path, resid=resid, lambda=lambda)
 }
 
-
+#' @useDynLib SpiecEasi
+#' @exportPattern "^[^\\.]"
 admm2 <- function(SigmaO, lambda, beta, r, tol=1e-3, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
   defopts <- list(mu=n, eta=75/100, muf=1e-4, maxiter=500, newtol=1e-4)
@@ -72,8 +78,6 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-3, shrinkDiag=TRUE, opts) {
 }
 
 #' @importFrom Matrix sparseMatrix forceSymmetric
-#' @useDynLib SpiecEasi
-#' @exportPattern "^[[:lambda:]]+"
 admm <- function(SigmaO, lambda, beta, r, LPD=FALSE, eigsolve=FALSE, tol=1e-5, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
   defopts <- list(mu=n, eta=99/100, muf=1e-4, maxiter=500, newtol=1e-4)
