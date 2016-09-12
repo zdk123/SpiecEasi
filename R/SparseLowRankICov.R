@@ -3,7 +3,7 @@
 #' TODO: add description
 #'
 #' @export
-sparseLowRankiCov <- function(data, ncores=1, ...) {
+sparseLowRankiCov <- function(data, ...) {
 
   if (isSymmetric(data)) SigmaO <- data
   else SigmaO <- cov(data)
