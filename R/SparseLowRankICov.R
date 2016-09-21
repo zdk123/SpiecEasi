@@ -3,7 +3,7 @@
 #' TODO: add description
 #'
 #' @export
-sparseLowRankiCov <- function(data, npn=FALSE, ...) {
+sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, ...) {
 
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
   if (isSymmetric(data)) SigmaO <- data
