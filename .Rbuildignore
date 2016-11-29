@@ -3,3 +3,5 @@
 ^README\.log$
 ^figure$
 ^\.travis\.yml$
+^.*\.Rproj$
+^\.Rproj\.user$
