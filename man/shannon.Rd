@@ -16,4 +16,3 @@ shannon entropy in base e
 Shannon entropy is:
     sum [ x_i log(x_i) ]
 }
-

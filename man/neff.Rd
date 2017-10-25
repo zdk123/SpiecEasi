@@ -15,4 +15,3 @@ N_eff in base e
 \description{
 N_effective: Compute the exponential of the shannon entropy. linearizes shannon entropy, for a better diveristy metric (effective number of species)
 }
-

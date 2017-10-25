@@ -19,4 +19,3 @@ Covariance matrix of sample dimension as cor
 Convert a symmetric correlation matrix to a covariance matrix
 given the standard deviation
 }
-

@@ -15,4 +15,3 @@ Weighted, symmetric matrix of edge probability estimates.
 \description{
 Get the optimal merge matrix StARS is run.
 }
-

@@ -19,4 +19,3 @@ Poisson counts of length \eqn{n}
 \description{
 Draw samples from a zero-inflated poisson distribution
 }
-

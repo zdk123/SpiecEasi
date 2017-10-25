@@ -9,4 +9,3 @@ norm_to_total(x)
 \description{
 Total sum normalization of a (presumably positive) data vector
 }
-

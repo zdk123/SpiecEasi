@@ -9,4 +9,3 @@ band(D, e)
 \description{
 keywords internal
 }
-

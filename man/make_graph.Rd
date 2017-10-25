@@ -20,4 +20,3 @@ make_graph(method, D, e, enforce = TRUE, ...)
 \description{
 Procedure to generate graph topologies for Gaussian Graphical Models
 }
-

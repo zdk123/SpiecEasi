@@ -9,4 +9,3 @@ cluster(D, e, numHubs = floor((D/15) + (e/D)) - 1)
 \description{
 keywords internal
 }
-

@@ -26,4 +26,3 @@ rmvnorm(n = 100, mu = rep(0, 10), Sigma = diag(10), tol = 1e-06,
 Draw samples from multivariate, correlated normal distribution
 with counts correlated according to Sigma
 }
-
