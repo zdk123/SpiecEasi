@@ -8,9 +8,11 @@ spiec.easi <- function(obj, ...) {
 
 #' Spiec-Easi pipeline
 #' @method spiec.easi phyloseq
-#' @import phyloseq
 #' @export
 spiec.easi.phyloseq <- function(obj, ...) {
+  if (!require('foo')) {
+    stop('\'Phyloseq\' package is not installed')
+  }
   OTU <- otu_table(obj)@.Data
   if (otu_table(obj)@taxa_are_rows) OTU <- t(OTU)
   spiec.easi.default(OTU, ...)
@@ -102,9 +104,9 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
 
   if (method %in% c("glasso")) {
-    est <- do.call(huge::huge,
-        c(args, list(x=data, method=method, verbose=verbose,
-                     cov.output = cov.output)))
+    est <- do.call(huge::huge, c(args,
+          list(x=data, method=method, verbose=verbose,
+               cov.output = cov.output)))
   } else if (method %in% c('mb')) {
     est <- do.call(huge::huge.mb, c(args, list(x=data, verbose=verbose)))
     est$method <- 'mb'
@@ -292,7 +294,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
           ifelse(sum(Matrix::tril(refit))>sum(Matrix::triu(refit)), 'L', 'U'))
 
       est$opt.lambda   <- est$lambda[est$opt.index]
-      est$opt.sparsity <- sum(est$refit)/(d*(d-1)) 
+      est$opt.sparsity <- sum(est$refit)/(d*(d-1))
       if (est$method == "glasso") {
         est$opt.icov = est$icov[[est$opt.index]]
         if (!is.null(est$cov))
