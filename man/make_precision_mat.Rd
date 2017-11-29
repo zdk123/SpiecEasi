@@ -19,4 +19,3 @@ make_precision_mat(method, D, u, v, ...)
 DEPREICATED FUNCTION Wrapper function for generating a Precision matrix
 }
 \keyword{internal}
-

@@ -20,4 +20,3 @@ fitdistr(x, densfun, start, control, ...)
 \description{
 Fit parameters of a marginal distribution to some data vector
 }
-

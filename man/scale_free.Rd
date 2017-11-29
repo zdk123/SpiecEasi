@@ -9,4 +9,3 @@ scale_free(D, e, pfun)
 \description{
 keywords internal
 }
-

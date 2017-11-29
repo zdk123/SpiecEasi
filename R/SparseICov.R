@@ -25,15 +25,16 @@ spiec.easi.phyloseq <- function(obj, ...) {
 #' @param ... further arguments to sparseiCov
 #' @method spiec.easi default
 #' @export
-spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', verbose=TRUE, 
+spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', verbose=TRUE,
                                icov.select=TRUE, icov.select.params=list(), ...) {
-  
+
   args <- list(...)
+  ## TODO: check icov.select.params names before running any code
   if (verbose) message("Normalizing/clr transformation of data with pseudocount ...")
   data.clr <- t(clr(data+1, 1))
   if (verbose) message(paste("Inverse Covariance Estimation with", method, "...", sep=" "))
   est      <- do.call('sparseiCov', c(list(data=data.clr, method=method), args))
-  
+
   if (icov.select) {
     if (verbose) message(paste("Model selection with", sel.criterion, "...", sep=" "))
     est <- do.call('icov.select', c(list(est=est, criterion=sel.criterion), icov.select.params))
@@ -65,6 +66,7 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', ver
 #'
 #' The argument \code{nlambda} determines the number of penalties - somewhere between 10-100 is usually good, depending on how the values of empirical correlation are distributed.
 #' @importFrom huge huge huge.npn
+#' @importFrom Matrix t
 #' @export
 #' @examples
 #' # simulate data with 1 negative correlation
@@ -90,7 +92,7 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', ver
 #' huge::huge.roc(est.f$path,   Theta)
 #'
 sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE, ...) {
-  
+
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
 
   args <- list(...)
@@ -100,22 +102,22 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
 
   if (method %in% c("glasso")) {
-    do.call(huge::huge, c(args, list(x=data, method=method, verbose=verbose, 
-                                     cov.output = cov.output)))
-
+    est <- do.call(huge::huge,
+        c(args, list(x=data, method=method, verbose=verbose,
+                     cov.output = cov.output)))
   } else if (method %in% c('mb')) {
     est <- do.call(huge::huge.mb, c(args, list(x=data, verbose=verbose)))
     est$method <- 'mb'
     est$data <- data
     est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
-    return(est)
   }
+  return(est)
 }
 
 
 #' Model selection for picking the right \code{lambda} penalty.
 #' This is identical to huge::huge.stars except that the subsampling loop is replaced with an mclapply function to add parallelization capabilities.
-#' 
+#'
 #' @param est an estimate/model as produced by the sparseiCov function
 #' @param criterion character string specifying criterion/method for model selection accepts 'stars' [default], 'ric', 'ebic'
 #' @param stars.thresh variability threshold for stars selection
@@ -125,8 +127,9 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @param ncores number of cores to use. Need multiple processers if \code{ncores > 1}
 #' @param normfun normalize internally if data should be renormalized
 #' @importFrom parallel mclapply
+#' @importFrom Matrix forceSymmetric
 #' @export
-icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5, 
+icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5,
                         stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
   gcinfo(FALSE)
   if (est$cov.input) {
@@ -135,9 +138,9 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
     return(est)
   }
   if (!est$cov.input) {
-    if (est$method == "mb" && is.null(criterion)) 
+    if (est$method == "mb" && is.null(criterion))
       criterion = "stars"
-    if (est$method == "ct" && is.null(criterion)) 
+    if (est$method == "ct" && is.null(criterion))
       criterion = "ebic"
     n = nrow(est$data)
     d = ncol(est$data)
@@ -155,8 +158,8 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
         nr = n
         r = 1:n
       }
-      out = .C("RIC", X = as.double(est$data), dd = as.integer(d), 
-               nn = as.integer(n), r = as.integer(r), nr = as.integer(nr), 
+      out = .C("RIC", X = as.double(est$data), dd = as.integer(d),
+               nn = as.integer(n), r = as.integer(r), nr = as.integer(nr),
                lambda_opt = as.double(0), PACKAGE = "huge")
       est$opt.lambda = out$lambda_opt/n
       rm(out)
@@ -169,28 +172,28 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
         message("Computing the optimal graph....")
 #        flush.console()
       }
-      if (est$opt.lambda > max(cor(est$data))) 
+      if (est$opt.lambda > max(cor(est$data)))
         est$refit = Matrix(0, d, d)
       else {
-        if (est$method == "mb") 
-          est$refit = huge::huge.mb(est$data, lambda = est$opt.lambda, 
+        if (est$method == "mb")
+          est$refit = huge::huge.mb(est$data, lambda = est$opt.lambda,
                               sym = est$sym, idx.mat = est$idx.mat, verbose = FALSE)$path[[1]]
         if (est$method == "glasso") {
           if (!is.null(est$cov)) {
-            tmp = huge::huge.glasso(est$data, lambda = est$opt.lambda, 
+            tmp = huge::huge.glasso(est$data, lambda = est$opt.lambda,
                               scr = est$scr, cov.output = TRUE, verbose = FALSE)
             est$opt.cov = tmp$cov[[1]]
           }
-          if (is.null(est$cov)) 
-            tmp = huge::huge.glasso(est$data, lambda = est$opt.lambda, 
+          if (is.null(est$cov))
+            tmp = huge::huge.glasso(est$data, lambda = est$opt.lambda,
                               verbose = FALSE)
           est$refit = tmp$path[[1]]
           est$opt.icov = tmp$icov[[1]]
           rm(tmp)
           gc()
         }
-        if (est$method == "ct") 
-          est$refit = huge::huge.ct(est$data, lambda = est$opt.lambda, 
+        if (est$method == "ct")
+          est$refit = huge::huge.ct(est$data, lambda = est$opt.lambda,
                               verbose = FALSE)$path[[1]]
       }
       est$opt.sparsity = sum(est$refit)/d/(d - 1)
@@ -208,7 +211,7 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
       est$opt.index = which.min(est$ebic.score)
       est$refit = est$path[[est$opt.index]]
       est$opt.icov = est$icov[[est$opt.index]]
-      if (est$cov.output) 
+      if (est$cov.output)
         est$opt.cov = est$cov[[est$opt.index]]
       est$opt.lambda = est$lambda[est$opt.index]
       est$opt.sparsity = est$sparsity[est$opt.index]
@@ -219,14 +222,14 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
     }
     if (criterion == "stars") {
       if (is.null(stars.subsample.ratio)) {
-        if (n > 144) 
+        if (n > 144)
           stars.subsample.ratio = 10 * sqrt(n)/n
-        if (n <= 144) 
+        if (n <= 144)
           stars.subsample.ratio = 0.8
       }
-      
+
       #            for (i in 1:nlambda) merge[[i]] <- Matrix(0, d, d)
-      
+
       if (verbose) {
         mes = "Conducting Subsampling....."
         message(mes, appendLF = FALSE)
@@ -236,23 +239,23 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
       #    for (i in 1:rep.num) {
       premerge <- parallel::mclapply(1:rep.num, function(i) {
         #                if (verbose) {
-        #                  mes <- paste(c("Conducting Subsampling....in progress:", 
+        #                  mes <- paste(c("Conducting Subsampling....in progress:",
         #                    floor(100 * i/rep.num), "%"), collapse = "")
         #                  cat(mes, "\r")
         #                  flush.console()
         #                }
         #                merge <- replicate(nlambda, Matrix(0, d,d))
-        ind.sample = sample(c(1:n), floor(n * stars.subsample.ratio), 
+        ind.sample = sample(c(1:n), floor(n * stars.subsample.ratio),
                             replace = FALSE)
-        if (est$method == "mb") 
-          tmp = huge::huge.mb(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
-                        scr = est$scr, idx.mat = est$idx.mat, sym = est$sym, 
+        if (est$method == "mb")
+          tmp = huge::huge.mb(normfun(est$data[ind.sample, ]), lambda = est$lambda,
+                        scr = est$scr, idx.mat = est$idx.mat, sym = est$sym,
                         verbose = FALSE)$path
-        if (est$method == "ct") 
-          tmp = huge::huge.ct(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
+        if (est$method == "ct")
+          tmp = huge::huge.ct(normfun(est$data[ind.sample, ]), lambda = est$lambda,
                         verbose = FALSE)$path
-        if (est$method == "glasso") 
-          tmp = huge::huge.glasso(normfun(est$data[ind.sample, ]), lambda = est$lambda, 
+        if (est$method == "glasso")
+          tmp = huge::huge.glasso(normfun(est$data[ind.sample, ]), lambda = est$lambda,
                             scr = est$scr, verbose = FALSE)$path
         #                for (j in 1:nlambda) merge[[j]] <- merge[[j]] + tmp[[j]]
 
@@ -279,14 +282,20 @@ icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamm
         est$merge[[i]]  <- merge[[i]]/rep.num
         est$variability[i] <- 4 * sum(est$merge[[i]] * (1 - est$merge[[i]]))/(d * (d - 1))
       }
-      est$opt.index = max(which.max(est$variability >= 
+      est$opt.index = max(which.max(est$variability >=
                                       stars.thresh)[1] - 1, 1)
-      est$refit = est$path[[est$opt.index]]
-      est$opt.lambda = est$lambda[est$opt.index]
-      est$opt.sparsity = est$sparsity[est$opt.index]
+      refit = est$path[[est$opt.index]]
+      ## correct for numerical issue in huge that results in
+      #  non-symmetric matrix in glasso method
+      ## accept the edge set of the denser half of the matrix
+      est$refit <- forceSymmetric(refit,
+          ifelse(sum(Matrix::tril(refit))>sum(Matrix::triu(refit)), 'L', 'U'))
+
+      est$opt.lambda   <- est$lambda[est$opt.index]
+      est$opt.sparsity <- sum(est$refit)/(d*(d-1)) 
       if (est$method == "glasso") {
         est$opt.icov = est$icov[[est$opt.index]]
-        if (!is.null(est$cov)) 
+        if (!is.null(est$cov))
           est$opt.cov = est$cov[[est$opt.index]]
       }
     }

@@ -9,4 +9,3 @@ norm_diric(x, rep = 1)
 \description{
 importFrom VGAM rdiric
 }
-

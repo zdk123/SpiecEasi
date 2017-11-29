@@ -26,4 +26,3 @@ Mode can be:
  \item lower:  Take the values from the lower triangle
 }
 }
-

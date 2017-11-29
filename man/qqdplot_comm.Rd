@@ -9,4 +9,3 @@ qqdplot_comm(comm, distr, param, plot = TRUE, ...)
 \description{
 qq-plot for theoretical vs observed communities
 }
-

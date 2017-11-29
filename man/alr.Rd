@@ -9,4 +9,3 @@ alr(x, ...)
 \description{
 Additive log-ratio functions
 }
-

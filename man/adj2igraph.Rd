@@ -21,4 +21,3 @@ adj2igraph(Adj, rmEmptyNodes = FALSE, diag = FALSE, edge.attr = list(),
 \description{
 Convert an adjacency matrix (ie - from the \code{sparseiCov} function) to an igraph object
 }
-

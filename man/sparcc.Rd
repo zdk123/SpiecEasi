@@ -16,4 +16,3 @@ sparcc(data, iter = 20, inner_iter = 10, th = 0.1)
 \description{
 reimplementation of SparCC in R
 }
-

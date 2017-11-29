@@ -11,4 +11,3 @@ graph2prec(Graph, posThetaLims = c(2, 3), negThetaLims = -posThetaLims,
 Has internal rules for converting various graph topologies into the associated
 adjancency and, therefore, precision matrix
 }
-

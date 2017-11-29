@@ -9,4 +9,3 @@
 \description{
 Spiec-Easi pipeline
 }
-

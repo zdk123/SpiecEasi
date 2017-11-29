@@ -25,4 +25,3 @@ rmvzipois(n, mu, Sigma, lambdas, ps, ...)
 Generate multivariate, Zero-inflated poisson data,
 with counts approximately correlated according to Sigma
 }
-

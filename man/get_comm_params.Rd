@@ -17,4 +17,3 @@ list of parameters
 \description{
 Get the parameters for the OTUs (along mar) of each community
 }
-

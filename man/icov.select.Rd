@@ -30,4 +30,3 @@ icov.select(est, criterion = "stars", stars.thresh = 0.05,
 Model selection for picking the right \code{lambda} penalty.
 This is identical to huge::huge.stars except that the subsampling loop is replaced with an mclapply function to add parallelization capabilities.
 }
-
