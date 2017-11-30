@@ -15,7 +15,7 @@ spiec.easi.phyloseq <- function(obj, ...) {
   if (!require('phyloseq')) {
     stop('\'Phyloseq\' package is not installed. See doi.org/doi:10.18129/B9.bioc.phyloseq')
   }
-  spiec.easi.otu_table(otu_table(OTU), ...)
+  spiec.easi.otu_table(otu_table(obj), ...)
 }
 
 #' @method spiec.easi otu_table
