@@ -13,7 +13,7 @@ spiec.easi <- function(obj, ...) {
 #' @export
 spiec.easi.phyloseq <- function(obj, ...) {
   if (!require('phyloseq')) {
-    stop('\'Phyloseq\' package is not installed')
+    stop('\'Phyloseq\' package is not installed. See doi.org/doi:10.18129/B9.bioc.phyloseq')
   }
   spiec.easi.otu_table(otu_table(OTU), ...)
 }
@@ -23,7 +23,7 @@ spiec.easi.phyloseq <- function(obj, ...) {
 #' @export
 spiec.easi.otu_table <- function(obj, ...) {
   if (!require('phyloseq')) {
-    stop('\'Phyloseq\' package is not installed')
+    stop('\'Phyloseq\' package is not installed. See doi.org/doi:10.18129/B9.bioc.phyloseq')
   }
   OTU <- obj@.Data
   if (obj@taxa_are_rows) OTU <- t(OTU)

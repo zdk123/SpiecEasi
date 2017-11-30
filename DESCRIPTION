@@ -19,8 +19,6 @@ Suggests:
     boot,
     phyloseq,
     testthat
-Remotes:
-    bioc::release/phyloseq
 License: getOptions('devtools.desc.license')
 LazyData: true
 RoxygenNote: 6.0.1
