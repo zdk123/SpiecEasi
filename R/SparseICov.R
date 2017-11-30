@@ -1,4 +1,5 @@
 #' Spiec-Easi pipeline
+#'
 #' Run the whole analysis, from data transformation, iCov estimation and model selection.
 #' Inputs are a non-normalized OTU table and pipeline options.
 #' @export
@@ -6,29 +7,41 @@ spiec.easi <- function(obj, ...) {
   UseMethod('spiec.easi', obj)
 }
 
-#' Spiec-Easi pipeline
+#' @param obj phyloseq object or just the otu_table
 #' @method spiec.easi phyloseq
+#' @rdname spiec.easi
 #' @export
 spiec.easi.phyloseq <- function(obj, ...) {
-  if (!require('foo')) {
+  if (!require('phyloseq')) {
     stop('\'Phyloseq\' package is not installed')
   }
-  OTU <- otu_table(obj)@.Data
-  if (otu_table(obj)@taxa_are_rows) OTU <- t(OTU)
+  spiec.easi.otu_table(otu_table(OTU), ...)
+}
+
+#' @method spiec.easi otu_table
+#' @rdname spiec.easi
+#' @export
+spiec.easi.otu_table <- function(obj, ...) {
+  if (!require('phyloseq')) {
+    stop('\'Phyloseq\' package is not installed')
+  }
+  OTU <- obj@.Data
+  if (obj@taxa_are_rows) OTU <- t(OTU)
   spiec.easi.default(OTU, ...)
 }
 
-
-#' Spiec-Easi pipeline
 #' @param data non-normalized count OTU/data table with samples on rows and features/OTUs in columns
-#' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann)
-#' @param sel.criterion character string specifying criterion/method for model selection accepts 'stars' [default], 'ric', 'ebic'
-#' @param icov.select.params list of further arguments to icov.select
-#' @param ... further arguments to sparseiCov
+#' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)
+#' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' [default], 'ric', 'ebic' (not recommended for high dimensional data)
+#' @param verbose flag to show progress messages
+#' @param icov.select.params list of further arguments to \code{\link{icov.select}}
+#' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
 #' @method spiec.easi default
+#' @rdname spiec.easi
 #' @export
-spiec.easi.default <- function(data, method='glasso', sel.criterion='stars', verbose=TRUE,
-                               icov.select=TRUE, icov.select.params=list(), ...) {
+spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
+                              verbose=TRUE, icov.select=TRUE,
+                              icov.select.params=list(), ...) {
 
   args <- list(...)
   ## TODO: check icov.select.params names before running any code
@@ -127,12 +140,14 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @param stars.subsample.ratio The default value 'is 10*sqrt(n)/n' when 'n>144' and '0.8' when 'n<=144', where 'n' is the sample size.
 #' @param rep.num number of subsamplings when \code{criterion} = stars.
 #' @param ncores number of cores to use. Need multiple processers if \code{ncores > 1}
-#' @param normfun normalize internally if data should be renormalized
+#' @param normfun normalize internally if data should be renormalized (experimental feature)
 #' @importFrom parallel mclapply
 #' @importFrom Matrix forceSymmetric
 #' @export
-icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05, ebic.gamma = 0.5,
-                        stars.subsample.ratio = NULL, rep.num = 20, ncores=1, normfun=function(x) x, verbose=FALSE) {
+icov.select <- function(est, criterion = 'stars', stars.thresh = 0.05,
+                    ebic.gamma = 0.5, stars.subsample.ratio = NULL,
+                    rep.num = 20, ncores=1,
+                    normfun=function(x) x, verbose=FALSE) {
   gcinfo(FALSE)
   if (est$cov.input) {
     message("Model selection is not available when using the covariance matrix as input.")
