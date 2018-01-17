@@ -25,4 +25,3 @@ rmvpois(n, mu, Sigma, ...)
 Generate multivariate poisson data,
 with counts approximately correlated according to Sigma
 }
-

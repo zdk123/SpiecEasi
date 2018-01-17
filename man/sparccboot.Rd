@@ -22,4 +22,3 @@ sparccboot object. Pass to \code{pval.sparccboot} to get empirical p-values
 \description{
 Bootstrapped Sparcc to get empirical and null distributions for correlations
 }
-

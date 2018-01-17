@@ -15,4 +15,3 @@ Weighted, non-symmetric matrix of model coefficients.
 \description{
 Get the optimal beta matrix when MB neighborhood selection is run with StARS
 }
-

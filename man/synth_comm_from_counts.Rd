@@ -29,4 +29,3 @@ community
 from count data (ex HMP) fit parameters to OTU margins
 and simulate a new community with those properties
 }
-

@@ -14,4 +14,3 @@ pval.sparccboot(x, sided = "both")
 \description{
 Compute empirical p-values from \code{sparccboot} output
 }
-

@@ -9,4 +9,3 @@ norm_pseudo(x)
 \description{
 add pseudocount before normalizing a vector
 }
-

@@ -9,4 +9,3 @@ clr(x, ...)
 \description{
 Centered log-ratio functions
 }
-

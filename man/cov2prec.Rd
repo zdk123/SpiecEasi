@@ -14,4 +14,3 @@ cov2prec(Cov, tol = 1e-04)
 \description{
 Covariance matrix to its matrix inverse (Precision matrix)
 }
-

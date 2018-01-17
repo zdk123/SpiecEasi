@@ -27,4 +27,3 @@ rmvzinegbin(n, mu, Sigma, munbs, ks, ps, ...)
 Generate multivariate, negative binomial data,
 with counts approximately correlated according to Sigma
 }
-

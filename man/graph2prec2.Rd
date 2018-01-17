@@ -16,4 +16,3 @@ Has internal rules for converting various graph topologies into the associated
 adjancency and, therefore, precision matrix
 }
 \keyword{internal}
-

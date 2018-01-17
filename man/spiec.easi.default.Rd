@@ -22,4 +22,3 @@
 \description{
 Spiec-Easi pipeline
 }
-

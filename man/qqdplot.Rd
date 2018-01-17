@@ -10,4 +10,3 @@ qqdplot(y, distr, param, plot = TRUE, ...)
 deprecated??
 }
 \keyword{internal}
-

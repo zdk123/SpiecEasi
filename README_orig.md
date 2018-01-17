@@ -1,18 +1,6 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-```{r setup, echo = FALSE, eval=TRUE}
-knitr::opts_knit$set(
-  upload.fun = function(file) imgur_upload(file, "ce3138fd1186b7d"), 
-  base.url = NULL) # upload all images to imgur.com
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#"
-)
-runchunks = FALSE
-saveout   = runchunks
 
-if (!runchunks) load('.README.RData')
-```
 SpiecEasi
 =========
 
@@ -28,7 +16,8 @@ I assume that all auxillary packages are already installed - for example huge, M
 
 From an interactive R session:
 
-```{r, eval=FALSE}
+
+```r
 library(devtools)
 install_github("zdk123/SpiecEasi")
 library(SpiecEasi)
@@ -48,7 +37,8 @@ Lets simulate some multivariate data under zero-inflated negative binomial model
 
 Obviously, for real data, skip 1-4.
 
-```{r, eval=runchunks}
+
+```r
 data(amgut1.filt)
 depths <- rowSums(amgut1.filt)
 amgut1.filt.n <- t(apply(amgut1.filt, 1, norm_to_total))
@@ -59,7 +49,8 @@ n <- nrow(amgut1.filt.cs)
 e <- d
 ```
 Synthesize the data
-```{r, eval=runchunks}
+
+```r
 set.seed(10010)
 graph <- make_graph('cluster', d, e)
 Prec  <- graph2prec(graph)
@@ -69,12 +60,14 @@ X <- synth_comm_from_counts(amgut1.filt.cs, mar=2, distr='zinegbin', Sigma=Cor, 
 ```
 
 the main SPIEC-EASI pipeline: Data transformation, sparse invserse covariance estimation and model selection
-```{r, eval=runchunks}
+
+```r
 se.est <- spiec.easi(X, method='mb', lambda.min.ratio=1e-2, nlambda=15)
 ```
 
 examine ROC over lambda path and PR over the stars index for the selected graph
-```{r, eval=FALSE, fig.width=5, fig.height=5}
+
+```r
 huge::huge.roc(se.est$path, graph, verbose=FALSE)
 stars.pr(getOptMerge(se.est), graph, verbose=FALSE)
 # stars selected final network under: se.est$refit
@@ -88,7 +81,8 @@ The above example does not cover all possible options and parameters. For exampl
 
 Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the \lstinline[basicstyle=\ttfamily]|spiec.easi| function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter \lstinline[basicstyle=\ttfamily]|icov.select.params|. If you have more than one processor available, you can also supply a number to \lstinline[basicstyle=\ttfamily]|ncores|. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
 
-```{r, eval=runchunks, message=FALSE, warning=FALSE}
+
+```r
 se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2, 
                             nlambda=20, icov.select.params=list(rep.num=50))
 se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
@@ -105,7 +99,8 @@ ig.sparcc <- adj2igraph(sparcc.graph)
 ```
 
 Visualize using igraph plotting:
-```{r, eval=TRUE, fig.width=15, fig.height=7, message=FALSE}
+
+```r
 library(igraph)
 ## set size of vertex proportional to clr-mean
 vsize <- rowMeans(clr(amgut1.filt, 1))+6
@@ -117,12 +112,15 @@ plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
 plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
 ```
 
+![plot of chunk unnamed-chunk-8](http://i.imgur.com/gV2qUHk.png)
+
 We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations
 can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI
 is based on penalized estimators, the edge weights are not directly comparable to SparCC (or Pearson/Spearman
 correlation coefficients)
 
-```{r, eval=TRUE, fig.width=8, fig.height=5}
+
+```r
 library(Matrix)
 elist.gl <- summary(triu(cov2cor(se.gl.amgut$opt.cov)*se.gl.amgut$refit, k=1))
 elist.mb <- summary(symBeta(getOptBeta(se.mb.amgut), mode='maxabs'))
@@ -133,9 +131,12 @@ hist(elist.mb[,3], add=TRUE, col='forestgreen')
 hist(elist.gl[,3], add=TRUE, col='red')
 ```
 
+![plot of chunk unnamed-chunk-9](http://i.imgur.com/txiYWvo.png)
+
 Lets look at the degree statistics from the networks inferred by each method.
 
-```{r, eval=TRUE, fig.width=9, fig.height=6}
+
+```r
 dd.gl <- degree.distribution(ig.gl)
 dd.mb <- degree.distribution(ig.mb)
 dd.sparcc <- degree.distribution(ig.sparcc)
@@ -148,11 +149,14 @@ legend("topright", c("MB", "glasso", "sparcc"),
         col=c("forestgreen", "red", "black"), pch=1, lty=1)
 ```
 
+![plot of chunk unnamed-chunk-10](http://i.imgur.com/qHUPIPE.png)
+
 
 ## Working with phyloseq ##
 
 SpiecEasi includes some convience wrappers to work directly with `phyloseq` objects.
-```{r, eval=TRUE, warning=FALSE, message=FALSE}
+
+```r
 library(phyloseq)
 ## Load round 2 of American gut project
 data('amgut2.filt.phy')
@@ -162,27 +166,7 @@ ig2.mb <- adj2igraph(se.mb.amgut2$refit,  vertex.attr=list(name=taxa_names(amgut
 plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
-
-```{r, echo = FALSE, eval=TRUE}
-if (saveout) 
- save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se.est, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".README.RData")
-```
+![plot of chunk unnamed-chunk-11](http://i.imgur.com/8u1hACa.png)
 
 
-## Cross domain interactions ##
 
-SpiecEasi now includes a convience wrapper for dealing with multiple taxa sequenced on the same samples, such as 16S and ITS, as seen in [Tipton, Müller, et. al. (2018)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0393-0). It assumes that each taxa is in it's own data matrix and that all samples are in all data matrices in the same order.
-```{r, eval=FALSE, echo=TRUE}
-cd.est <- multi.spiec.easi(list(X,Y), icov.select.params=list(stars.thresh=0.1))
-```
-
-## Extracting Neighborhood ##
-
-Sometimes we are interested in the neighborhood that surrounds specific taxa/nodes, as seen in figure 4 in Tipton, Müller, et. al. The node(s) of interest and their direct neighbors can be extracted for future plotting purposes. For example, if we want to look at the first 5 nodes of the Am Gut Data.
-```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
-amhood1to5 <- extract_hood(se.gl.amgut, c(1:5))
-```
-And to plot, using igraph plotting:
-```{r, eval=TRUE, fig.width=15, fig.height=7, message=FALSE}
-plot(adj2igraph(amhood1to5))
-```

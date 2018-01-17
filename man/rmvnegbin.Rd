@@ -29,4 +29,3 @@ rmvnegbin(n, mu, Sigma, ks, ...)
 Generate multivariate, Zero-inflated negative binomial data,
 with counts approximately correlated according to Sigma
 }
-
