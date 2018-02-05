@@ -35,7 +35,7 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 #' @return sparccboot object. Pass to \code{pval.sparccboot} to get empirical p-values
 #' @export
 #' @importFrom boot boot
-sparccboot <- function(data, sparcc.params=list(), statisticboot, statisticperm, R, ncpus=1, ...) {
+sparccboot <- function(data, sparcc.params=list(), statisticboot, statisticperm, R, ncpus=1,parallel="multicore", ...) {
     if (missing(statisticboot)) {
         statisticboot <- function(data, indices)
             triu(do.call("sparcc", c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor)
@@ -44,9 +44,15 @@ sparccboot <- function(data, sparcc.params=list(), statisticboot, statisticperm,
         statisticperm <- function(data, indices)
             triu(do.call("sparcc", c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor)
     }
-
-    res     <- boot::boot(data, statisticboot, R=R, parallel="multicore", ncpus=ncpus, ...)
-    null_av <- boot::boot(data, statisticperm, sim='permutation', R=R, parallel="multicore", ncpus=ncpus)
+    #if using windows10 X64, snow appears to work. Timeout closes the cluster but isn't explicit unfortunately
+    if(parallel=="snow"){
+      cpuCluster=makeCluster(ncpus,timeout=500)
+      clusterExport(cl=cpuCluster,varlist = c("triu","sparcc"))
+    }else{
+      cpuCluster=NULL
+    }
+    res     <- boot::boot(data, statisticboot, R=R, parallel=parallel, ncpus=ncpus,cl=cpuCluster, ...)
+    null_av <- boot::boot(data, statisticperm, sim='permutation', R=R, parallel=parallel, ncpus=ncpus,cl=cpuCluster)
     class(res) <- 'list'
     structure(c(res, list(null_av=null_av)), class='sparccboot')
 }
