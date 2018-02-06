@@ -12,7 +12,7 @@ One small point on notation: we refer to the method as "SPIEC-EASI" and reserve 
 
 ## Installation ##
 
-I assume that all auxillary packages are already installed - for example huge, MASS, etc. If you get an unexpected error, you may need to download and install a missing dependency.
+I assume that all auxiliary packages are already installed - for example huge, MASS, etc. If you get an unexpected error, you may need to download and install a missing dependency.
 
 From an interactive R session:
 
@@ -83,7 +83,7 @@ Now let's apply SpiecEasi directly to the American Gut data. Don't forget that t
 
 
 ```r
-se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2, 
+se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
                             nlambda=20, icov.select.params=list(rep.num=50))
 se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
                             nlambda=20, icov.select.params=list(rep.num=50))
@@ -112,7 +112,7 @@ plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
 plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
 ```
 
-![plot of chunk unnamed-chunk-8](http://i.imgur.com/gV2qUHk.png)
+![plot of chunk unnamed-chunk-7](https://i.imgur.com/prKCnj8.png)
 
 We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations
 can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI
@@ -124,14 +124,16 @@ correlation coefficients)
 library(Matrix)
 elist.gl <- summary(triu(cov2cor(se.gl.amgut$opt.cov)*se.gl.amgut$refit, k=1))
 elist.mb <- summary(symBeta(getOptBeta(se.mb.amgut), mode='maxabs'))
+# Error in t.default(Matrix::tril(beta)): argument is not a matrix
 elist.sparcc <- summary(sparcc.graph*sparcc.amgut$Cor)
 
 hist(elist.sparcc[,3], main="", xlab="edge weights")
 hist(elist.mb[,3], add=TRUE, col='forestgreen')
+# Error in hist(elist.mb[, 3], add = TRUE, col = "forestgreen"): object 'elist.mb' not found
 hist(elist.gl[,3], add=TRUE, col='red')
 ```
 
-![plot of chunk unnamed-chunk-9](http://i.imgur.com/txiYWvo.png)
+![plot of chunk unnamed-chunk-8](https://i.imgur.com/JSVn9Pc.png)
 
 Lets look at the degree statistics from the networks inferred by each method.
 
@@ -141,15 +143,15 @@ dd.gl <- degree.distribution(ig.gl)
 dd.mb <- degree.distribution(ig.mb)
 dd.sparcc <- degree.distribution(ig.sparcc)
 
-plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b', 
+plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b',
       ylab="Frequency", xlab="Degree", main="Degree Distributions")
 points(0:(length(dd.gl)-1), dd.gl, col="red" , type='b')
 points(0:(length(dd.mb)-1), dd.mb, col="forestgreen", type='b')
-legend("topright", c("MB", "glasso", "sparcc"), 
+legend("topright", c("MB", "glasso", "sparcc"),
         col=c("forestgreen", "red", "black"), pch=1, lty=1)
 ```
 
-![plot of chunk unnamed-chunk-10](http://i.imgur.com/qHUPIPE.png)
+![plot of chunk unnamed-chunk-9](https://i.imgur.com/v9pHQ9M.png)
 
 
 ## Working with phyloseq ##
@@ -166,7 +168,23 @@ ig2.mb <- adj2igraph(se.mb.amgut2$refit,  vertex.attr=list(name=taxa_names(amgut
 plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
-![plot of chunk unnamed-chunk-11](http://i.imgur.com/8u1hACa.png)
+![plot of chunk unnamed-chunk-10](https://i.imgur.com/g1u6EcC.png)
 
 
 
+
+
+## Cross domain interactions ##
+
+SpiecEasi now includes a convenience wrapper for dealing with multiple taxa sequenced on the same samples, such as 16S and ITS, as seen in [Tipton, Müller, et. al. (2018)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0393-0). It assumes that each taxa is in it's own data matrix and that all samples are in all data matrices in the same order.
+
+```r
+library(phyloseq)
+data(hmp2)
+se.hmp2 <- spiec.easi(list(hmp216S, hmp2prot), method='mb', nlambda=40, lambda.min.ratio=1e-2, icov.select.params = list(stars.thresh = 0.05, ncores = 2))
+
+dtype <- c(rep(1,ntaxa(hmp216S)), rep(2,ntaxa(hmp2prot)))
+plot(adj2igraph(se.hmp2$refit), vertex.color=dtype+1, vertex.size=9)
+```
+
+![plot of chunk unnamed-chunk-12](https://i.imgur.com/MxT7dP8.png)
