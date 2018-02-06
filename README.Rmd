@@ -2,7 +2,7 @@
 
 ```{r setup, echo = FALSE, eval=TRUE}
 knitr::opts_knit$set(
-  upload.fun = function(file) imgur_upload(file, "ce3138fd1186b7d"), 
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
   base.url = NULL) # upload all images to imgur.com
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -24,7 +24,7 @@ One small point on notation: we refer to the method as "SPIEC-EASI" and reserve 
 
 ## Installation ##
 
-I assume that all auxillary packages are already installed - for example huge, MASS, etc. If you get an unexpected error, you may need to download and install a missing dependency.
+I assume that all auxiliary packages are already installed - for example huge, MASS, etc. If you get an unexpected error, you may need to download and install a missing dependency.
 
 From an interactive R session:
 
@@ -89,7 +89,7 @@ The above example does not cover all possible options and parameters. For exampl
 Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the \lstinline[basicstyle=\ttfamily]|spiec.easi| function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter \lstinline[basicstyle=\ttfamily]|icov.select.params|. If you have more than one processor available, you can also supply a number to \lstinline[basicstyle=\ttfamily]|ncores|. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
 
 ```{r, eval=runchunks, message=FALSE, warning=FALSE}
-se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2, 
+se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
                             nlambda=20, icov.select.params=list(rep.num=50))
 se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
                             nlambda=20, icov.select.params=list(rep.num=50))
@@ -140,11 +140,11 @@ dd.gl <- degree.distribution(ig.gl)
 dd.mb <- degree.distribution(ig.mb)
 dd.sparcc <- degree.distribution(ig.sparcc)
 
-plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b', 
+plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b',
       ylab="Frequency", xlab="Degree", main="Degree Distributions")
 points(0:(length(dd.gl)-1), dd.gl, col="red" , type='b')
 points(0:(length(dd.mb)-1), dd.mb, col="forestgreen", type='b')
-legend("topright", c("MB", "glasso", "sparcc"), 
+legend("topright", c("MB", "glasso", "sparcc"),
         col=c("forestgreen", "red", "black"), pch=1, lty=1)
 ```
 
@@ -164,25 +164,32 @@ plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 
 
 ```{r, echo = FALSE, eval=TRUE}
-if (saveout) 
+if (saveout)
  save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se.est, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".README.RData")
 ```
 
 
 ## Cross domain interactions ##
 
-SpiecEasi now includes a convience wrapper for dealing with multiple taxa sequenced on the same samples, such as 16S and ITS, as seen in [Tipton, Müller, et. al. (2018)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0393-0). It assumes that each taxa is in it's own data matrix and that all samples are in all data matrices in the same order.
-```{r, eval=FALSE, echo=TRUE}
-cd.est <- multi.spiec.easi(list(X,Y), icov.select.params=list(stars.thresh=0.1))
+SpiecEasi now includes a convenience wrapper for dealing with multiple taxa sequenced on the same samples, such as 16S and ITS, as seen in [Tipton, Müller, et. al. (2018)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0393-0). It assumes that each taxa is in it's own data matrix and that all samples are in all data matrices in the same order.
+```{r, eval=TRUE, echo=TRUE, message=FALSE}
+library(phyloseq)
+data(hmp2)
+se.hmp2 <- spiec.easi(list(hmp216S, hmp2prot), method='mb', nlambda=40, lambda.min.ratio=1e-2, icov.select.params = list(stars.thresh = 0.05, ncores = 2))
+
+dtype <- c(rep(1,ntaxa(hmp216S)), rep(2,ntaxa(hmp2prot)))
+plot(adj2igraph(se.hmp2$refit), vertex.color=dtype+1, vertex.size=9)
 ```
 
-## Extracting Neighborhood ##
+<!-- ## Extracting Neighborhood ##
 
 Sometimes we are interested in the neighborhood that surrounds specific taxa/nodes, as seen in figure 4 in Tipton, Müller, et. al. The node(s) of interest and their direct neighbors can be extracted for future plotting purposes. For example, if we want to look at the first 5 nodes of the Am Gut Data.
 ```{r, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE}
-amhood1to5 <- extract_hood(se.gl.amgut, c(1:5))
+
+hubind <- which(rowSums(se.hmp2$refit) > 7)
+hmp2hubs <- extract_hood(se.hmp2, hubind)
 ```
 And to plot, using igraph plotting:
 ```{r, eval=TRUE, fig.width=15, fig.height=7, message=FALSE}
-plot(adj2igraph(amhood1to5))
-```
+plot(adj2igraph(hmp2hubs), color=dtype[hubind])
+``` -->
