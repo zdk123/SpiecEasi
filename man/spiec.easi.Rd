@@ -2,14 +2,37 @@
 % Please edit documentation in R/SparseICov.R
 \name{spiec.easi}
 \alias{spiec.easi}
-\title{Spiec-Easi pipeline
-Run the whole analysis, from data transformation, iCov estimation and model selection.
-Inputs are a non-normalized OTU table and pipeline options.}
+\alias{spiec.easi.phyloseq}
+\alias{spiec.easi.otu_table}
+\alias{spiec.easi.default}
+\title{Spiec-Easi pipeline}
 \usage{
 spiec.easi(obj, ...)
+
+\method{spiec.easi}{phyloseq}(obj, ...)
+
+\method{spiec.easi}{otu_table}(obj, ...)
+
+\method{spiec.easi}{default}(data, method = "glasso",
+  sel.criterion = "stars", verbose = TRUE, icov.select = TRUE,
+  icov.select.params = list(), ...)
+}
+\arguments{
+\item{obj}{phyloseq object or just the otu_table}
+
+\item{...}{further arguments to \code{\link{sparseiCov}} / \code{huge}}
+
+\item{data}{non-normalized count OTU/data table with samples on rows and features/OTUs in columns}
+
+\item{method}{estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
+
+\item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' [default], 'ric', 'ebic' (not recommended for high dimensional data)}
+
+\item{verbose}{flag to show progress messages}
+
+\item{icov.select.params}{list of further arguments to \code{\link{icov.select}}}
 }
 \description{
-Spiec-Easi pipeline
 Run the whole analysis, from data transformation, iCov estimation and model selection.
 Inputs are a non-normalized OTU table and pipeline options.
 }

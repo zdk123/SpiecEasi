@@ -24,7 +24,7 @@ icov.select(est, criterion = "stars", stars.thresh = 0.05,
 
 \item{ncores}{number of cores to use. Need multiple processers if \code{ncores > 1}}
 
-\item{normfun}{normalize internally if data should be renormalized}
+\item{normfun}{normalize internally if data should be renormalized (experimental feature)}
 }
 \description{
 Model selection for picking the right \code{lambda} penalty.
