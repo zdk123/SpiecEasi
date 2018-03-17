@@ -1,0 +1,16 @@
+library(devtools)
+load_all('.')
+
+p <- 12
+graph <- make_graph(p, e=8,method='cluster')
+S <- cov2cor(prec2cov(graph2prec(graph)))
+X <- rmvpois(1000, mu=rep(10,p), Sigma=S)
+
+rs <- round(exp(seq(log(1), log(8), length.out=4)))
+out <- spiec.easi(scale(X), method='slr', r=rs, lambda.min.ratio=1e-2, nlambda=100, pulsar.params=list(thresh=0.1, ncores=4))
+
+opt.inds <- sapply(out, function(x) opt.index(x$select, 'stars'))
+
+sel <- sapply(1:length(out), function(i) ebic(out[[i]]$refit, out[[i]]$est$data, out[[i]]$est$loglik[[opt.inds[i]]]))
+
+huge::huge.roc(lapply(out, '[[', 'refit'), graph)

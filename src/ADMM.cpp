@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
- 
+
 using namespace Rcpp;
 using namespace arma;
 
@@ -76,10 +76,11 @@ arma::mat softSVT2(arma::mat& M, int k, double beta=0) {
 
 
 // [[Rcpp::export]]
-List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda,
-          arma::mat& Y, double beta=0, int r=0, double mu=0, const double& eta=4/5, 
-          const double& muf=1e-6, const int& maxiter=500, const double& newtol=1e-5,
-          const double& tol=1e-5, const double& over_relax_par=1.6, bool shrinkDiag=true) {
+List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
+          arma::mat& Lambda, arma::mat& Y, double beta=0, int r=0, double mu=0,
+          const double& eta=4/5, const double& muf=1e-6, const int&
+          maxiter=500, const double& newtol=1e-5, const double& tol=1e-5,
+          const double& over_relax_par=1.6, bool shrinkDiag=true) {
 
     int n = SigmaO.n_rows;
     if (mu == 0) mu = n;
@@ -153,9 +154,9 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat
 
     }
 
-    Lambda.cols(0  ,n-1  ) = Lambda1;
-    Lambda.cols(n  ,n*2-1) = Lambda2;
-    Lambda.cols(n*2,n*3-1) = Lambda3;
+    Lambda.cols(0  , n-1  ) = Lambda1;
+    Lambda.cols(n  , n*2-1) = Lambda2;
+    Lambda.cols(n*2, n*3-1) = Lambda3;
 
     return List::create(_["R"] = R,  _["S"] = S, _["L"] = L,
                         _["Y"] = Y,
@@ -167,4 +168,3 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat
                           _["eps_pri"] = eps_pri)
                         );
 }
-

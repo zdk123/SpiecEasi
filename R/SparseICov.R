@@ -100,9 +100,8 @@ neighborhood.net <- function(Z, lambda, method="ising", ncores=1, sym='or', ...)
 
 
 #' @importFrom glmnet glmnet
-glm.neighborhood <- function(X, Y, lambda, link='binomial') {
-    return(as.matrix(Bmat <- glmnet::glmnet(X, Y, family=link, lambda=lambda)$beta))
-##    lapply(1:ncol(Bmat), function(i) Bmat[,i,drop=FALSE])
+glm.neighborhood <- function(X, Y, lambda, link='binomial', ...) {
+    return(as.matrix(Bmat <- glmnet::glmnet(X, Y, family=link, lambda=lambda, ...)$beta))
 }
 
 # #' @useDynLib SpiecEasi LPGM_neighborhood
