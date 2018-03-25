@@ -1,6 +1,6 @@
 context("Graphs")
 
-types <-  c("cluster", "erdos_renyi",  "hub",  "scale_free", 
+types <-  c("cluster", "erdos_renyi",  "hub",  "scale_free",
                 "block", "band")
 D <- 10 ; e <- 10
 gr_list <- lapply(types, make_graph, D=D, e=e, enforce=TRUE)
@@ -48,8 +48,7 @@ test_that("graph2prec returns error if input is not of class graph", {
 })
 
 test_that("expected number of edges is properly enforced", {
-    lapply(gr_list, function(gr) {
-        is_identical_to(edge_count(gr), e)
-    })
-
+    for (gr in gr_list) {
+      expect_equal(edge_count(gr), e)
+    }
 })

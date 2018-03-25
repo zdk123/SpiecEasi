@@ -14,7 +14,7 @@ rzipois <- function(n, lambda, pstr0 = 0) {
     ind0 <- (deflat.limit <= pstr0) & (pstr0 < 0)
     if (any(ind0)) {
         pobs0 <- pstr0[ind0] + (1 - pstr0[ind0]) * pstr0[ind0]
-        ans[ind0] <- qpois(p = runif(sum(ind0), 
+        ans[ind0] <- qpois(p = runif(sum(ind0),
                     min = dpois(0, lambda[ind0])), lambda[ind0])
         ans[ind0] <- ifelse(runif(sum(ind0)) < pobs0, 0, ans[ind0])
     }
@@ -47,7 +47,7 @@ rzipois <- function(n, lambda, pstr0 = 0) {
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom VGAM qzipois
 #' @export
-rmvzipois <- function(n, mu, Sigma, lambdas, ps, ...) {
+rmvzipois <- function(n, mu, Sigma=diag(length(mu)), lambdas, ps, ...) {
     d   <- ncol(Sigma)
     Cor <- cov2cor(Sigma)
     SDs <- sqrt(diag(Sigma))
@@ -63,7 +63,7 @@ rmvzipois <- function(n, mu, Sigma, lambdas, ps, ...) {
 
     normd  <- rmvnorm(n, rep(0, d), Cor)
     unif   <- pnorm(normd)
-    data <- t(VGAM::qzipois(t(unif), lambdas, pstr0=ps, ...))
+    data <- matrix(VGAM::qzipois(unif, lambdas, pstr0=ps, ...), n, d)
     data <- .fixInf(data)
     return(data)
 }
@@ -88,7 +88,7 @@ rmvpois <- function(n, mu, Sigma, ...) {
     if (length(mu) == 1) stop("Need more than 1 variable")
     normd  <- rmvnorm(n, rep(0, d), Cor)
     unif   <- pnorm(normd)
-    data <- t(qpois(t(unif), mu, ...))
+    data <- matrix(qpois(unif, mu, ...), n, d)
     data <- .fixInf(data)
     return(data)
 }
@@ -176,7 +176,7 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
     d   <- length(munbs)
     normd  <- rmvnorm(n, rep(0, d), Sigma=Cor)
     unif   <- pnorm(normd)
-    data <- t(VGAM::qzinegbin(t(unif), munb=munbs, size=ks, pstr0=ps, ...))
+    data <- matrix(VGAM::qzinegbin(unif, munb=munbs, size=ks, pstr0=ps, ...), n, d)
     data <- .fixInf(data)
     return(data)
 }
@@ -211,11 +211,11 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
 #' @export
 rmvnorm <- function(n=100, mu=rep(0,10), Sigma=diag(10), tol=1e-6, empirical=TRUE) {
     p <- length(mu)
-    if (!all(dim(Sigma) == c(p, p))) 
+    if (!all(dim(Sigma) == c(p, p)))
         stop("incompatible arguments")
     eS <- eigen(Sigma, symmetric = TRUE)
     ev <- eS$values
-    if (!all(ev >= -tol * abs(ev[1L]))) 
+    if (!all(ev >= -tol * abs(ev[1L])))
         stop("'Sigma' is not positive definite")
     X <- matrix(rnorm(p * n), n)
     if (empirical) {

@@ -19,7 +19,7 @@ norm_to_total <- function(x) x/sum(x)
 #'
 #' Shannon entropy is:
 #'     sum [ x_i log(x_i) ]
-#'      
+#'
 #' @param x data vector
 #' @return shannon entropy in base e
 #' @export

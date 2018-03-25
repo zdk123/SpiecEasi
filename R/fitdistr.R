@@ -10,7 +10,7 @@
 #' @param n number of samples (defaults to comm samples)
 #' @param retParams if TRUE, return the fitted parameters
 #' @param ... additional parameters to parameter fitting
-#' @return community 
+#' @return community
 #' @export
 synth_comm_from_counts <- function(comm, mar=2, distr, Sigma=cov(comm),
                                    params, n=nrow(comm), retParams=FALSE, ...) {
@@ -63,15 +63,15 @@ get_comm_params <- function(comm, mar=2, distr, ...) {
 fitdistr <- function (x, densfun, start, ...)  {
     if (class(x) != "numeric") stop("Error: input must be numeric vector")
     Call <- match.call(expand.dots = TRUE)
-    if (missing(start)) 
+    if (missing(start))
         start <- NULL
     dots <- names(list(...))
     dots <- dots[!is.element(dots, c("upper", "lower"))]
-    if (missing(x) || length(x) == 0L || mode(x) != "numeric") 
+    if (missing(x) || length(x) == 0L || mode(x) != "numeric")
         stop("'x' must be a non-empty numeric vector")
-    if (any(!is.finite(x))) 
+    if (any(!is.finite(x)))
         stop("'x' contains missing or infinite values")
-    if (missing(densfun) || !(is.function(densfun) || is.character(densfun))) 
+    if (missing(densfun) || !(is.function(densfun) || is.character(densfun)))
         stop("'densfun' must be supplied as a function or name")
     control <- list()
     n <- length(x)
@@ -79,9 +79,9 @@ fitdistr <- function (x, densfun, start, ...)  {
         distname <- tolower(densfun)
         densfun <- switch(distname, zipois = VGAM::dzipois, zinegbin = VGAM::dzinegbin, negbin = dnbinom,
             pois=dpois, lognorm='dlnorm', NULL)
-        if (is.null(densfun)) 
+        if (is.null(densfun))
             stop("unsupported distribution")
-    } 
+    }
 
     if (distname == "lognorm") {
         meanlog <- mean(log(x))
@@ -89,8 +89,8 @@ fitdistr <- function (x, densfun, start, ...)  {
         return(list(par=list(meanlog=meanlog, sdlog=sdlog)))
     }
     if (distname == "zipois") {
-        if (!is.null(start)) 
-            stop(gettextf("supplying pars for the %s distribution is not supported", 
+        if (!is.null(start))
+            stop(gettextf("supplying pars for the %s distribution is not supported",
               "Poisson"), domain = NA)
         whichz  <- which(x == 0.0)
         which1  <- which(x == 1.0)
@@ -110,7 +110,7 @@ fitdistr <- function (x, densfun, start, ...)  {
         loglikfn <- match.fun(logLikzip)
         }
     if (distname == "gamma" && is.null(start)) {
-        if (any(x < 0)) 
+        if (any(x < 0))
             stop("gamma values must be >= 0")
         m <- mean(x)
         v <- var(x)
@@ -146,11 +146,11 @@ fitdistr <- function (x, densfun, start, ...)  {
         start <- c(size = size, munb = estimate, pstr0 = pstr0)
         start <- start[!is.element(names(start), dots)]
         loglikfn <- match.fun(logLikzinb)
-     } 
+     }
     else if (distname == 'negbin') {
         m <- mean(x)
         v <- var(x)
-        size <- if (v > m) 
+        size <- if (v > m)
                 m^2/((v/2) - m)
                 else 100
         start <- list(size = size, mu = m)
@@ -213,7 +213,7 @@ qqdplot_comm <- function(comm, distr, param, plot=TRUE, ...) {
         x <- comm$x
         y <- comm$y
     }
-    
+
     if (plot) {
         xrange <- range(y)
         if (!('main' %in% names(list(...)))) main = 'QQ-plot'
@@ -257,7 +257,7 @@ qqdplot <- function(y, distr, param, plot=TRUE, ...) {
         }
         x <- qpois(ppoints(n), lambda=param$lambda)[order(order(y))]
     }
-    
+
     if (plot) {
         xrange <- range(y)
         plot(y, x, main="QQ-plot", ylim=xrange, xlab='Observed Quantiles', ylab='Theoretical Quantiles')
@@ -267,5 +267,3 @@ qqdplot <- function(y, distr, param, plot=TRUE, ...) {
         return(x)
     }
 }
-
-

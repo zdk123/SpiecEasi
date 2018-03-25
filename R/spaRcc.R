@@ -3,8 +3,8 @@
 sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 ## reimplementation of SparCC in R
 #  without all the 'frills'
-    sparccs <- 
-     lapply(1:iter, function(i) 
+    sparccs <-
+     lapply(1:iter, function(i)
          sparccinner(t(apply(data, 1, norm_diric)), iter=inner_iter, th=th))
     # collect
     cors <- array(unlist(lapply(sparccs, function(x) x$Cor)),
@@ -20,13 +20,15 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 
 
 #' @export
-#' @importFrom boot boot
 sparccboot <- function(data, sparcc.params=list(),
-                             statisticboot=function(data, indices) triu(do.call("sparcc", 
-                                           c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor),
-                             statisticperm=function(data, indices) triu(do.call("sparcc", 
-                                           c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor),
+                        statisticboot=function(data, indices) triu(do.call("sparcc",
+                      c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor),
+                        statisticperm=function(data, indices) triu(do.call("sparcc",
+                 c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor),
                       R, ncpus=1, ...) {
+
+    if (!require('boot')) stop('\'boot\' package is not installed')
+
     res     <- boot::boot(data, statisticboot, R=R, parallel="multicore", ncpus=ncpus, ...)
     null_av <- boot::boot(data, statisticperm, sim='permutation', R=R, parallel="multicore", ncpus=ncpus)
     class(res) <- 'list'
@@ -41,8 +43,8 @@ pval.sparccboot <- function(x, sided='both', mar=2) {
     if (sided != "both") stop("only two-sided currently supported")
     nparams  <- ncol(x$t)
     tmeans   <- colMeans(x$null_av$t)
-#    check to see whether Aitchison variance is unstable -- confirm 
-#    that sample Aitchison variance is in 95% confidence interval of 
+#    check to see whether Aitchison variance is unstable -- confirm
+#    that sample Aitchison variance is in 95% confidence interval of
 #    bootstrapped samples
     niters   <- nrow(x$t)
     ind95    <- max(1,round(.025*niters)):round(.975*niters)
@@ -54,7 +56,7 @@ pval.sparccboot <- function(x, sided='both', mar=2) {
             range[1] > aitvar || range[2] < aitvar
         }))
     # calc whether center of mass is above or below the mean
-    bs_above <- unlist(lapply(1:nparams, function(i) 
+    bs_above <- unlist(lapply(1:nparams, function(i)
                     length(which(x$t[, i] > tmeans[i]))))
     is_above <- bs_above > x$R/2
     cors <- x$t0
@@ -130,8 +132,8 @@ basis_cov <- function(data.f) {
 }
 
 #' @keywords internal
-basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)), 
-                      M = matrix(1, nrow(T), ncol(T)) + (diag(ncol(T))*(ncol(T)-2)), 
+basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
+                      M = matrix(1, nrow(T), ncol(T)) + (diag(ncol(T))*(ncol(T)-2)),
                       excluded = NULL, Vmin=1e-4) {
 
     if (!is.null(excluded)) {
@@ -173,4 +175,3 @@ norm_diric   <- function(x, rep=1) {
     dmat <- VGAM::rdiric(rep, x+1)
     norm_to_total(colMeans(dmat))
 }
-

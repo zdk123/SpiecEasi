@@ -1,6 +1,18 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+```{r setup, echo = FALSE, eval=TRUE}
+knitr::opts_knit$set(
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = TRUE
+saveout   = runchunks
 
+if (!runchunks) load('.README.RData')
+```
 SpiecEasi
 =========
 [![Build Status](https://travis-ci.org/zdk123/SpiecEasi.svg?branch=pulsar)](https://travis-ci.org/zdk123/SpiecEasi)
@@ -26,8 +38,7 @@ I assume that all auxiliary packages are already installed - for example huge, M
 
 From an interactive R session:
 
-
-```r
+```{r, eval=FALSE}
 library(devtools)
 install_github("zdk123/SpiecEasi", ref='pulsar')
 library(SpiecEasi)
@@ -47,8 +58,7 @@ Lets simulate some multivariate data under zero-inflated negative binomial model
 
 Obviously, for real data, skip 1-4.
 
-
-```r
+```{r, eval=runchunks}
 data(amgut1.filt)
 depths <- rowSums(amgut1.filt)
 amgut1.filt.n  <- t(apply(amgut1.filt, 1, norm_to_total))
@@ -59,8 +69,7 @@ n <- nrow(amgut1.filt.cs)
 e <- d
 ```
 Synthesize the data
-
-```r
+```{r, eval=runchunks}
 set.seed(10010)
 graph <- make_graph('cluster', d, e)
 Prec  <- graph2prec(graph)
@@ -70,18 +79,12 @@ X <- synth_comm_from_counts(amgut1.filt.cs, mar=2, distr='zinegbin', Sigma=Cor, 
 ```
 
 the main SPIEC-EASI pipeline: Data transformation, sparse inverse covariance estimation and model selection
-
-```r
+```{r, eval=runchunks}
 se <- spiec.easi(X, method='mb', lambda.min.ratio=1e-2, nlambda=15)
-# Applying data transformations...
-# Selecting model with pulsar using stars...
-# Fitting final estimate with mb...
-# done
 ```
 
 examine ROC over lambda path and PR over the stars index for the selected graph
-
-```r
+```{r, eval=FALSE, fig.width=5, fig.height=5}
 huge::huge.roc(se$est$path, graph, verbose=FALSE)
 stars.pr(getOptMerge(se), graph, verbose=FALSE)
 # stars selected final network under: se.est$refit$stars
@@ -95,8 +98,7 @@ The above example does not cover all possible options and parameters. For exampl
 
 Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the `spiec.easi` function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter `pulsar.params`. If you have more than one processor available, you can also supply a number to `ncores`. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
 
-
-```r
+```{r, eval=runchunks, message=FALSE, warning=FALSE}
 se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
                           nlambda=20, pulsar.params=list(rep.num=50))
 se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
@@ -113,8 +115,7 @@ ig.sparcc <- adj2igraph(sparcc.graph)
 ```
 
 Visualize using igraph plotting:
-
-```r
+```{r, eval=runchunks, fig.width=15, fig.height=7, message=FALSE}
 library(igraph)
 ## set size of vertex proportional to clr-mean
 vsize    <- rowMeans(clr(amgut1.filt, 1))+6
@@ -126,12 +127,9 @@ plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
 plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
 ```
 
-![plot of chunk unnamed-chunk-7](https://i.imgur.com/XmBikQk.png)
-
 We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI is based on penalized estimators, the edge weights are not directly comparable to SparCC (or Pearson/Spearman correlation coefficients)
 
-
-```r
+```{r, eval=runchunks, fig.width=8, fig.height=5}
 library(Matrix)
 secor  <- cov2cor(getOptCov(se.gl.amgut))
 sebeta <- symBeta(getOptBeta(se.mb.amgut), mode='maxabs')
@@ -144,12 +142,9 @@ hist(elist.mb[,3], add=TRUE, col='forestgreen')
 hist(elist.gl[,3], add=TRUE, col='red')
 ```
 
-![plot of chunk unnamed-chunk-8](https://i.imgur.com/aDk0l3v.png)
-
 Lets look at the degree statistics from the networks inferred by each method.
 
-
-```r
+```{r, eval=runchunks, fig.width=9, fig.height=6}
 dd.gl     <- degree.distribution(ig.gl)
 dd.mb     <- degree.distribution(ig.mb)
 dd.sparcc <- degree.distribution(ig.sparcc)
@@ -162,23 +157,18 @@ legend("topright", c("MB", "glasso", "sparcc"),
         col=c("forestgreen", "red", "black"), pch=1, lty=1)
 ```
 
-![plot of chunk unnamed-chunk-9](https://i.imgur.com/qQnKlFL.png)
-
 
 ## Working with phyloseq ##
 
 SpiecEasi includes some convience wrappers to work directly with `phyloseq` objects.
-
-```r
+```{r, eval=runchunks, warning=FALSE, message=FALSE}
 library(phyloseq)
 ## Load round 2 of American gut project
 data('amgut2.filt.phy')
 se.mb.amgut2 <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
                            nlambda=20, pulsar.params=list(rep.num=50))
 ig2.mb <- adj2igraph(getOptRefit(se.mb.amgut2),  vertex.attr=list(name=taxa_names(amgut2.filt.phy)))
-# Error in getOptRefit(se.mb.amgut2): could not find function "getOptRefit"
 plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
-# Error in "igraph" %in% class(graph): object 'ig2.mb' not found
 ```
 
 ## Cross domain interactions ##
@@ -187,8 +177,7 @@ SpiecEasi now includes a convenience wrapper for dealing with multiple taxa sequ
 
 Here's an example run from the [HMP2 project](https://ibdmdb.org/tunnel/public/summary.html) with 16S and Proteomics data.
 
-
-```r
+```{r, eval=runchunks, echo=TRUE, message=FALSE}
 library(phyloseq)
 data(hmp2)
 se.hmp2 <- spiec.easi(list(hmp216S, hmp2prot), method='mb', nlambda=40,
@@ -198,15 +187,12 @@ dtype <- c(rep(1,ntaxa(hmp216S)), rep(2,ntaxa(hmp2prot)))
 plot(adj2igraph(getRefit(se.hmp2)), vertex.color=dtype+1, vertex.size=9)
 ```
 
-![plot of chunk unnamed-chunk-11](https://i.imgur.com/7bWbuZ0.png)
-
 
 ## pulsar: parallel utilities for model selection ##
 SpiecEasi is now using the [pulsar package](https://cran.r-project.org/package=pulsar) as the backend for performing model selection. In the default parameter setting, this uses the same [StARS](https://arxiv.org/abs/1006.3316) procedure as previous versions.
 As in the previous version of SpiecEasi, we can supply the `ncores` argument to the pulsar.params list to break up the subsampled computations into parallel tasks.
 In this example, we set the random seed to make consistent comparison across experiments.
-
-```r
+```{r, message=FALSE, warning=FALSE}
 ## Default settings ##
 pargs1 <- list(rep.num=50, seed=10010)
 t1 <- system.time(
@@ -222,8 +208,7 @@ se2 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
 ```
 
 We can further speed up StARS using the [bounded-StARS](https://arxiv.org/abs/1605.07072) ('bstars') method. The B-StARS approach computes network stability across the whole lambda path, but only for the first 2 subsamples. This is used to build an initial estimate of the summary statistic, which in turn gives us a lower/upper bound on the optimal lambda. The remaining subsamples are used to compute the stability over the restricted path. Since denser networks are more computational expensive to compute, this can significantly reduce computational time for datasets with many variables.
-
-```r
+```{r, message=FALSE, warning=FALSE}
 t3 <- system.time(
 se3 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
                sel.criterion='bstars', pulsar.select=TRUE, pulsar.params=pargs1)
@@ -235,8 +220,7 @@ se4 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
 ```
 
 We can see that in addition to the computational savings, the refit networks are identical.
-
-```r
+```{r, eval=FALSE}
 ## serial vs parallel
 identical(getRefit(se1), getRefit(se2))
 t1[3] > t2[3]
@@ -252,23 +236,17 @@ t2[3] > t4[3]
 Pulsar gives us the option of running stability selection in batch mode, using the [batchtools](https://mllg.github.io/batchtools/) package. This will be useful to anyone with access to an hpc/distributing computing system. Each subsample will be independently executed using a system-specific cluster function.
 
 This requires an external config file which will instruct the batchtools registry how to construct the cluster function which will execute the individual jobs. `batch.pulsar` has some built in config files that are useful for testing purposes (serial mode, "parallel", "snow", etc), but it is advisable to create your own config file and pass in the absolute path. See the [batchtools docs](https://mllg.github.io/batchtools/articles/batchtools.html#configuration-file) for instructions on how to construct config file and template files (i.e. to interact with a queueing system such as TORQUE or SGE).
-
-```r
+```{r, run=FALSE}
 
 ## bargs <- list(rep.num=50, seed=10010, conffile="path/to/conf.txt")
 bargs <- list(rep.num=50, seed=10010, conffile="parallel")
 ## See the config file stores:
 pulsar::findConfFile('parallel')
-# [1] "/usr/local/lib/R/3.4/site-library/pulsar/config/batchtools.conf.parallel.R"
 
 ## uncomment line below to turn off batchtools reporting
 # options(batchtools.verbose=FALSE)
 se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
             sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs1)
-# Applying data transformations...
-# Selecting model with batch.pulsar using stars...
-# Fitting final estimate with mb...
-# done
 ```
 
 ## Troubleshooting ##
@@ -276,45 +254,38 @@ se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
 A common issue that comes up with when running `spiec.easi` is coming up with an empty network after running StARS.
 
 For example:
-
-```r
+```{r, echo=TRUE, message=FALSE, warning=TRUE}
 pargs <- list(seed=10010)
 se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=5e-1, nlambda=10, pulsar.params=pargs)
-# Warning message:
-# In pulsar(data = X, fun = match.fun(estFun), fargs = args, seed = 10010) :
-#   Optimal lambda may be smaller than the supplied values
 getOptInd(se)
-# [1] 1
 sum(getRefit(se))/2
-# [1] 0
 ```
 
 As the warning indicates, the network stability could not be determined from the lambda path. Looking at the stability along the lambda path, `se$select$stars$summary`, we can see that the maximum value of the StARS summary statistic never crosses the default threshold (0.05).
 
 This problem we can fix by lowering `lambda.min.ratio` to explore denser networks.
 
-
-```r
+```{r, message=FALSE, warning=FALSE}
 se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=10, pulsar.params=pargs)
 ```
 
 We have now fit a network, but since we have only a rough, discrete sampling of networks along the lambda path, we should check how far we are from the target stability threshold (0.05).
 
-
-```r
+```{r}
 getStability(se)
-# [1] 0.07647419
 sum(getRefit(se))/2
-# [1] 278
 ```
 
 To get closer to the mark, we should bump up `nlambda` to more finely sample of the lambda path, which gives a denser network.
 
-
-```r
+```{r, message=FALSE, warning=FALSE}
 se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=100, pulsar.params=pargs)
 getStability(se)
-# [1] 0.0992301
 sum(getRefit(se))/2
-# [1] 365
+```
+
+
+```{r, echo = FALSE, eval=runchunks}
+if (saveout)
+ save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".README.RData")
 ```
