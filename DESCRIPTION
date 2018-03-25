@@ -24,6 +24,8 @@ Suggests:
    phyloseq,
    igraph,
    testthat
+Remotes:
+   bioc::phyloseq
 License: getOptions('devtools.desc.license')
 LazyData: true
 RoxygenNote: 6.0.1

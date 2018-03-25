@@ -24,13 +24,13 @@ This package will be useful to anybody who wants to infer graphical models for a
 One small point on notation: we refer to the method as "SPIEC-EASI" and reserve "SpiecEasi" for this package.
 
 ## TOC ##
-[Installation](#installation)
-[Basic Usage](#basic-usage)
-[American Gut Data](#analysis-of-american-gut-data)
-[Using phyloseq](#working-with-phyloseq)
-[Cross Domain SPIEC-EASI](#cross-domain-interactions)
-[pulsar & batch options](#pulsar-parallel-utilities-for-model-selection)
-[Troubleshooting](#troubleshooting)
+0. [Installation](#installation)
+1. [Basic Usage](#basic-usage)
+2. [American Gut Data](#analysis-of-american-gut-data)
+3. [Using phyloseq](#working-with-phyloseq)
+4. [Cross Domain SPIEC-EASI](#cross-domain-interactions)
+5. [pulsar & batch options](#pulsar-parallel-utilities-for-model-selection)
+6. [Troubleshooting](#troubleshooting)
 
 ## Installation ##
 
@@ -167,7 +167,7 @@ library(phyloseq)
 data('amgut2.filt.phy')
 se.mb.amgut2 <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
                            nlambda=20, pulsar.params=list(rep.num=50))
-ig2.mb <- adj2igraph(getOptRefit(se.mb.amgut2),  vertex.attr=list(name=taxa_names(amgut2.filt.phy)))
+ig2.mb <- adj2igraph(getRefit(se.mb.amgut2),  vertex.attr=list(name=taxa_names(amgut2.filt.phy)))
 plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
