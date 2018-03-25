@@ -58,3 +58,6 @@ test_that("stars == batch bstars", {
   expect_equal(as.matrix(out.stars$refit$stars),
                as.matrix(bout.bstars$refit$stars))
 })
+
+
+## TODO: test pulsar params in/out

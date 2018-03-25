@@ -185,8 +185,6 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
   }
 
 
-  call <- do.call('update', c(pulsar.params, list(object=list(call=call), evaluate=FALSE)))
-
   if (pulsar.select) {
     ## process pulsar.params defaults
     flag <- .check_pulsar_params(fun, pulsar.params)
@@ -201,6 +199,9 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
     if (sel.criterion %in% c("bstars", "gstars"))
       pulsar.params$lb.stars <- pulsar.params$ub.stars <- TRUE
     if (is.null(pulsar.params[[ "thresh" ]])) pulsar.params$thresh <- 0.05
+
+    call <- do.call('update',
+              c(pulsar.params, list(object=list(call=call), evaluate=FALSE)))
 
     if (verbose)
       message(sprintf("Selecting model with %s using ", fun), sel.criterion, "...")

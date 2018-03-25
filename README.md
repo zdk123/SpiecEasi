@@ -126,7 +126,7 @@ plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
 plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
 ```
 
-![plot of chunk unnamed-chunk-7](https://i.imgur.com/U2L7PMA.png)
+![plot of chunk unnamed-chunk-7](https://i.imgur.com/SUUK3RV.png)
 
 We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI is based on penalized estimators, the edge weights are not directly comparable to SparCC (or Pearson/Spearman correlation coefficients)
 
@@ -144,7 +144,7 @@ hist(elist.mb[,3], add=TRUE, col='forestgreen')
 hist(elist.gl[,3], add=TRUE, col='red')
 ```
 
-![plot of chunk unnamed-chunk-8](https://i.imgur.com/ajHl3iG.png)
+![plot of chunk unnamed-chunk-8](https://i.imgur.com/Wx2u0il.png)
 
 Lets look at the degree statistics from the networks inferred by each method.
 
@@ -162,7 +162,7 @@ legend("topright", c("MB", "glasso", "sparcc"),
         col=c("forestgreen", "red", "black"), pch=1, lty=1)
 ```
 
-![plot of chunk unnamed-chunk-9](https://i.imgur.com/DJvG1Bs.png)
+![plot of chunk unnamed-chunk-9](https://i.imgur.com/jFXxt9x.png)
 
 
 ## Working with phyloseq ##
@@ -179,7 +179,7 @@ ig2.mb <- adj2igraph(getRefit(se.mb.amgut2),  vertex.attr=list(name=taxa_names(a
 plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
-![plot of chunk unnamed-chunk-10](https://i.imgur.com/AoksYgU.png)
+![plot of chunk unnamed-chunk-10](https://i.imgur.com/U5YLDyB.png)
 
 ## Cross domain interactions ##
 
@@ -198,7 +198,7 @@ dtype <- c(rep(1,ntaxa(hmp216S)), rep(2,ntaxa(hmp2prot)))
 plot(adj2igraph(getRefit(se.hmp2)), vertex.color=dtype+1, vertex.size=9)
 ```
 
-![plot of chunk unnamed-chunk-11](https://i.imgur.com/0AQb52l.png)
+![plot of chunk unnamed-chunk-11](https://i.imgur.com/2DiRAgO.png)
 
 
 ## pulsar: parallel utilities for model selection ##
@@ -259,11 +259,16 @@ This requires an external config file which will instruct the batchtools registr
 bargs <- list(rep.num=50, seed=10010, conffile="parallel")
 ## See the config file stores:
 pulsar::findConfFile('parallel')
+# [1] "/usr/local/lib/R/3.4/site-library/pulsar/config/batchtools.conf.parallel.R"
 
 ## uncomment line below to turn off batchtools reporting
 # options(batchtools.verbose=FALSE)
 se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
             sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs1)
+# Applying data transformations...
+# Selecting model with batch.pulsar using stars...
+# Fitting final estimate with mb...
+# done
 ```
 
 ## Troubleshooting ##
@@ -276,7 +281,7 @@ For example:
 pargs <- list(seed=10010)
 se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=5e-1, nlambda=10, pulsar.params=pargs)
 # Warning in pulsar(data = X, fun = match.fun(estFun), fargs = args, seed =
-# 10010): Optimal lambda may be smaller than the supplied values
+# 10010, : Optimal lambda may be smaller than the supplied values
 getOptInd(se)
 # [1] 1
 sum(getRefit(se))/2
@@ -297,9 +302,9 @@ We have now fit a network, but since we have only a rough, discrete sampling of 
 
 ```r
 getStability(se)
-# [1] 0.07647419
+# [1] 0.03518685
 sum(getRefit(se))/2
-# [1] 278
+# [1] 158
 ```
 
 To get closer to the mark, we should bump up `nlambda` to more finely sample of the lambda path, which gives a denser network.
@@ -308,7 +313,7 @@ To get closer to the mark, we should bump up `nlambda` to more finely sample of 
 ```r
 se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=100, pulsar.params=pargs)
 getStability(se)
-# [1] 0.0992301
+# [1] 0.04798275
 sum(getRefit(se))/2
-# [1] 365
+# [1] 206
 ```
