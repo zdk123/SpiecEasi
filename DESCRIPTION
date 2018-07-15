@@ -20,7 +20,8 @@ Imports:
    pulsar (>= 0.3.4),
    MASS,
    VGAM,
-   Matrix
+   Matrix,
+   Rcpp
 Suggests:
    parallel,
    boot,

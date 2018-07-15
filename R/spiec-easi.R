@@ -170,6 +170,8 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                   },
 
         slr    = {
+                    # if (!require('irlba'))
+                      # stop('irlba package required')
                     if (length(args$r) > 1) { #TODO: add beta vector option
                       tmp <- lapply(args$r, function(r) {
                         if (verbose)

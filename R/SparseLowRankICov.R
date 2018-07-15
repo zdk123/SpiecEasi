@@ -2,8 +2,8 @@
 #'
 #' TODO: add description
 #' @export
-sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, ...) {
-
+sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
+## TODO: make args to admm2 explicit
   args <- list(...)
   if (length(args$r) > 1 || length(args$beta) > 1)
     stop("Only single value allowed for \'r\' or \'beta\'")
@@ -11,6 +11,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, ...) {
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
   if (isSymmetric(data)) SigmaO <- data
   else SigmaO <- cov(data)
+  if (cor) SigmaO <- cov2cor(SigmaO)
 
   if (!is.null(args[[ "lambda.max" ]])) maxlam <- args$lambda.max
   else maxlam <- 1
@@ -36,7 +37,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, ...) {
   p <- ncol(SigmaO)
   I    <- diag(p)
   args$opts <- c(args$opts, list(I=I))
-  args$opts$tol <- 1e-4
+  args$opts$tol <- 1e-3
 ##  lest <- vector('list', n)
   loglik <- vector('numeric', n)
   path <- vector('list', n) ; icov <- vector('list', n) ; resid <- vector('list', n)
@@ -62,9 +63,9 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, ...) {
 
 #' @useDynLib SpiecEasi
 #' @exportPattern "^[^\\.]"
-admm2 <- function(SigmaO, lambda, beta, r, tol=1e-3, shrinkDiag=TRUE, opts) {
+admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
-  defopts <- list(mu=n, eta=75/100, muf=1e-4, maxiter=500, newtol=1e-4)
+  defopts <- list(mu=n, eta=75/100, muf=1e-4, maxiter=100, newtol=1e-4)
   if (!missing(opts)) for (o in names(opts)) defopts[[ o ]] <- opts [[ o ]]
   if (missing(beta)) beta <- 0
   if (missing(r))       r <- 0
@@ -80,7 +81,6 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-3, shrinkDiag=TRUE, opts) {
   if (is.null(opts[[ 'Y' ]]))
     Y <- cbind(I, I, matrix(0, n, n))
   else Y <- opts$Y
-
   ADMM(SigmaO=SigmaO, lambda=lambda, I=I, Lambda=Lambda, Y=Y, beta=beta, r=r, shrinkDiag=shrinkDiag,
        maxiter=opts$maxiter, mu=opts$mu, eta=opts$eta, newtol=opts$newtol, muf=opts$muf)
 }

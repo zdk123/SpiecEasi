@@ -13,6 +13,10 @@ svdPowSym <- function(U, d, V, A, k, q) {
     invisible(.Call('_SpiecEasi_svdPowSym', PACKAGE = 'SpiecEasi', U, d, V, A, k, q))
 }
 
+svdPowSym2 <- function(M, k) {
+    .Call('_SpiecEasi_svdPowSym2', PACKAGE = 'SpiecEasi', M, k)
+}
+
 softSVT3 <- function(M, k, beta = 0) {
     .Call('_SpiecEasi_softSVT3', PACKAGE = 'SpiecEasi', M, k, beta)
 }
@@ -21,16 +25,12 @@ softSVT2 <- function(M, k, beta = 0) {
     .Call('_SpiecEasi_softSVT2', PACKAGE = 'SpiecEasi', M, k, beta)
 }
 
+SVD2 <- function(M) {
+    .Call('_SpiecEasi_SVD2', PACKAGE = 'SpiecEasi', M)
+}
+
 ADMM <- function(SigmaO, lambda, I, Lambda, Y, beta = 0, r = 0L, mu = 0, eta = 4/5, muf = 1e-6, maxiter = 500L, newtol = 1e-5, tol = 1e-5, over_relax_par = 1.6, shrinkDiag = TRUE) {
     .Call('_SpiecEasi_ADMM', PACKAGE = 'SpiecEasi', SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag)
-}
-
-MATAVE2 <- function(A, B) {
-    .Call('_SpiecEasi_MATAVE2', PACKAGE = 'SpiecEasi', A, B)
-}
-
-MATAVE3 <- function(A, B, C) {
-    .Call('_SpiecEasi_MATAVE3', PACKAGE = 'SpiecEasi', A, B, C)
 }
 
 sqrtmNewt <- function(C, sqrt0, errTol = 1e-3) {

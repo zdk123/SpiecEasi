@@ -21,6 +21,11 @@ norm_pseudo  <- function(x) norm_to_total(x+1)
 norm_to_total <- function(x) x/sum(x)
 
 
+#' 'Normalize' by sampling once from a dirichlet
+norm_rdiric <- function(x) {
+  VGAM::rdiric(n=1, shape=x)[1,]
+}
+
 #' compute the shannon entropy from a vector (normalized internally)
 #'
 #' Shannon entropy is:

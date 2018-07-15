@@ -85,7 +85,7 @@ soft.thresh <- function(S, lam, shrinkDiag=FALSE) {
         return(M)
     } else if (inherits(S, 'denseMatrix')) {
         return(soft.thresh(as(S, 'matrix'), lam, shrinkDiag))
-    } else 
+    } else
         stop('Class not recognized')
 }
 
@@ -98,7 +98,7 @@ hard.thresh <- function(S, lam, shrinkDiag=FALSE) {
         return(.sparseThresh(S, lam, shrinkDiag, thresh="hard"))
     } else if (inherits(S, 'denseMatrix')) {
         return(hard.thresh(as(S, 'sparseMatrix'), lam, shrinkDiag))
-    } else 
+    } else
         stop('Class not recognized')
 }
 
@@ -113,7 +113,7 @@ adaptive.thresh <- function(S, lam, shrinkDiag=FALSE, eta=1) {
         return(.sparseThresh(S, lam, shrinkDiag, thresh="adapt", eta))
     } else if (inherits(S, 'denseMatrix')) {
         return(adaptive.thresh(as(S, 'sparseMatrix'), lam, shrinkDiag, eta))
-    } else 
+    } else
         stop('Class not recognized')
 }
 

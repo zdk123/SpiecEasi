@@ -43,9 +43,16 @@ void svdPowSym(arma::mat& U, arma::vec& d, arma::mat& V, arma::mat& A, int k, in
         qr(Q, R, (P.t()*A).t());
     }
     svd_econ(U, d, V, A*Q);
-//    d = d.subvec(0,k-1);
-//    U = U.cols(0,k-1);
 }
+
+// [[Rcpp::export]]
+List svdPowSym2(arma::mat& M, int k) {
+    arma::mat U, V;
+    arma::vec d;
+    svdPowSym(U, d, V, M, k, k+1);
+    return List::create(_["d"] = d, _["U"] = U, _["V"] = V) ;
+}
+
 
 // [[Rcpp::export]]
 arma::mat softSVT3(arma::mat& M, int k, double beta=0) {
@@ -74,6 +81,71 @@ arma::mat softSVT2(arma::mat& M, int k, double beta=0) {
     return U*diagmat(tmpd)*V.t();
 }
 
+// [[Rcpp::export]]
+List SVD2(arma::mat& M) {
+    arma::mat U, V;
+    arma::vec d;
+    svd_econ(U, d, V, M);
+    return List::create(_["d"] = d, _["U"] = U, _["V"] = V) ;
+}
+
+// // [[Rcpp::export]]
+// Rcpp::List SVD3(arma::mat& A, int k=5) {
+//
+//   Rcpp::Environment base("package:irlba");
+//   Rcpp::Function f = base["irlba"];
+//   return f(A, k);
+// }
+
+// // [[Rcpp::export]]
+// DL_FUNC SVD4(SEXP xp, arma::mat& A, int k=5) {
+//   DL_FUNC IRLB = reinterpret_cast<DL_FUNC>( R_ExternalPtrAddr(xp) ) ;
+//
+// //   int maxit=1000;
+// //   double tol=1e-5;
+// //   double eps2=1e-12;
+// //   int SP;
+// //   int RESTART = 0;
+// //   // SEXP RV = Rcpp::Nullable<>();
+// //   // SEXP RW = Rcpp::Nullable<>();
+// //   // SEXP RS = Rcpp::Nullable<>();
+// //   // SEXP SCALE = Rcpp::Nullable<>();
+// //   // SEXP SHIFT = Rcpp::Nullable<>();
+// //   // SEXP CENTER = Rcpp::Nullable<>();
+// //   Rcpp::Nullable<arma::mat> RV = R_NilValue;
+// //   Rcpp::Nullable<arma::vec> RW = R_NilValue;
+// //   Rcpp::Nullable<arma::vec> RS = R_NilValue;
+// //   Rcpp::Nullable<float> SCALE = R_NilValue;
+// //   Rcpp::Nullable<float> SHIFT = R_NilValue;
+// //   Rcpp::Nullable<float> CENTER = R_NilValue;
+// //
+// //   double svtol = tol;
+// // //  RESTART <- 0L
+// // //RV <- RW <- RS <- NULL
+// //
+// //   int n = A.n_rows;
+// //   int work = k + 7;
+// //
+// //   arma::vec v = randn(n);
+//
+//   return IRLB;
+//   //A, k, v, work, maxit, tol, eps2, SP, RESTART, RV, RW, RS, SCALE, SHIFT, CENTER, svtol);
+//
+// }
+
+
+// // [[Rcpp::export]]
+// arma::mat softSVT4(arma::mat& M, int k, double beta=0) {
+//   List sout = SVD3(M, k);
+//   arma::mat U = as<arma::mat>(sout["u"]);
+//   arma::mat V = as<arma::mat>(sout["v"]);
+//   arma::vec d = as<arma::vec>(sout["d"]);
+//   if (beta == 0)
+//     beta = d(k-1);
+//   arma::vec tmpd = d - beta;
+//   return U*diagmat(tmpd)*V.t();
+// }
+
 
 // [[Rcpp::export]]
 List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
@@ -96,8 +168,8 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
     arma::mat X(size(Y));
 //    arma::mat Y_old(Y);
     arma::mat K, K2, KI;
-    int iter=0;
-    for (iter; iter < maxiter; iter++) {
+    int iter;
+    for (iter = 0; iter < maxiter; iter++) {
       // update X = (R,S,L)
 //      if (iter > 0) {
         RA = RY + mu*Lambda1;
@@ -117,6 +189,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
         L = LA;
       } else {
         L = softSVT2(LA, r, mu*beta);
+//        L = softSVT4(LA, r+1, mu*beta);
       }
 
       X.cols(0  , n-1  ) = R;
@@ -140,9 +213,9 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       Lambda2 = Lambda2 - (SO-SY)/mu;
       Lambda3 = Lambda3 - (LO-LY)/mu;
 
-      Y.cols(0  ,n-1  ) = RY;
-      Y.cols(n  ,n*2-1) = SY;
-      Y.cols(n*2,n*3-1) = LY;
+      Y.cols(0  , n-1  ) = RY;
+      Y.cols(n  , n*2-1) = SY;
+      Y.cols(n*2, n*3-1) = LY;
 
       r_norm(iter)  = norm(X - Y, "fro");
       eps_pri(iter) = sqrt(3*n*n)*tol + tol*std::max(norm(X,"fro"), norm(Y,"fro"));
