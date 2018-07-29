@@ -183,7 +183,6 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
     call <- quote(pulsar(data=X, fun=match.fun(estFun), fargs=args))
   }
 
-
   if (pulsar.select) {
     ## process pulsar.params defaults
     flag <- .check_pulsar_params(fun, pulsar.params)

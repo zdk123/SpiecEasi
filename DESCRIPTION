@@ -15,6 +15,7 @@ Imports:
    stats,
    methods,
    graphics,
+   grDevices,
    huge,
    pulsar,
    MASS,

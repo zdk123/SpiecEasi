@@ -7,7 +7,7 @@
 \usage{
 stars.roc(optmerge, theta, verbose = TRUE, plot = TRUE, ll = 15)
 
-stars.pr(optmerge, theta, verbose = TRUE, ll = 15)
+stars.pr(optmerge, theta, verbose = TRUE, plot = TRUE, ll = 15)
 }
 \arguments{
 \item{optmerge}{the optimal 'merge' matrix selected by stars}
@@ -15,6 +15,8 @@ stars.pr(optmerge, theta, verbose = TRUE, ll = 15)
 \item{theta}{the true graph or precision matrix}
 
 \item{verbose}{display messages}
+
+\item{plot}{graph the output}
 
 \item{ll}{number of points for the plot}
 }

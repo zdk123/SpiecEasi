@@ -13,12 +13,15 @@ One small point on notation: we refer to the method as "SPIEC-EASI" and reserve 
 
 ## TOC ##
 0. [Installation](#installation)
-1. [Basic Usage](#basic-usage)
-2. [American Gut Data](#analysis-of-american-gut-data)
-3. [Using phyloseq](#working-with-phyloseq)
-4. [Cross Domain SPIEC-EASI](#cross-domain-interactions)
-5. [pulsar & batch options](#pulsar-parallel-utilities-for-model-selection)
-6. [Troubleshooting](#troubleshooting)
+1. [News](#news)
+2. [Basic Usage](#basic-usage)
+3. [American Gut Data](#analysis-of-american-gut-data)
+4. [Using phyloseq](#working-with-phyloseq)
+5. [Cross Domain SPIEC-EASI](#cross-domain-interactions)
+6. [pulsar & batch options](#pulsar-parallel-utilities-for-model-selection)
+7. [Troubleshooting](#troubleshooting)
+
+## Installation ##
 
 ## Installation ##
 
@@ -32,6 +35,18 @@ library(devtools)
 install_github("zdk123/SpiecEasi", ref='pulsar')
 library(SpiecEasi)
 ```
+
+
+## News ##
+
+The latest SpiecEasi (version 1.0.0 and higher) now uses the [pulsar package](https://cran.r-project.org/package=pulsar) for stability-based model selection. The methods are similar to previous releases, but contains some additional methods for [speeding up computations](#pulsar-parallel-utilities-for-model-selection)
+
+The input arguments have changed slightly (but are backwards compatible) but the data structure that is returned from `spiec.easi` has changed.
+
+The output to spiec.easi-fit models structure can be easily processed using new getter functions. See `?getOptInd` for usage.
+
+You can revert to the previous release ([0.1.4](https://github.com/zdk123/SpiecEasi/releases/tag/v0.1.4)) to avoid code-breaking changes.
+
 ## Basic Usage ##
 
 Lets simulate some multivariate data under zero-inflated negative binomial model, based on (high depth/count) round 1 of the American gut project, with a sparse network. The basic steps are
@@ -94,7 +109,6 @@ The above example does not cover all possible options and parameters. For exampl
 
 
 Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the `spiec.easi` function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter `pulsar.params`. If you have more than one processor available, you can also supply a number to `ncores`. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
-
 
 
 ```r

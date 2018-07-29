@@ -20,15 +20,12 @@
 #'
 #' The argument \code{nlambda} determines the number of penalties - somewhere between 10-100 is usually good, depending on how the values of empirical correlation are distributed.
 #' @importFrom huge huge huge.npn
-#' @importFrom Matrix t
 #' @export
 #' @examples
 #' # simulate data with 1 negative correlation
 #'  set.seed(10010)
-#'  Theta <- matrix(0, 50, 50)
-#'  Theta[1,2] <- Theta[2,1] <- 1
-#'  Sigma <- -.45*Theta
-#'  diag(Sigma) <- 1
+#'  Sigma <- diag(50)*2
+#'  Sigma[1,2] <- Sigma[2,1] <- -.9
 #'  data  <- exp(rmvnorm(50, runif(50, 0, 2), Sigma))
 #'
 #' # normalize
@@ -40,11 +37,11 @@
 #'  est.f    <- sparseiCov(data.f, method='glasso')
 #'  est.log  <- sparseiCov(log(data), method='glasso')
 #'
-#' # evaluate results
-#' huge::huge.roc(est.clr$path, Theta)
-#' huge::huge.roc(est.log$path, Theta)
-#' huge::huge.roc(est.f$path,   Theta)
-#'
+#' # visualize results
+#'  par(mfrow=c(1,3))
+#'  image(as.matrix(est.log$path[[3]][1:5,1:5]))
+#'  image(as.matrix(est.clr$path[[3]][1:5,1:5]))
+#'  image(as.matrix(est.f$path[[3]][1:5,1:5]))
 sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE, ...) {
 
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
@@ -57,7 +54,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
 
   if (method %in% c("glasso")) {
-    do.call(huge::huge, c(args, list(x=data, method=method, verbose=verbose,
+    est <- do.call(huge::huge, c(args, list(x=data, method=method, verbose=verbose,
                                      cov.output = cov.output)))
 
   } else if (method %in% c('mb')) {
@@ -66,5 +63,5 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
     est$data <- data
     est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
   }
-
+  return(est)
 }
