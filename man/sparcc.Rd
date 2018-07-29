@@ -6,6 +6,15 @@
 \usage{
 sparcc(data, iter = 20, inner_iter = 10, th = 0.1)
 }
+\arguments{
+\item{data}{Community count data matrix}
+
+\item{iter}{Number of iterations in the outer loop}
+
+\item{inner_iter}{Number of iterations in the inner loop}
+
+\item{th}{absolute value of correlations below this threshold are considered zero by the inner SparCC loop.}
+}
 \description{
 sparcc wrapper
 }

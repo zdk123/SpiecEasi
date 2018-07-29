@@ -44,6 +44,7 @@ rzipois <- function(n, lambda, pstr0 = 0) {
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
 #' @param lambdas supply rate parameter (instead of mu)
 #' @param ps probability of zeros (instead of mu)
+#' @param ... arguments passed to \code{VGAM::qzipois}
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom VGAM qzipois
 #' @export
@@ -75,8 +76,7 @@ rmvzipois <- function(n, mu, Sigma=diag(length(mu)), lambdas, ps, ...) {
 #' @param n number of samples to draw
 #' @param mu mean vector for variables (of length \eqn{D})
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
-#' @param lambdas supply rate parameter (instead of mu)
-#' @param ps probability of zeros (instead of mu)
+#' @param ... Arguments passed to \code{qpois}
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom stats qpois
 #' @export
@@ -105,8 +105,6 @@ rmvpois <- function(n, mu, Sigma, ...) {
 #' @param n number of samples to draw
 #' @param mu mean vector for variables (of length \eqn{D})
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
-#' @param munbs Rate/mean parameter (instead of mu)
-#' @param ps probability of zeros (instead of mu)
 #' @param ks shape parameter
 #' @param ... other arguments to the negative binomial distribution
 #' @return \eqn{Dxn} matrix with zi-poisson data
@@ -155,6 +153,7 @@ rmvnegbin <- function(n, mu, Sigma, ks, ...) {
 #' @param n number of samples to draw
 #' @param mu mean vector for variables (of length \eqn{D})
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
+#' @param ps probability of zero inflation
 #' @param munbs Rate/mean parameter (instead of mu)
 #' @param ks shape parameter
 #' @param ... other arguments to the negative binomial distribution
@@ -225,14 +224,6 @@ rmvnorm <- function(n=100, mu=rep(0,10), Sigma=diag(10), tol=1e-6, empirical=TRU
     }
     X <- drop(mu) + eS$vectors %*% diag(sqrt(pmax(ev, 0)), p) %*% t(X)
     return(t(X))
-}
-
-#' @export
-multivnomial <- function(n, mu, Sigma) {
-    N <- sum(mu)
-    data <- rmultinom(n, N, mu/N)
-    c <- as.matrix(chol(Sigma))
-    t(data) %*% c
 }
 
 #' Convert a symmetric correlation matrix to a covariance matrix

@@ -4,6 +4,7 @@
 #' and simulate a new community with those properties
 #'
 #' @param comm community: matrix of counts
+#' @param mar the sample margin of the community data matrix (1: rows, 2: cols)
 #' @param distr distribution to fit (see fitdistr)
 #' @param Sigma covariance structure (defaults to empirical cov of comm)
 #' @param params optionally supply already fitted parameters
@@ -39,7 +40,9 @@ synth_comm_from_counts <- function(comm, mar=2, distr, Sigma=cov(comm),
 #' Get the parameters for the OTUs (along mar) of each community
 #'
 #' @param comm community: matrix of counts
+#' @param mar sample margin (1: "rows", 2: "cols")
 #' @param distr distribution to fit (see fitdistr)
+#' @param ... arguments passed to fitdistr
 #' @return list of parameters
 #' @export
 get_comm_params <- function(comm, mar=2, distr, ...) {
@@ -199,6 +202,11 @@ logLikzip <- function(param, x, ddistr, ...) {
 
 #' qq-plot for theoretical vs observed communities
 #'
+#' @param comm commutity count matrix
+#' @param distr character specifying target distribution
+#' @param param parameter list for fitting the data. Output from \code{get_comm_params}
+#' @param plot graph the output
+#' @param ... pass arguments to qqplot
 #' @export
 qqdplot_comm <- function(comm, distr, param, plot=TRUE, ...) {
     if (class(comm) != 'qqdcomm') {
@@ -246,14 +254,12 @@ qqdplot <- function(y, distr, param, plot=TRUE, ...) {
         x <- qlnorm(ppoints(n), meanlog=mean, sdlog=sd)[order(order(y))]
     } else if (distr == 'negbin') {
         if (missing(param) || is.null(param)) {
-            require(MASS)
-            param <- as.list(fitdistr(y, 'negbin')$par)
+            param <- as.list(MASS::fitdistr(y, 'negbin')$par)
         }
         x <- qnbinom(ppoints(n), mu=param$mu, size=param$size)[order(order(y))]
     } else if (distr == 'pois' || is.null(param)) {
         if (missing(param) || is.null(param)) {
-            require(MASS)
-            param <- as.list(fitdistr(y, 'poisson')$estimate)
+            param <- as.list(MASS::fitdistr(y, 'poisson')$estimate)
         }
         x <- qpois(ppoints(n), lambda=param$lambda)[order(order(y))]
     }

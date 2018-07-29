@@ -17,6 +17,8 @@ rmvzipois(n, mu, Sigma = diag(length(mu)), lambdas, ps, ...)
 \item{lambdas}{supply rate parameter (instead of mu)}
 
 \item{ps}{probability of zeros (instead of mu)}
+
+\item{...}{arguments passed to \code{VGAM::qzipois}}
 }
 \value{
 \eqn{Dxn} matrix with zi-poisson data

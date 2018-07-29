@@ -7,12 +7,14 @@ Authors@R: c(
     person("Emily", "Miraldi",     role="aut"),
     person("Richard", "Bonneau",   role="aut"),
     person("Laura", "Tipton",      role="ctb"))
-Description: Estimate networks from the precision matrix of compositional
- microbial abundance data
+Description: Estimate networks from the precision matrix of compositional microbial abundance data.
 Encoding: UTF-8
 Depends:
    R (>= 3.3.0),
 Imports:
+   stats,
+   methods,
+   graphics,
    huge,
    pulsar,
    MASS,
@@ -23,10 +25,11 @@ Suggests:
    boot,
    phyloseq,
    igraph,
+   batchtools,
    testthat
 Remotes:
    bioc::phyloseq
 biocViews:
-License: getOptions('devtools.desc.license')
+License: GPL (>= 2)
 LazyData: true
 RoxygenNote: 6.0.1

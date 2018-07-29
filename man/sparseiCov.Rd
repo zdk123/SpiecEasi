@@ -16,6 +16,8 @@ sparseiCov(data, method, npn = FALSE, verbose = FALSE, cov.output = TRUE,
 
 \item{verbose}{print progress to standard out}
 
+\item{cov.output}{return the covariance matrix as well.}
+
 \item{...}{further arguments to huge/estimation functions. See details.}
 }
 \description{

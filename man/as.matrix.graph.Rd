@@ -4,7 +4,12 @@
 \alias{as.matrix.graph}
 \title{s3 method for graph to other data types}
 \usage{
-\method{as.matrix}{graph}(x)
+\method{as.matrix}{graph}(x, ...)
+}
+\arguments{
+\item{x}{graph adjacency matrix}
+
+\item{...}{Arguments to base as.matrix}
 }
 \description{
 s3 method for graph to other data types

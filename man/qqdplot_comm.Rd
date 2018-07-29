@@ -6,6 +6,17 @@
 \usage{
 qqdplot_comm(comm, distr, param, plot = TRUE, ...)
 }
+\arguments{
+\item{comm}{commutity count matrix}
+
+\item{distr}{character specifying target distribution}
+
+\item{param}{parameter list for fitting the data. Output from \code{get_comm_params}}
+
+\item{plot}{graph the output}
+
+\item{...}{pass arguments to qqplot}
+}
 \description{
 qq-plot for theoretical vs observed communities
 }

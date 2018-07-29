@@ -7,7 +7,7 @@
 prec2cov <- function(Precision, tol=1e-4) {
     eigval <- eigen(Precision)$values
     if (any(eigval < tol)) {
-        warning("Warning: Precision matrix not invertible, trying generalized inverse instead") 
+        warning("Warning: Precision matrix not invertible, trying generalized inverse instead")
         ginv(Precision)
     } else {
         solve(Precision)
@@ -21,54 +21,46 @@ prec2cov <- function(Precision, tol=1e-4) {
 #' @importFrom MASS ginv
 #' @export
 cov2prec <- function(Cov, tol=1e-4) {
-    Precision <- tryCatch(solve(Cov), error = function(e) { 
-              warning("Warning: Precision matrix not invertible, trying generalized inverse instead") 
+    Precision <- tryCatch(solve(Cov), error = function(e) {
+              warning("Warning: Precision matrix not invertible, trying generalized inverse instead")
               ginv(Cov) })
     Precision[which(Precision == 0)] <- tol
 }
 
 
-#' DEPREICATED FUNCTION Wrapper function for generating a Precision matrix
-#'
-#' @param method graph generation method
-#' @param D graph dimension (number of OTUs)
-#' @param u some parameter that controls Prec values
-#' @param v some other parameter that controls Prec values
-#' @keywords internal
-make_precision_mat <- function(method, D, u, v, ...) {
-    if (v <=0 || v >= 1) stop ("v must be between 0 and 1")
-    Graph <- make_graph(method, D, ...)
-    Precision <- graph2prec(Graph, u=u, v=v)
-    return(list(Graph=Graph, Precision=Precision))
-}
-
 
 
 #' Convert a symmetric graph (extension of R matrix class)
-#' 
+#'
 #'  Has internal rules for converting various graph topologies into the associated
 #' adjancency and, therefore, precision matrix
 #'
 #' @export
+#' @param Graph graph adjacency matrix
+#' @param posThetaLims length 2 vector of lower and upper bound of positive values
+#' @param negThetaLims length 2 vector of lower and upper bound of negative values
+#' @param targetCondition sets the condition of the precision matrix by modulating the magnitude of the diagonal
+#' @param epsBin the convergence tolerance of the condition number binary search
+#' @param numBinSearch maximum number of iterations
 graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, targetCondition=100, epsBin=1e-2,
                         numBinSearch=100) {
 
     if (class(Graph) != 'graph') stop('input is not a graph')
     n <- ncol(Graph)
-    
+
     posThetaLims <- sort(posThetaLims)
     negThetaLims <- sort(negThetaLims)
-    
+
     #add diagonal
     Theta <- Graph + diag(n)
     # node degree
     degVec <- colSums(Graph)
-    
+
     # add random edge weights uniformly from theta_min to theta_max
     utri  <- triu(Theta)
     nzind <- which(utri != 0)
-    
-    if (length(posThetaLims) > 2 || length(negThetaLims) > 2) 
+
+    if (length(posThetaLims) > 2 || length(negThetaLims) > 2)
         stop("theta_max and theta_min should be a numeric vector of length 1 or 2")
 
     rands <- runif(length(nzind))
@@ -76,9 +68,9 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
         span <- diff(sort(lim))
         min(lim) + (x * span)
     }
-    
+
     boolind <- sample(c(TRUE, FALSE), length(nzind), replace=TRUE)
-    
+
     rands[boolind]  <- mapToRange(rands[boolind], posThetaLims)
     rands[!boolind] <- mapToRange(rands[!boolind], negThetaLims)
 
@@ -89,7 +81,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
     eigVals <- eigen(Theta)$values
     minEig  <- min(eigVals)
     maxEig  <- max(eigVals)
-    
+
     if (minEig < 1e-2) Theta <- Theta + abs(minEig)*diag(n)
     diagConst <- .binSearchCond(Theta, targetCondition, numBinSearch, epsBin)
     Theta <- Theta + diagConst*diag(n)
@@ -116,7 +108,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
     } else {
         currLB <- 0
         stepSize = 0.1
-        
+
         while (currCondTheta > condTheta) {
             currCondTheta <- kappa(Theta + stepSize*diag(n))
             stepSize      <- 2*stepSize
@@ -127,57 +119,13 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
     for (i in 1:numBinSearch) {
         diagConst <- (currUB+currLB)/2
         currCondTheta <- kappa(Theta+diagConst*diag(n))
-        
+
         if (currCondTheta < condTheta) currUB <- diagConst
         else currLB <- diagConst
-        
+
         if (abs(currCondTheta-condTheta)<epsBin) break
     }
     diagConst
-}
-
-
-#' DEPRECATED FUNCTION Convert a symmetric graph (extension of R matrix class)
-#' 
-#' Has internal rules for converting various graph topologies into the associated
-#' adjancency and, therefore, precision matrix
-#'
-#' @param u some parameter that controls Prec values
-#' @param v some other parameter that controls Prec values
-#' @keywords internal
-graph2prec2 <- function(Graph,theta_min,theta_max,condTheta) {
-
-    if (class(Graph) != 'graph') stop('input is not a graph')
-    n <- ncol(Graph)
-
-    if (missing(method)) {
-        method <- attr(Graph, "graph")
-        if (is.null(method)) stop("Please supply graph gen method")
-    }
-
-    A <- Graph * v #adjacency matrix, multiply by arbitrary constant
-    eigVals <- sort(eigen(A)$values)
-    lam_min <- eigVals[1]
-    
-    
-    if (method %in% c("scale_free", "hub")) {
-        # Continuous scales
-        D   <- diag(seq(1.5,1,length.out=n))
-        Phi <- D %*%(A + (abs(lam_min)+u+0.1)*diag(n))%*%D
-    } else if (method %in% c( "erdos_renyi", "cluster", "band")) {
-        # two underlying scales
-        D   <- diag(c(rep(1.5, floor(n/2)), rep(1, ceiling(n/2))))
-        Phi <- Phi <- D %*%(A + (abs(lam_min)+u+0.1)*diag(n))%*%D
-    } else if (method == "block") {
-        # random Gaussian graph:
-        temp <- matrix(0, n, n)
-        temp[upper.tri(temp)] <- 1.5*sqrt(1/n)*rnorm(n*(n-1)/2)
-        temp <- temp %*% t(temp)
-        
-        D <-diag(c(rep(1.5, floor(n/2)), rep(0.5, ceiling(n/2))))
-        Phi = temp * Graph + D
-    }
-    return(Phi)
 }
 
 
@@ -191,15 +139,15 @@ graph2prec2 <- function(Graph,theta_min,theta_max,condTheta) {
 make_graph <- function(method, D, e, enforce=TRUE, ...) {
     if (e < round(D/2)) stop('Number of edges e must be bigger than 1/2 D')
     if (e>((D-1)*D)/2) stop('Number of edges e must smaller than D(D-1)/2')
-    
-    method <- switch(method, cluster = "cluster", erdos_renyi = "erdos_renyi", 
-                       hub = "hub", scale_free = "scale_free", 
-                       block = "block", band = "band", 
+
+    method <- switch(method, cluster = "cluster", erdos_renyi = "erdos_renyi",
+                       hub = "hub", scale_free = "scale_free",
+                       block = "block", band = "band",
                        stop(paste("Error: graph method", method, "not supported")))
     graphgen <- get(method)
     Graph    <- graphgen(D, e=e, ...)
     attr(Graph, "graph") <- method
-    
+
     ## enforce edge number
     if (enforce) {
         Graph <- enforceE(Graph, e)
@@ -225,7 +173,7 @@ enforceE <- function(Graph, e) {
         for (i in randi) {
             gind <- tmpInds[i,]
             Graph[gind[1], gind[2]] <- Graph[gind[2], gind[1]] <- 0
-            
+
         }
     } else if (diffE < 0) {
         diag(Graph) <- 1   # fill diag with dummy 1s
@@ -244,7 +192,7 @@ enforceE <- function(Graph, e) {
 }
 
 
-#' keywords internal
+#' @keywords internal
 scale_free <- function(D, e, pfun) {
 # Make a scale free graph
 # Args:
@@ -256,7 +204,7 @@ scale_free <- function(D, e, pfun) {
     #initialize D by D zero matrix
     Graph <- matrix(0, D, D)
     K_mat <- matrix(0, D)   # keep track of the number of degrees in the graph
-    
+
     # pick first two nodes at random
     nodes <- sample(1:D, 2)
     #connect nodes
@@ -278,7 +226,7 @@ scale_free <- function(D, e, pfun) {
         n1 <- na.exclude(newnodes)[1]
         for (n2 in existnodes)  { # and a node already in the graph
             p <- pfun(K_mat, n2)
-            conn <- sample(c(TRUE, FALSE), 1, p=c(p, 1-p))
+            conn <- sample(c(TRUE, FALSE), 1, prob=c(p, 1-p))
             if (conn) {
                  #connect nodes
                 Graph[n1, n2] <- 1
@@ -299,7 +247,7 @@ scale_free <- function(D, e, pfun) {
     return(Graph)
 }
 
-#' keywords internal
+#' @keywords internal
 erdos_renyi <- function(D, e, p=e/(D*(D-1)/2)) {
 # Make a random graph:
 # Args:
@@ -314,7 +262,7 @@ erdos_renyi <- function(D, e, p=e/(D*(D-1)/2)) {
     return(Graph)
 }
 
-#' keywords internal
+#' @keywords internal
 hub <- function(D, e, numHubs=ceiling(D/20)) {
 # Make hub graph
 # Args:
@@ -337,7 +285,7 @@ hub <- function(D, e, numHubs=ceiling(D/20)) {
     return(Graph)
 }
 
-#' keywords internal
+#' @keywords internal
 cluster <- function(D, e, numHubs=floor((D/15)+(e/D))-1) {
 # Make a cluster graph (groups of random graphs)
 # Args:
@@ -359,9 +307,9 @@ cluster <- function(D, e, numHubs=floor((D/15)+(e/D))-1) {
     return(Graph)
 }
 
-#' keywords internal
+#' @keywords internal
 band <- function(D, e) {
-# Make a banded graph 
+# Make a banded graph
 # Args:
 #   D    -> number of nodes
 #   e    -> target number of edges
@@ -384,7 +332,7 @@ band <- function(D, e) {
     return(Graph)
 }
 
-#' keywords internal
+#' @keywords internal
 block <- function(D, e, numHubs) {  #blocksize=20, p=D/((D/blocksize)*(blocksize*(blocksize)/2)), u=NULL, v=NULL) {
 # Make precision matrix for block graph (note the difference from other functions)
 # Args:
@@ -462,21 +410,18 @@ covReport <- function(Cov, Prec) {
 
 
 #' s3 method for graph to other data types
+#' @param x graph adjacency matrix
+#' @param ... Arguments to base as.data.frame
 #' @export
 as.data.frame.graph <- function(x, ...) {
     as.data.frame(as.matrix(x), ...)
 }
 
 #' s3 method for graph to other data types
+#' @param x graph adjacency matrix
+#' @param ... Arguments to base as.matrix
 #' @export
-as.matrix.graph <- function(x) {
+as.matrix.graph <- function(x, ...) {
     class(x) <- 'matrix'
     return(x)
 }
-
-
-
-
-
-
-

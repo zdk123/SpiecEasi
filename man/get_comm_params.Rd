@@ -9,7 +9,11 @@ get_comm_params(comm, mar = 2, distr, ...)
 \arguments{
 \item{comm}{community: matrix of counts}
 
+\item{mar}{sample margin (1: "rows", 2: "cols")}
+
 \item{distr}{distribution to fit (see fitdistr)}
+
+\item{...}{arguments passed to fitdistr}
 }
 \value{
 list of parameters

@@ -10,6 +10,8 @@ synth_comm_from_counts(comm, mar = 2, distr, Sigma = cov(comm), params,
 \arguments{
 \item{comm}{community: matrix of counts}
 
+\item{mar}{the sample margin of the community data matrix (1: rows, 2: cols)}
+
 \item{distr}{distribution to fit (see fitdistr)}
 
 \item{Sigma}{covariance structure (defaults to empirical cov of comm)}

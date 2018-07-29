@@ -7,11 +7,11 @@
 \alias{spiec.easi.default}
 \title{SPIEC-EASI pipeline}
 \usage{
-spiec.easi(obj, ...)
+spiec.easi(data, ...)
 
-\method{spiec.easi}{phyloseq}(obj, ...)
+\method{spiec.easi}{phyloseq}(data, ...)
 
-\method{spiec.easi}{otu_table}(obj, ...)
+\method{spiec.easi}{otu_table}(data, ...)
 
 \method{spiec.easi}{default}(data, method = "glasso",
   sel.criterion = "stars", verbose = TRUE, pulsar.select = TRUE,
@@ -19,11 +19,9 @@ spiec.easi(obj, ...)
   icov.select.params = pulsar.params, ...)
 }
 \arguments{
-\item{obj}{phyloseq object or just the otu_table}
+\item{data}{For a matrix, non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also by phyloseq or otu_table object.}
 
 \item{...}{further arguments to \code{\link{sparseiCov}} / \code{huge}}
-
-\item{data}{non-normalized count OTU/data table with samples on rows and features/OTUs in columns}
 
 \item{method}{estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
 

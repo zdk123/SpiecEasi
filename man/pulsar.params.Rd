@@ -25,5 +25,5 @@ With \code{pulsar.select='batch'}, additional arguments:
 }
 }
 \seealso{
-\code{\link[pulsar]{pulsar::pulsar}} \code{\link[pulsar]{pulsar::batch.pulsar}} \code{\link{spiec.easi}}
+\code{\link[pulsar]{pulsar}} \code{\link[pulsar]{batch.pulsar}} \code{\link{spiec.easi}}
 }

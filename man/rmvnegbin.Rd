@@ -17,10 +17,6 @@ rmvnegbin(n, mu, Sigma, ks, ...)
 \item{ks}{shape parameter}
 
 \item{...}{other arguments to the negative binomial distribution}
-
-\item{munbs}{Rate/mean parameter (instead of mu)}
-
-\item{ps}{probability of zeros (instead of mu)}
 }
 \value{
 \eqn{Dxn} matrix with zi-poisson data

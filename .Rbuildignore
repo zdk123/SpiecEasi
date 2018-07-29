@@ -2,3 +2,4 @@
 ^\.travis\.yml$
 ^figure*
 ^\.README\.RData$
+^README\.Rmd$

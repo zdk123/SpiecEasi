@@ -7,6 +7,19 @@
 graph2prec(Graph, posThetaLims = c(2, 3), negThetaLims = -posThetaLims,
   targetCondition = 100, epsBin = 0.01, numBinSearch = 100)
 }
+\arguments{
+\item{Graph}{graph adjacency matrix}
+
+\item{posThetaLims}{length 2 vector of lower and upper bound of positive values}
+
+\item{negThetaLims}{length 2 vector of lower and upper bound of negative values}
+
+\item{targetCondition}{sets the condition of the precision matrix by modulating the magnitude of the diagonal}
+
+\item{epsBin}{the convergence tolerance of the condition number binary search}
+
+\item{numBinSearch}{maximum number of iterations}
+}
 \description{
 Has internal rules for converting various graph topologies into the associated
 adjancency and, therefore, precision matrix

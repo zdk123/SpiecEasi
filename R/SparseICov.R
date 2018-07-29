@@ -8,6 +8,7 @@
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann)
 #' @param npn perform Nonparanormal (npn) transformation before estimation?
 #' @param verbose print progress to standard out
+#' @param cov.output return the covariance matrix as well.
 #' @param ... further arguments to huge/estimation functions. See details.
 #' @details
 #' This is a wrapper function for sparse iCov estimations performed by glasso in the huge package.

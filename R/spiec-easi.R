@@ -4,8 +4,8 @@
 #' Inputs are a non-normalized OTU table and pipeline options.
 #' @export
 #' @importFrom pulsar pulsar batch.pulsar
-spiec.easi <- function(obj, ...) {
-  UseMethod('spiec.easi', obj)
+spiec.easi <- function(data, ...) {
+  UseMethod('spiec.easi', data)
 }
 
 #' @keywords internal
@@ -19,25 +19,24 @@ spiec.easi <- function(obj, ...) {
   return(OTU)
 }
 
-#' @param obj phyloseq object or just the otu_table
 #' @method spiec.easi phyloseq
 #' @rdname spiec.easi
 #' @export
-spiec.easi.phyloseq <- function(obj, ...) {
-  if (!require('phyloseq')) {
+spiec.easi.phyloseq <- function(data, ...) {
+  if (!requireNamespace('phyloseq', quietly=TRUE)) {
     stop('\'Phyloseq\' package is not installed. See doi.org/doi:10.18129/B9.bioc.phyloseq')
   }
-  spiec.easi(.phy2mat(obj), ...)
+  spiec.easi(.phy2mat(data), ...)
 }
 
 #' @method spiec.easi otu_table
 #' @rdname spiec.easi
 #' @export
-spiec.easi.otu_table <- function(obj, ...) {
-  if (!require('phyloseq')) {
+spiec.easi.otu_table <- function(data, ...) {
+  if (!requireNamespace('phyloseq', quietly=TRUE)) {
     stop('\'Phyloseq\' package is not installed. See doi.org/doi:10.18129/B9.bioc.phyloseq')
   }
-  spiec.easi(.phy2mat(obj), ...)
+  spiec.easi(.phy2mat(data), ...)
 
 }
 
@@ -79,7 +78,7 @@ spiec.easi.otu_table <- function(obj, ...) {
 #'    \item job.res, list, empty list. Named list to specify job resources for an hpc.
 #'    \item cleanup, boolean, FALSE. Remove registry files.
 #'}
-#' @seealso \code{\link[pulsar]{pulsar::pulsar}} \code{\link[pulsar]{pulsar::batch.pulsar}} \code{\link{spiec.easi}}
+#' @seealso \code{\link[pulsar]{pulsar}} \code{\link[pulsar]{batch.pulsar}} \code{\link{spiec.easi}}
 NULL
 
 #' @keywords internal
@@ -111,7 +110,7 @@ NULL
 }
 
 
-#' @param data non-normalized count OTU/data table with samples on rows and features/OTUs in columns
+#' @param data For a matrix, non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also by phyloseq or otu_table object.
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)
 #' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' [default], 'bstars' (Bounded StARS)
 #' @param verbose flag to show progress messages
@@ -246,7 +245,8 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)
 #' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' [default]
 #' @param verbose flag to show progress messages
-#' @param pulsar.params list of further arguments to \code{\link{pulsar}}
+#' @param pulsar.select flag to perform model selection. Choices are TRUE/FALSE/'batch'
+#' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
 #' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
 #' @seealso spiec.easi
 #' @export
@@ -260,25 +260,26 @@ multi.spiec.easi <- function(datalist, method='glasso', sel.criterion='stars',
 }
 
 #' @method spiec.easi list
+#' @param data non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also be list of phyloseq objects.
 #' @rdname multi.spiec.easi
 #' @export
-spiec.easi.list <- function(obj, ...) {
-  classes <- sapply(obj, class)
+spiec.easi.list <- function(data, ...) {
+  classes <- sapply(data, class)
   if (length(unique(classes)) != 1)
     warning('input list contains data of mixed classes.')
 
   ## convert phyloseq objects to matrices
   if (any('phyloseq' %in% classes) || any('otu_table' %in% classes))
-    obj <- lapply(obj, .phy2mat)
+    data <- lapply(data, .phy2mat)
 
   ## Finally, check the number of rows (samples) are equal
   ## and sample names are identical (sample names can be NULL)
-  ssizes <- lapply(obj, nrow)
-  snames <- lapply(obj, row.names)
+  ssizes <- lapply(data, nrow)
+  snames <- lapply(data, row.names)
   list.equal <- function(li) sum(duplicated(li)) == length(li)-1
 
   if (!list.equal(snames) || !list.equal(ssizes))
     stop("Do not run multi.spiec.easi with unidentical sample scheme")
 
-  spiec.easi.default(obj, ...)
+  spiec.easi.default(data, ...)
 }

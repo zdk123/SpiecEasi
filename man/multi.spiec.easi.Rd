@@ -8,7 +8,7 @@
 multi.spiec.easi(datalist, method = "glasso", sel.criterion = "stars",
   verbose = TRUE, pulsar.select = TRUE, pulsar.params = list(), ...)
 
-\method{spiec.easi}{list}(obj, ...)
+\method{spiec.easi}{list}(data, ...)
 }
 \arguments{
 \item{datalist}{list of non-normalized count OTU/data tables (stored in a matrix, data.frame or phyloseq/otu_table) with samples on rows and features/OTUs in columns}
@@ -19,9 +19,13 @@ multi.spiec.easi(datalist, method = "glasso", sel.criterion = "stars",
 
 \item{verbose}{flag to show progress messages}
 
-\item{pulsar.params}{list of further arguments to \code{\link{pulsar}}}
+\item{pulsar.select}{flag to perform model selection. Choices are TRUE/FALSE/'batch'}
+
+\item{pulsar.params}{list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.}
 
 \item{...}{further arguments to \code{\link{sparseiCov}} / \code{huge}}
+
+\item{data}{non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also be list of phyloseq objects.}
 }
 \description{
 A SPIEC-EASI pipeline for inferring a sparse inverse covariance matrix within and between multiple compositional datasets, under joint sparsity penalty.

@@ -2,10 +2,13 @@
 % Please edit documentation in R/normalization.R
 \name{norm_to_total}
 \alias{norm_to_total}
-\title{Total sum normalization of a (presumably positive) data vector}
+\title{Total Sum Normalize}
 \usage{
 norm_to_total(x)
 }
+\arguments{
+\item{x}{count data vector}
+}
 \description{
-Total sum normalization of a (presumably positive) data vector
+Normalize a count vector by the total sum of that vector
 }

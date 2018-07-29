@@ -1,4 +1,9 @@
 #' sparcc wrapper
+#'
+#' @param data Community count data matrix
+#' @param iter Number of iterations in the outer loop
+#' @param inner_iter Number of iterations in the inner loop
+#' @param th absolute value of correlations below this threshold are considered zero by the inner SparCC loop.
 #' @export
 sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 ## reimplementation of SparCC in R
@@ -18,16 +23,26 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
     list(Cov=covMed, Cor=corMed)
 }
 
-
+#' Bootstrap SparCC
+#'
+#' Get bootstrapped estimates of SparCC correlation coefficients. Pass results to \code{pval.sparccboot}.
+#'
+#' @param data Community count data
+#' @param sparcc.params named list of parameters to pass to \code{sparcc}
+#' @param statisticboot function which takes data and bootstrap sample indices and results the upper triangle of the bootstapped correlation matrix
+#' @param statisticperm function which takes data and permutated sample indices and results the upper triangle of the null correlation matrix
+#' @param R number of bootstraps
+#' @param ncpus number of cores to use for parallelization
+#' @param ... more arguments to pass to \code{boot::boot}
 #' @export
 sparccboot <- function(data, sparcc.params=list(),
                         statisticboot=function(data, indices) triu(do.call("sparcc",
                       c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor),
-                        statisticperm=function(data, indices) triu(do.call("sparcc",
-                 c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor),
+                statisticperm=function(data, indices) triu(do.call("sparcc",  c(list(apply(data[indices,], 2, sample)), sparcc.params))$Cor),
                       R, ncpus=1, ...) {
 
-    if (!require('boot')) stop('\'boot\' package is not installed')
+    if (!requireNamespace('boot', quietly=TRUE))
+      stop('\'boot\' package is not installed')
 
     res     <- boot::boot(data, statisticboot, R=R, parallel="multicore", ncpus=ncpus, ...)
     null_av <- boot::boot(data, statisticperm, sim='permutation', R=R, parallel="multicore", ncpus=ncpus)
@@ -35,9 +50,14 @@ sparccboot <- function(data, sparcc.params=list(),
     structure(c(res, list(null_av=null_av)), class='sparccboot')
 }
 
-
+#' SparCC p-vals
+#'
+#' Get empirical p-values from bootstrap SparCC.
+#'
+#' @param x output from \code{sparccboot}
+#' @param sided type of p-value to compute. Only two sided (sided="both") is implemented.
 #' @export
-pval.sparccboot <- function(x, sided='both', mar=2) {
+pval.sparccboot <- function(x, sided='both') {
 # calculate 1 or 2 way pseudo p-val from boot object
 # Args: a boot object
     if (sided != "both") stop("only two-sided currently supported")
@@ -169,8 +189,8 @@ av <- function(data) {
 }
 
 
-#' importFrom VGAM rdiric
-#' @export
+#' @importFrom VGAM rdiric
+#' @keywords internal
 norm_diric   <- function(x, rep=1) {
     dmat <- VGAM::rdiric(rep, x+1)
     norm_to_total(colMeans(dmat))
