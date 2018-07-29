@@ -2,7 +2,7 @@
 % Please edit documentation in R/spaRcc.R
 \name{sparcc}
 \alias{sparcc}
-\title{sparcc wrapper}
+\title{SparCC}
 \usage{
 sparcc(data, iter = 20, inner_iter = 10, th = 0.1)
 }
@@ -16,5 +16,5 @@ sparcc(data, iter = 20, inner_iter = 10, th = 0.1)
 \item{th}{absolute value of correlations below this threshold are considered zero by the inner SparCC loop.}
 }
 \description{
-sparcc wrapper
+reimplementation of SparCC in R
 }

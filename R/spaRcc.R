@@ -6,7 +6,7 @@
 #' @param th absolute value of correlations below this threshold are considered zero by the inner SparCC loop.
 #' @export
 sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
-## reimplementation of SparCC in R
+##
 #  without all the 'frills'
     sparccs <-
      lapply(1:iter, function(i)
@@ -162,7 +162,7 @@ basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
     }
     Ti     <- matrix(rowSums(T))
     CovVec <- matrix(rowSums(CovMat - diag(diag(CovMat)))) # row sum of off diagonals
-    M.I <- tryCatch(solve(M), error=function(e) ginv(M))
+    M.I <- tryCatch(solve(M), error=function(e) MASS::ginv(M))
     Vbase <- M.I %*% (Ti + 2*CovVec)
     Vbase[Vbase < Vmin] <- Vmin
     list(Vbase=Vbase, M=M)

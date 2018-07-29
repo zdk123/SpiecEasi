@@ -10,27 +10,30 @@
 #' @param verbose display messages
 #' @param ll number of points for the plot
 #' @export
-stars.roc <- function(optmerge, theta, verbose = TRUE, ll=15) {
-    huge::huge.roc(merge2path(optmerge, ll), theta, verbose)
+stars.roc <- function(optmerge, theta, verbose = TRUE, plot = TRUE, ll=15) {
+    if (!plot) { ff <- tempfile() ; png(filename=ff) }
+    tmp <- huge::huge.roc(merge2path(optmerge, ll), theta, verbose)
+    if (!plot) { dev.off() ; unlink(ff) }
+    return(tmp)
 }
 
 #' @rdname stars.roc
-stars.pr <- function(optmerge, theta, verbose = TRUE, ll=15) {
-    huge.pr(merge2path(optmerge, ll+1), theta, verbose)
+#' @export
+stars.pr <- function(optmerge, theta, verbose = TRUE, plot = TRUE, ll=15) {
+    huge.pr(merge2path(optmerge, ll+1), theta, verbose, plot)
 }
 
 merge2path <- function(merge, length.out) {
-
  if (missing(length.out)) {
     path <- unique(c(merge))
  } else {
     path <- seq(min(merge), max(merge), length.out=length.out)
  }
- 
  lapply(path, function(i) merge > i)
 }
 
-huge.pr <- function (path, theta, verbose = TRUE) {
+
+huge.pr <- function (path, theta, verbose = TRUE, plot = TRUE) {
     gcinfo(verbose = FALSE)
     ROC = list()
     theta = as.matrix(theta)
@@ -38,7 +41,7 @@ huge.pr <- function (path, theta, verbose = TRUE) {
     pos.total = sum(theta != 0)
     neg.total = d * (d - 1) - pos.total
     if (verbose) 
-        cat("Computing F1 scores, false positive rates and true positive rates....")
+        message("Computing F1 scores, false positive rates and true positive rates....", appendLF=FALSE)
     ROC$prec = rep(0, length(path))
     ROC$rec  = rep(0, length(path))
     ROC$F1 = rep(0, length(path))
@@ -60,15 +63,17 @@ huge.pr <- function (path, theta, verbose = TRUE) {
             ROC$F1[r] = 0
     }
     if (verbose) 
-        cat("done.\n")
+        message("done.")
     rm(precision, recall, tp.all, fp.all, path, theta, fn)
     gc()
     ord.p = order(ROC$prec, na.last=NA)
     tmp1 = ROC$prec[ord.p]
     tmp2 = ROC$rec[ord.p]
-    par(mfrow = c(1, 1))
-    plot(tmp1, tmp2, type = "b", main = "PR Curve", xlab = "Precision", 
-        ylab = "Recall", ylim = c(0, 1))
+    if (plot) {
+        par(mfrow = c(1, 1))
+        plot(tmp1, tmp2, type = "b", main = "PR Curve", xlab = "Precision", 
+            ylab = "Recall", ylim = c(0, 1))
+    }
     ROC$AUC = sum(diff(tmp1) * (tmp2[-1] + tmp2[-length(tmp2)]))/2
     rm(ord.p, tmp1, tmp2)
     gc()

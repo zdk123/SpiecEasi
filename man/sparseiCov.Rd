@@ -38,8 +38,10 @@ The argument \code{nlambda} determines the number of penalties - somewhere betwe
 \examples{
 # simulate data with 1 negative correlation
  set.seed(10010)
- Sigma <- diag(50)*2
- Sigma[1,2] <- Sigma[2,1] <- -.9
+ Theta <- matrix(0, 50, 50)
+ Theta[1,2] <- Theta[2,1] <- 1
+ Sigma <- -.45*Theta
+ diag(Sigma) <- 1
  data  <- exp(rmvnorm(50, runif(50, 0, 2), Sigma))
 
 # normalize
