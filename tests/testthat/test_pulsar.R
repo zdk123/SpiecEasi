@@ -2,19 +2,18 @@ context('setup')
 
 p <- 20
 e <- p
-n <- 100
+n <- 500
 set.seed(10010)
-g <- make_graph('hub', p, e)
+g <- make_graph('erdos_renyi', p, e)
 S <- cov2cor(prec2cov(graph2prec(g)))
 X <- exp(rmvnorm(n, rep(0,p), S))
-
 
 pargs <- list(seed=10010, rep.num=10)
 
 context("SPIEC-EASI fit")
-lmx  <- .6
-lmr  <- 5e-3
-nlam <- 35
+lmx  <- .7
+lmr  <- 1e-2
+nlam <- 20
 ## No selection ##
 out <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.min.ratio=lmr, nlambda=nlam, pulsar.select=FALSE)
 

@@ -18,7 +18,7 @@ test_that("unrecognized graph method returns error", {
 
 
 
-tol <- 1e-1
+tol <- 9
 conds <- round(exp(seq(log(10), log(10000), length.out=10)))
 prec_list <- lapply(gr_list, function(gr) {
                 lapply(conds, function(kappa) {
