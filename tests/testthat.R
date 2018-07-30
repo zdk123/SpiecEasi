@@ -1,4 +1,4 @@
-library(testthat)
-library(SpiecEasi)
+suppressPackageStartupMessages(library(testthat))
+suppressPackageStartupMessages(library(SpiecEasi))
 
-test_check("SpiecEasi")
+testthat::test_check("SpiecEasi")

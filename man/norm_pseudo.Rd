@@ -2,10 +2,13 @@
 % Please edit documentation in R/normalization.R
 \name{norm_pseudo}
 \alias{norm_pseudo}
-\title{add pseudocount before normalizing a vector}
+\title{Normalize w/ Pseudocount}
 \usage{
 norm_pseudo(x)
 }
+\arguments{
+\item{x}{count data vector}
+}
 \description{
-add pseudocount before normalizing a vector
+add pseudocount before normalizing a count vector
 }

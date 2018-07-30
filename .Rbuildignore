@@ -1,5 +1,5 @@
-^.*\.BatchJobs.*\.R$
-^README\.Rmd$
-^README\.log$
-^figure$
+## Ignore build and temp file
 ^\.travis\.yml$
+^figure*
+^\.README\.RData$
+^README\.Rmd$

@@ -1,24 +1,36 @@
 Package: SpiecEasi
 Title: Sparse Inverse Covariance for Ecological Statistical Inference
-Version: 0.1.4
-Authors.R: c(person("Zachary", "Kurtz", role = c("aut", "cre"),
-    email="zachary.kurtz@med.nyu.edu"), person("Christian",
-    "Mueller", role = c("aut")), person("Emily", "Miraldi",
-    role=c("aut")), person("Richard", "Bonneau", role=c("aut")))
-Description: Estimate networks from the precision matrix of compositional
-    microbial abundance data
+Version: 1.0.0
+Authors@R: c(
+    person("Zachary", "Kurtz", role = c("aut", "cre"), email="zdkurtz@gmail.com"),
+    person("Christian", "Mueller", role = "aut"),
+    person("Emily", "Miraldi",     role="aut"),
+    person("Richard", "Bonneau",   role="aut"),
+    person("Laura", "Tipton",      role="ctb"))
+Description: Estimate networks from the precision matrix of compositional microbial abundance data.
+Encoding: UTF-8
 Depends:
-    R (>= 3.0.0),
+   R (>= 3.3.0),
 Imports:
-    huge,
-    MASS,
-    VGAM,
-    Matrix
+   stats,
+   methods,
+   graphics,
+   grDevices,
+   huge,
+   pulsar,
+   MASS,
+   VGAM,
+   Matrix
 Suggests:
-    parallel,
-    boot,
-    phyloseq,
-    testthat
-License: getOptions('devtools.desc.license')
+   parallel,
+   boot,
+   phyloseq,
+   igraph,
+   batchtools,
+   testthat
+Remotes:
+   bioc::phyloseq
+biocViews:
+License: GPL (>= 2)
 LazyData: true
 RoxygenNote: 6.0.1

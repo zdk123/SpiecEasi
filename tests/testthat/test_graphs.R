@@ -1,7 +1,7 @@
 context("Graphs")
 
-types <-  c("cluster", "erdos_renyi",  "hub",  "scale_free", 
-                "block", "band")
+types <-  c("cluster", "erdos_renyi",  "hub",
+            "scale_free", "block", "band")
 D <- 10 ; e <- 10
 gr_list <- lapply(types, make_graph, D=D, e=e, enforce=TRUE)
 
@@ -18,8 +18,8 @@ test_that("unrecognized graph method returns error", {
 
 
 
-tol <- 1e-2
-conds     <- round(exp(seq(log(10), log(10000), length.out=10)))
+tol <- 9
+conds <- round(exp(seq(log(10), log(10000), length.out=10)))
 prec_list <- lapply(gr_list, function(gr) {
                 lapply(conds, function(kappa) {
                     graph2prec(gr, epsBin=tol, targetCondition=kappa)
@@ -28,7 +28,7 @@ prec_list <- lapply(gr_list, function(gr) {
 test_that("condition number of precision matrix is within eps of target condition", {
     lapply(1:length(prec_list), function(i) {
         lapply(1:length(prec_list[[i]]), function(j) {
-            expect_equal(kappa(prec_list[[i]][[j]]), conds[j], tolerance=tol)
+            expect_equal(kappa(prec_list[[i]][[j]]), conds[j], tolerance=tol, scale=1)
         })
     })
 })
@@ -48,8 +48,7 @@ test_that("graph2prec returns error if input is not of class graph", {
 })
 
 test_that("expected number of edges is properly enforced", {
-    lapply(gr_list, function(gr) {
-        is_identical_to(edge_count(gr), e)
-    })
-
+    for (gr in gr_list) {
+      expect_equal(edge_count(gr), e)
+    }
 })

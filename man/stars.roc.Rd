@@ -16,6 +16,8 @@ stars.pr(optmerge, theta, verbose = TRUE, plot = TRUE, ll = 15)
 
 \item{verbose}{display messages}
 
+\item{plot}{graph the output}
+
 \item{ll}{number of points for the plot}
 }
 \description{

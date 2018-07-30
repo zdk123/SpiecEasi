@@ -6,6 +6,11 @@
 \usage{
 \method{as.data.frame}{graph}(x, ...)
 }
+\arguments{
+\item{x}{graph adjacency matrix}
+
+\item{...}{Arguments to base as.data.frame}
+}
 \description{
 s3 method for graph to other data types
 }

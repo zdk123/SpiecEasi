@@ -2,23 +2,29 @@
 % Please edit documentation in R/spaRcc.R
 \name{sparccboot}
 \alias{sparccboot}
-\title{SparCC bootstraps}
+\title{Bootstrap SparCC}
 \usage{
-sparccboot(data, sparcc.params = list(), statisticboot, statisticperm, R,
-  ncpus = 1, ...)
+sparccboot(data, sparcc.params = list(), statisticboot = function(data,
+  indices) triu(do.call("sparcc", c(list(data[indices, , drop = FALSE]),
+  sparcc.params))$Cor), statisticperm = function(data, indices)
+  triu(do.call("sparcc", c(list(apply(data[indices, ], 2, sample)),
+  sparcc.params))$Cor), R, ncpus = 1, ...)
 }
 \arguments{
-\item{data}{count data matrix}
+\item{data}{Community count data}
 
-\item{sparcc.params}{named list of parameters passed to sparcc}
+\item{sparcc.params}{named list of parameters to pass to \code{sparcc}}
 
-\item{statisticboot}{optional argument to override default bootstrap function}
+\item{statisticboot}{function which takes data and bootstrap sample indices and results the upper triangle of the bootstapped correlation matrix}
 
-\item{statisticperm}{optional argument to override default permute function}
-}
-\value{
-sparccboot object. Pass to \code{pval.sparccboot} to get empirical p-values
+\item{statisticperm}{function which takes data and permutated sample indices and results the upper triangle of the null correlation matrix}
+
+\item{R}{number of bootstraps}
+
+\item{ncpus}{number of cores to use for parallelization}
+
+\item{...}{more arguments to pass to \code{boot::boot}}
 }
 \description{
-Bootstrapped Sparcc to get empirical and null distributions for correlations
+Get bootstrapped estimates of SparCC correlation coefficients. Pass results to \code{pval.sparccboot}.
 }

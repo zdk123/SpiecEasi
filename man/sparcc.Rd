@@ -2,17 +2,19 @@
 % Please edit documentation in R/spaRcc.R
 \name{sparcc}
 \alias{sparcc}
-\title{SparCC}
+\title{sparcc wrapper}
 \usage{
 sparcc(data, iter = 20, inner_iter = 10, th = 0.1)
 }
 \arguments{
-\item{data}{count data}
+\item{data}{Community count data matrix}
 
-\item{iter}{number of iterations to compute median correlation}
+\item{iter}{Number of iterations in the outer loop}
 
-\item{inner_iter}{number of iterations for the inner loop}
+\item{inner_iter}{Number of iterations in the inner loop}
+
+\item{th}{absolute value of correlations below this threshold are considered zero by the inner SparCC loop.}
 }
 \description{
-reimplementation of SparCC in R
+sparcc wrapper
 }

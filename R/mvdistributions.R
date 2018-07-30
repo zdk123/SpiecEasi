@@ -14,7 +14,7 @@ rzipois <- function(n, lambda, pstr0 = 0) {
     ind0 <- (deflat.limit <= pstr0) & (pstr0 < 0)
     if (any(ind0)) {
         pobs0 <- pstr0[ind0] + (1 - pstr0[ind0]) * pstr0[ind0]
-        ans[ind0] <- qpois(p = runif(sum(ind0), 
+        ans[ind0] <- qpois(p = runif(sum(ind0),
                     min = dpois(0, lambda[ind0])), lambda[ind0])
         ans[ind0] <- ifelse(runif(sum(ind0)) < pobs0, 0, ans[ind0])
     }
@@ -44,10 +44,11 @@ rzipois <- function(n, lambda, pstr0 = 0) {
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
 #' @param lambdas supply rate parameter (instead of mu)
 #' @param ps probability of zeros (instead of mu)
+#' @param ... arguments passed to \code{VGAM::qzipois}
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom VGAM qzipois
 #' @export
-rmvzipois <- function(n, mu, Sigma, lambdas, ps, ...) {
+rmvzipois <- function(n, mu, Sigma=diag(length(mu)), lambdas, ps, ...) {
     d   <- ncol(Sigma)
     Cor <- cov2cor(Sigma)
     SDs <- sqrt(diag(Sigma))
@@ -63,11 +64,7 @@ rmvzipois <- function(n, mu, Sigma, lambdas, ps, ...) {
 
     normd  <- rmvnorm(n, rep(0, d), Cor)
     unif   <- pnorm(normd)
-    data <- t(apply(unif, 1, function(probs) {
-              VGAM::qzipois(probs, lambdas, pstr0=ps, ...)
-            }))
-
-
+    data <- matrix(VGAM::qzipois(unif, lambdas, pstr0=ps, ...), n, d)
     data <- .fixInf(data)
     return(data)
 }
@@ -79,8 +76,7 @@ rmvzipois <- function(n, mu, Sigma, lambdas, ps, ...) {
 #' @param n number of samples to draw
 #' @param mu mean vector for variables (of length \eqn{D})
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
-#' @param lambdas supply rate parameter (instead of mu)
-#' @param ps probability of zeros (instead of mu)
+#' @param ... Arguments passed to \code{qpois}
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom stats qpois
 #' @export
@@ -92,7 +88,7 @@ rmvpois <- function(n, mu, Sigma, ...) {
     if (length(mu) == 1) stop("Need more than 1 variable")
     normd  <- rmvnorm(n, rep(0, d), Cor)
     unif   <- pnorm(normd)
-    data <- t(qpois(t(unif), mu, ...))
+    data <- matrix(qpois(unif, mu, ...), n, d)
     data <- .fixInf(data)
     return(data)
 }
@@ -109,8 +105,6 @@ rmvpois <- function(n, mu, Sigma, ...) {
 #' @param n number of samples to draw
 #' @param mu mean vector for variables (of length \eqn{D})
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
-#' @param munbs Rate/mean parameter (instead of mu)
-#' @param ps probability of zeros (instead of mu)
 #' @param ks shape parameter
 #' @param ... other arguments to the negative binomial distribution
 #' @return \eqn{Dxn} matrix with zi-poisson data
@@ -159,6 +153,7 @@ rmvnegbin <- function(n, mu, Sigma, ks, ...) {
 #' @param n number of samples to draw
 #' @param mu mean vector for variables (of length \eqn{D})
 #' @param Sigma \eqn{DxD} covariance or correlation matrix
+#' @param ps probability of zero inflation
 #' @param munbs Rate/mean parameter (instead of mu)
 #' @param ks shape parameter
 #' @param ... other arguments to the negative binomial distribution
@@ -180,9 +175,7 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
     d   <- length(munbs)
     normd  <- rmvnorm(n, rep(0, d), Sigma=Cor)
     unif   <- pnorm(normd)
-    data <- t(apply(unif, 1, function(probs) {
-              VGAM::qzinegbin(probs, munb=munbs, size=ks, pstr0=ps, ...)
-            }))
+    data <- matrix(VGAM::qzinegbin(unif, munb=munbs, size=ks, pstr0=ps, ...), n, d)
     data <- .fixInf(data)
     return(data)
 }
@@ -217,11 +210,11 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
 #' @export
 rmvnorm <- function(n=100, mu=rep(0,10), Sigma=diag(10), tol=1e-6, empirical=TRUE) {
     p <- length(mu)
-    if (!all(dim(Sigma) == c(p, p))) 
+    if (!all(dim(Sigma) == c(p, p)))
         stop("incompatible arguments")
     eS <- eigen(Sigma, symmetric = TRUE)
     ev <- eS$values
-    if (!all(ev >= -tol * abs(ev[1L]))) 
+    if (!all(ev >= -tol * abs(ev[1L])))
         stop("'Sigma' is not positive definite")
     X <- matrix(rnorm(p * n), n)
     if (empirical) {
@@ -231,14 +224,6 @@ rmvnorm <- function(n=100, mu=rep(0,10), Sigma=diag(10), tol=1e-6, empirical=TRU
     }
     X <- drop(mu) + eS$vectors %*% diag(sqrt(pmax(ev, 0)), p) %*% t(X)
     return(t(X))
-}
-
-#' @export
-multivnomial <- function(n, mu, Sigma) {
-    N <- sum(mu)
-    data <- rmultinom(n, N, mu/N)
-    c <- as.matrix(chol(Sigma))
-    t(data) %*% c
 }
 
 #' Convert a symmetric correlation matrix to a covariance matrix

@@ -2,9 +2,29 @@
 % Please edit documentation in R/normalization.R
 \name{clr}
 \alias{clr}
+\alias{clr.default}
+\alias{clr.matrix}
+\alias{clr.data.frame}
 \title{Centered log-ratio functions}
 \usage{
-clr(x, ...)
+clr(x.f, ...)
+
+\method{clr}{default}(x.f, base = exp(1), tol = .Machine$double.eps, ...)
+
+\method{clr}{matrix}(x.f, mar = 2, ...)
+
+\method{clr}{data.frame}(x.f, mar = 2, ...)
+}
+\arguments{
+\item{x.f}{input data}
+
+\item{...}{pass through arguments}
+
+\item{base}{base for log transformation}
+
+\item{tol}{tolerance for a numerical zero}
+
+\item{mar}{margin to apply the transformation (rows: 1 or cols: 2)}
 }
 \description{
 Centered log-ratio functions

@@ -18,6 +18,8 @@ rmvzinegbin(n, mu, Sigma, munbs, ks, ps, ...)
 
 \item{ks}{shape parameter}
 
+\item{ps}{probability of zero inflation}
+
 \item{...}{other arguments to the negative binomial distribution}
 }
 \value{

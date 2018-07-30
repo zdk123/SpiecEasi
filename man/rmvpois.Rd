@@ -14,9 +14,7 @@ rmvpois(n, mu, Sigma, ...)
 
 \item{Sigma}{\eqn{DxD} covariance or correlation matrix}
 
-\item{lambdas}{supply rate parameter (instead of mu)}
-
-\item{ps}{probability of zeros (instead of mu)}
+\item{...}{Arguments passed to \code{qpois}}
 }
 \value{
 \eqn{Dxn} matrix with zi-poisson data

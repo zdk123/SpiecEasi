@@ -2,15 +2,15 @@
 % Please edit documentation in R/spaRcc.R
 \name{pval.sparccboot}
 \alias{pval.sparccboot}
-\title{get pvals}
+\title{SparCC p-vals}
 \usage{
 pval.sparccboot(x, sided = "both")
 }
 \arguments{
-\item{x}{output from sparccboot}
+\item{x}{output from \code{sparccboot}}
 
-\item{sided}{compute two sided p-values (one-sided not currently supported)}
+\item{sided}{type of p-value to compute. Only two sided (sided="both") is implemented.}
 }
 \description{
-Compute empirical p-values from \code{sparccboot} output
+Get empirical p-values from bootstrap SparCC.
 }

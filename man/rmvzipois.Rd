@@ -5,7 +5,7 @@
 \title{Generate multivariate, Zero-inflated poisson data,
 with counts approximately correlated according to Sigma}
 \usage{
-rmvzipois(n, mu, Sigma, lambdas, ps, ...)
+rmvzipois(n, mu, Sigma = diag(length(mu)), lambdas, ps, ...)
 }
 \arguments{
 \item{n}{number of samples to draw}
@@ -17,6 +17,8 @@ rmvzipois(n, mu, Sigma, lambdas, ps, ...)
 \item{lambdas}{supply rate parameter (instead of mu)}
 
 \item{ps}{probability of zeros (instead of mu)}
+
+\item{...}{arguments passed to \code{VGAM::qzipois}}
 }
 \value{
 \eqn{Dxn} matrix with zi-poisson data
