@@ -4,6 +4,9 @@
 \alias{spiec.easi}
 \alias{spiec.easi.phyloseq}
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fixed imports
 \alias{spiec.easi.otu_table}
 \alias{spiec.easi.default}
 \title{SPIEC-EASI pipeline}

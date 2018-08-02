@@ -21,7 +21,8 @@ Imports:
    MASS,
    VGAM,
    Matrix,
-   Rcpp
+   Rcpp,
+   glmnet
 Suggests:
    parallel,
    boot,
