@@ -32,7 +32,7 @@ From an interactive R session:
 
 ```r
 library(devtools)
-install_github("zdk123/SpiecEasi", ref='pulsar')
+install_github("zdk123/SpiecEasi")
 library(SpiecEasi)
 ```
 
