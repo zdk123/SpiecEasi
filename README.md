@@ -282,6 +282,37 @@ se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
             sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs)
 # Applying data transformations...
 # Selecting model with batch.pulsar using stars...
+# Sourcing configuration file '/usr/local/lib/R/3.5/site-library/pulsar/config/batchtools.conf.parallel.R' ...
+# Created registry in '/var/folders/8h/m7c712_948df5tnnk9cxhhjr0000gp/T/Rtmp2hJ4ng/registryd71ffe03d98' using cluster functions 'Multicore'
+# Adding 50 jobs ...
+# Submitting 50 jobs in 50 chunks using cluster functions 'Multicore' ...
+# Fitting final estimate with mb...
+# done
+```
+
+## Latent Variable Graphical Model ##
+
+An alternative model of the precision matrix is a decomposition of sparse and low rank components (stay tuned for a preprint manuscript).
+We can treat unobserved covariates as low rank and spread out, we can disentangle compositional, technical artifacts and biological confounders from direct interactions, even if we can't observe them.
+
+Lets compare our SpiecEasi methods on the first two rounds of the American gut dataset.
+
+```r
+install_github("zdk123/SpiecEasi", ref='lowrank')
+library(SpiecEasi)
+data(amgut1.filt)
+data(amgut2.filt.phy)
+args <- list(ncores=4)
+
+se1 <- list(
+        mb=spiec.easi(amgut1.filt, method='mb', pulsar.params=args,
+                      lambda.min.ratio=1e-2, sel.criterion='bstars'),
+        glasso=spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
+                      pulsar.params=args, sel.criterion='bstars'),
+        slr=spiec.easi(amgut1.filt, method='slr', r=2,
+                      pulsar.params=args, sel.criterion='bstars'))
+# Applying data transformations...
+# Selecting model with pulsar using bstars...
 # Fitting final estimate with mb...
 # done
 ```
