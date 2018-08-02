@@ -32,7 +32,7 @@ From an interactive R session:
 
 ```r
 library(devtools)
-install_github("zdk123/SpiecEasi", ref='pulsar')
+install_github("zdk123/SpiecEasi")
 library(SpiecEasi)
 ```
 
@@ -279,7 +279,7 @@ pulsar::findConfFile('parallel')
 ## uncomment line below to turn off batchtools reporting
 # options(batchtools.verbose=FALSE)
 se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
-            sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs1)
+            sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs)
 # Applying data transformations...
 # Selecting model with batch.pulsar using stars...
 # Fitting final estimate with mb...
