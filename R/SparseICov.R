@@ -71,6 +71,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 
 #' Neighborhood net estimates
 #'
+#' @importFrom Matrix t
 neighborhood.net <- function(Z, lambda, method="ising", ncores=1, sym='or', ...) {
     p <- ncol(Z)
     l <- length(lambda)

@@ -4,7 +4,8 @@
 \alias{neighborhood.net}
 \title{Neighborhood net estimates}
 \usage{
-neighborhood.net(Z, lambda, method = "ising", ncores = 1, sym = "or", ...)
+neighborhood.net(Z, lambda, method = "ising", ncores = 1, sym = "or",
+  ...)
 }
 \description{
 Neighborhood net estimates
