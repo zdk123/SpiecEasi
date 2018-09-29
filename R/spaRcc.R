@@ -1,23 +1,25 @@
 #' sparcc wrapper
 #'
+#' A reimplementation of SparCC algorithm (Friedman et Alm 2012, PLoS Comp Bio, 2012).
 #' @param data Community count data matrix
 #' @param iter Number of iterations in the outer loop
 #' @param inner_iter Number of iterations in the inner loop
 #' @param th absolute value of correlations below this threshold are considered zero by the inner SparCC loop.
+#' @seealso \code{\link{sparccboot}}
 #' @export
 sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 ##
 #  without all the 'frills'
-    sparccs <-
-     lapply(1:iter, function(i)
-         sparccinner(t(apply(data, 1, norm_diric)), iter=inner_iter, th=th))
+    sparccs <- lapply(1:iter, function(i)
+                      sparccinner(t(apply(data, 1, norm_diric)),
+                                  iter=inner_iter, th=th))
     # collect
     cors <- array(unlist(lapply(sparccs, function(x) x$Cor)),
                  c(ncol(data),ncol(data),iter))
     corMed <- apply(cors, 1:2, median)
     covs <- array(unlist(lapply(sparccs, function(x) x$Cov)),
                  c(ncol(data),ncol(data),iter))
-    covMed <- apply(cors, 1:2, median)
+    covMed <- apply(covs, 1:2, median)
 
     covMed <- cor2cov(corMed, sqrt(diag(covMed)))
     list(Cov=covMed, Cor=corMed)
@@ -25,7 +27,7 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 
 #' Bootstrap SparCC
 #'
-#' Get bootstrapped estimates of SparCC correlation coefficients. Pass results to \code{pval.sparccboot}.
+#' Get bootstrapped estimates of SparCC correlation coefficients. To get empirical p-values, pass this output to \code{pval.sparccboot}.
 #'
 #' @param data Community count data
 #' @param sparcc.params named list of parameters to pass to \code{sparcc}
@@ -33,7 +35,7 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 #' @param statisticperm function which takes data and permutated sample indices and results the upper triangle of the null correlation matrix
 #' @param R number of bootstraps
 #' @param ncpus number of cores to use for parallelization
-#' @param ... more arguments to pass to \code{boot::boot}
+#' @param ... additional arguments that are passed to \code{boot::boot}
 #' @export
 sparccboot <- function(data, sparcc.params=list(),
                         statisticboot=function(data, indices) triu(do.call("sparcc",
@@ -52,7 +54,7 @@ sparccboot <- function(data, sparcc.params=list(),
 
 #' SparCC p-vals
 #'
-#' Get empirical p-values from bootstrap SparCC.
+#' Get empirical p-values from bootstrap SparCC output.
 #'
 #' @param x output from \code{sparccboot}
 #' @param sided type of p-value to compute. Only two sided (sided="both") is implemented.
@@ -63,8 +65,8 @@ pval.sparccboot <- function(x, sided='both') {
     if (sided != "both") stop("only two-sided currently supported")
     nparams  <- ncol(x$t)
     tmeans   <- colMeans(x$null_av$t)
-#    check to see whether Aitchison variance is unstable -- confirm
-#    that sample Aitchison variance is in 95% confidence interval of
+#    check to see whether correlations are unstable -- confirm
+#    that sample correlations are in 95% confidence interval of
 #    bootstrapped samples
     niters   <- nrow(x$t)
     ind95    <- max(1,round(.025*niters)):round(.975*niters)

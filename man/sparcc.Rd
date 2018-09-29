@@ -16,5 +16,8 @@ sparcc(data, iter = 20, inner_iter = 10, th = 0.1)
 \item{th}{absolute value of correlations below this threshold are considered zero by the inner SparCC loop.}
 }
 \description{
-sparcc wrapper
+A reimplementation of SparCC algorithm (Friedman et Alm 2012, PLoS Comp Bio, 2012).
+}
+\seealso{
+\code{\link{sparccboot}}
 }

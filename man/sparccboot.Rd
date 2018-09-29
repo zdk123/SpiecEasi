@@ -23,8 +23,8 @@ sparccboot(data, sparcc.params = list(), statisticboot = function(data,
 
 \item{ncpus}{number of cores to use for parallelization}
 
-\item{...}{more arguments to pass to \code{boot::boot}}
+\item{...}{additional arguments that are passed to \code{boot::boot}}
 }
 \description{
-Get bootstrapped estimates of SparCC correlation coefficients. Pass results to \code{pval.sparccboot}.
+Get bootstrapped estimates of SparCC correlation coefficients. To get empirical p-values, pass this output to \code{pval.sparccboot}.
 }

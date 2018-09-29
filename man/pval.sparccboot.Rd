@@ -12,5 +12,5 @@ pval.sparccboot(x, sided = "both")
 \item{sided}{type of p-value to compute. Only two sided (sided="both") is implemented.}
 }
 \description{
-Get empirical p-values from bootstrap SparCC.
+Get empirical p-values from bootstrap SparCC output.
 }
