@@ -13,7 +13,7 @@ test_that("sparcc gives expected output", {
   out <- sparcc(X)
   expect_true(all(c('Cov', 'Cor') %in% names(out)))
   expect_true(all(diag(out$Cor)==1))
-  expect_false(all(out$Cor==out$Cov))
+  expect_false(any(out$Cor==out$Cov))
   expect_equal(out$Cor, cov2cor(out$Cov))
   expect_equal(dim(out$Cor), c(p,p))
   expect_equal(dim(out$Cov), c(p,p))
