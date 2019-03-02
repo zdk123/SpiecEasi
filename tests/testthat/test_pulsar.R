@@ -1,6 +1,6 @@
 context('setup')
 
-p <- 20
+p <- 40
 e <- p
 n <- 500
 set.seed(10010)
@@ -8,7 +8,7 @@ g <- make_graph('erdos_renyi', p, e)
 S <- cov2cor(prec2cov(graph2prec(g)))
 X <- exp(rmvnorm(n, rep(0,p), S))
 
-pargs <- list(seed=10010, rep.num=10)
+pargs <- list(seed=10010, rep.num=15)
 
 context("SPIEC-EASI fit")
 lmx  <- .7
