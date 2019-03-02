@@ -1,6 +1,6 @@
 context('setup')
 
-p <- 40
+p <- 30
 e <- p
 n <- 500
 set.seed(10010)
@@ -28,9 +28,6 @@ bout.stars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.m
 bout.bstars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='bstars', pulsar.select='batch', pulsar.params=pargs)
 
 
-# save(out, out.stars, out.bstars, bout.stars, bout.bstars,
-#     file=system.file('testdata', 'sepulsar.RData', package='SpiecEasi'))
-
 test_that("no pulsar has same output", {
   expect_equal(as.matrix(out$est$path[[out.stars$select$stars$opt.index]]),
                as.matrix(out.stars$refit$stars))
@@ -39,6 +36,7 @@ test_that("no pulsar has same output", {
 test_that("stars == bstars", {
   expect_equal(as.matrix(out.bstars$refit$stars),
                as.matrix(out.stars$refit$stars))
+  print(t1[3] - t2[3])
   expect_gt(t1[3], t2[3])
 
 })
@@ -58,13 +56,7 @@ test_that("stars == batch bstars", {
                as.matrix(bout.bstars$refit$stars))
 })
 
-
-## TODO: test pulsar params in/out
-
-
 context('spiec.easi getters')
-
-# load(system.file('testdata', 'sepulsar.RData', package='SpiecEasi'))
 
 test_that("Getter API throws errors if no pulsar selection", {
   expect_error(getOptInd(out))

@@ -1,10 +1,6 @@
 Package: SpiecEasi
 Title: Sparse Inverse Covariance for Ecological Statistical Inference
-<<<<<<< HEAD
-Version: 1.0.2
-=======
 Version: 1.0.5
->>>>>>> some general data checks
 Authors@R: c(
     person("Zachary", "Kurtz", role = c("aut", "cre"), email="zdkurtz@gmail.com"),
     person("Christian", "Mueller", role = "aut"),
@@ -35,4 +31,4 @@ Suggests:
 biocViews:
 License: GPL (>= 2)
 LazyData: true
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
