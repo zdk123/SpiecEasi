@@ -36,9 +36,6 @@ test_that("no pulsar has same output", {
 test_that("stars == bstars", {
   expect_equal(as.matrix(out.bstars$refit$stars),
                as.matrix(out.stars$refit$stars))
-  print(t1[3] - t2[3])
-  expect_gt(t1[3], t2[3])
-
 })
 
 test_that("stars == batch stars", {
