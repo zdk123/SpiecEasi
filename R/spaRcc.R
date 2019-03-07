@@ -20,7 +20,6 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
     covs <- array(unlist(lapply(sparccs, function(x) x$Cov)),
                  c(ncol(data),ncol(data),iter))
     covMed <- apply(covs, 1:2, median)
-
     covMed <- cor2cov(corMed, sqrt(diag(covMed)))
     list(Cov=covMed, Cor=corMed)
 }

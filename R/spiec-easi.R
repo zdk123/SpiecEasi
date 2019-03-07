@@ -19,6 +19,18 @@ spiec.easi <- function(data, ...) {
   return(OTU)
 }
 
+#' @keywords internal
+.data.checks <- function(data) {
+  ## data checks ##
+  if (isTRUE(all.equal(rowSums(data), rep(1L, nrow(data))))) {
+    warning('Data is normalized, but raw counts are expected')
+  }
+
+  if (any(data<0)) {
+    warning('Negative values detected, but raw counts are expected')
+  }
+}
+
 #' @method spiec.easi phyloseq
 #' @rdname spiec.easi
 #' @export
@@ -129,6 +141,9 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                         icov.select.params=pulsar.params, ...) {
 
   args <- list(...)
+
+  .data.checks(data)
+
   if (verbose) msg <- .makeMessage("Applying data transformations...")
   else msg <- .makeMessage('')
 
