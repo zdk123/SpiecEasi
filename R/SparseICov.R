@@ -60,8 +60,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
                                             cov.output = cov.output)))
 
   } else if (method %in% c('mb')) {
-    est <- do.call(huge::huge, c(args, list(x=data,
-                                            method=method,
+    est <- do.call(huge:::huge.mb, c(args, list(x=data,
                                             verbose=verbose)))
     est$method <- 'mb'
     est$data <- data

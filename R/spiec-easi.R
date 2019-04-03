@@ -296,6 +296,5 @@ spiec.easi.list <- function(data, ...) {
 
   if (!list.equal(snames) || !list.equal(ssizes))
     stop("Do not run multi.spiec.easi with unidentical sample scheme")
-
-  spiec.easi.default(data, ...)
+  spiec.easi.default(do.call('cbind', data), ...)
 }
