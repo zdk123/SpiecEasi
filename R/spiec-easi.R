@@ -22,6 +22,10 @@ spiec.easi <- function(data, ...) {
 #' @keywords internal
 .data.checks <- function(data) {
   ## data checks ##
+  if (inherits(data, 'list')) {
+    sink <- lapply(data, .data.checks)
+    return(NULL)
+  }
   if (isTRUE(all.equal(rowSums(data), rep(1L, nrow(data))))) {
     warning('Data is normalized, but raw counts are expected')
   }
@@ -29,6 +33,7 @@ spiec.easi <- function(data, ...) {
   if (any(data<0)) {
     warning('Negative values detected, but raw counts are expected')
   }
+  return(NULL)
 }
 
 #' @method spiec.easi phyloseq
@@ -296,6 +301,5 @@ spiec.easi.list <- function(data, ...) {
 
   if (!list.equal(snames) || !list.equal(ssizes))
     stop("Do not run multi.spiec.easi with unidentical sample scheme")
-
   spiec.easi.default(data, ...)
 }
