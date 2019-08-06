@@ -1,6 +1,6 @@
 context('setup')
 
-p <- 30
+p <- 20
 e <- p
 n <- 500
 set.seed(10010)
@@ -8,7 +8,7 @@ g <- make_graph('erdos_renyi', p, e)
 S <- cov2cor(prec2cov(graph2prec(g)))
 X <- exp(rmvnorm(n, rep(0,p), S))
 
-pargs <- list(seed=10010, rep.num=15)
+pargs <- list(seed=10010, rep.num=10)
 
 context("SPIEC-EASI fit")
 lmx  <- .7
@@ -19,17 +19,26 @@ out <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.min.rati
 
 ## StARs / B-StARS
 t1 <- system.time(
-out.stars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs))
+out.stars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx,
+  lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='stars',
+  pulsar.select=TRUE, pulsar.params=pargs))
 t2 <- system.time(
-out.bstars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='bstars', pulsar.select=TRUE, pulsar.params=pargs))
+out.bstars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx,
+  lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='bstars',
+  pulsar.select=TRUE, pulsar.params=pargs))
 ## Batch Mode StARs / B-StARS
 options(batchtools.verbose=FALSE)
-bout.stars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='stars', pulsar.select='batch', pulsar.params=pargs)
-bout.bstars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx, lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='bstars', pulsar.select='batch', pulsar.params=pargs)
+bout.stars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx,
+  lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='stars',
+  pulsar.select='batch', pulsar.params=pargs)
+bout.bstars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx,
+  lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='bstars',
+  pulsar.select='batch', pulsar.params=pargs)
 
 
 test_that("no pulsar has same output", {
-  expect_equal(as.matrix(out$est$path[[out.stars$select$stars$opt.index]]),
+  tmp <- out.stars$select$stars$opt.index
+  expect_equal(as.matrix(Matrix::drop0(out$est$path[[tmp]])),
                as.matrix(out.stars$refit$stars))
 })
 
@@ -67,12 +76,17 @@ test_that("Getter API throws errors if no pulsar selection", {
 })
 
 runtests <- function(out) {
-  expect_equal(getOptInd(out), (i<-out$select$stars$opt.index))
-  expect_equal(getOptNet(out), out$refit$stars)
-  expect_equal(getRefit(out), out$refit$stars)
+  expect_equal(getOptInd(out),
+              (i<-out$select$stars$opt.index))
+  expect_equal(getOptNet(out),
+               Matrix::drop0(out$refit$stars))
+  expect_equal(getRefit(out),
+               Matrix::drop0(out$refit$stars))
   expect_equal(getOptLambda(out), out$lambda[i])
-  expect_equal(getOptMerge(out), out$select$stars$merge[[i]])
-  expect_equal(getOptBeta(out), out$est$beta[[i]])
+  expect_equal(getOptMerge(out),
+               Matrix::drop0(out$select$stars$merge[[i]]))
+  expect_equal(getOptBeta(out),
+               Matrix::drop0(out$est$beta[[i]]))
 }
 
 test_that("Getter API, pulsar / stars ", {

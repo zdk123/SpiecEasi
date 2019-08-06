@@ -66,10 +66,10 @@ getOptX.pulsar.refit <- function(est, getter='index') {
               est$select$stars$opt.index
                 },
         refit = {
-              est$refit$stars
+              Matrix::drop0(est$refit$stars)
         },
         merge = {
-              est$select$stars$merge[[getOptInd(est)]]
+              Matrix::drop0(est$select$stars$merge[[getOptInd(est)]])
         },
         stars = {
               est$select$stars$summary[getOptInd(est)]
@@ -79,19 +79,19 @@ getOptX.pulsar.refit <- function(est, getter='index') {
         },
         icov = {
           if (est$est$method == "glasso")
-            est$est$icov[[getOptInd(est)]]
+            Matrix::drop0(est$est$icov[[getOptInd(est)]])
           else
           stop("Run spiec-easi with method=\"glasso\"")
         },
         cov = {
           if (est$est$method == "glasso")
-            est$est$cov[[getOptInd(est)]]
+            Matrix::drop0(est$est$cov[[getOptInd(est)]])
           else
             stop("Run spiec-easi with method=\"glasso\"")
         },
         beta = {
           if (est$est$method == "mb")
-            est$est$beta[[getOptInd(est)]]
+            Matrix::drop0(est$est$beta[[getOptInd(est)]])
           else
             stop("Run spiec-easi with method=\"mb\"")
         }

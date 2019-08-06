@@ -51,20 +51,21 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   method <- switch(method, glasso = "glasso", mb = "mb",
                    stop("Method not supported"))
 
-  if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
+  if (is.null(args$lambda.min.ratio))
+    args$lambda.min.ratio <- 1e-3
 
-  if (method %in% c("glasso")) {
-    est <- do.call(huge::huge, c(args, list(x=data,
-                                            method=method,
-                                            verbose=verbose,
-                                            cov.output = cov.output)))
+  est <- do.call(huge::huge, c(args, list(x=data,
+                                          method=method,
+                                          verbose=verbose,
+                                          cov.output = cov.output)))
 
-  } else if (method %in% c('mb')) {
-    est <- do.call(utils::getFromNamespace('huge.mb', 'huge'),
-                   c(args, list(x=data, verbose=verbose)))
-    est$method <- 'mb'
-    est$data <- data
-    est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
-  }
+  ## MB betas exported in huge>=1.3.2
+  # if (method %in% c('mb')) {
+  #   est <- do.call(utils::getFromNamespace('huge.mb', 'huge'),
+  #                  c(args, list(x=data, verbose=verbose)))
+  #   est$method <- 'mb'
+  #   est$data <- data
+  #   est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
+  # }
   return(est)
 }
