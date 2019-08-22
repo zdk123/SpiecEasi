@@ -20,9 +20,9 @@ Imports:
    pulsar (>= 0.3.4),
    MASS,
    VGAM,
-   Matrix
-Suggests:
+   Matrix,
    parallel,
+Suggests:
    boot,
    phyloseq,
    igraph,

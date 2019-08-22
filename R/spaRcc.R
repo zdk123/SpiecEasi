@@ -5,14 +5,18 @@
 #' @param iter Number of iterations in the outer loop
 #' @param inner_iter Number of iterations in the inner loop
 #' @param th absolute value of correlations below this threshold are considered zero by the inner SparCC loop.
+#' @param ncpus number of cpus for parallel mode.
+#' @importFrom parallel mclapply
 #' @seealso \code{\link{sparccboot}}
 #' @export
-sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
-##
-#  without all the 'frills'
-    sparccs <- lapply(1:iter, function(i)
+sparcc <- function(data, iter=20, inner_iter=10, th=.1, ncpus=1) {
+    ## check that data are positive counts
+    .data.checks(data)
+
+    sparccs <- mclapply(1:iter, function(i)
                       sparccinner(t(apply(data, 1, norm_diric)),
-                                  iter=inner_iter, th=th))
+                                  iter=inner_iter, th=th),
+                        mc.cores=ncpus)
     # collect
     cors <- array(unlist(lapply(sparccs, function(x) x$Cor)),
                  c(ncol(data),ncol(data),iter))
