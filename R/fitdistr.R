@@ -69,7 +69,7 @@ fitdistr <- function (x, densfun, start, control, ...)  {
     Call <- match.call(expand.dots = TRUE)
     if (missing(start))
         start <- NULL
-    if (missing(control)) 
+    if (missing(control))
         control <- list(fnscale=1e12, factr=1e-2, maxit=10)
 
     dots <- names(list(...))

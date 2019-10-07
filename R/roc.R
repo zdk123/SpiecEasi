@@ -68,15 +68,18 @@ huge.pr <- function (path, theta, verbose = TRUE, plot = TRUE) {
         message("done.")
     rm(precision, recall, tp.all, fp.all, path, theta, fn)
     gc()
-    ord.p = order(ROC$prec, na.last=NA)
-    tmp1 = ROC$prec[ord.p]
-    tmp2 = ROC$rec[ord.p]
+    ord.p = order(ROC$prec, ROC$rec, na.last=NA)
+    ROC$prec <- ROC$prec[ord.p]
+    ROC$rec  <- ROC$rec[ord.p]
+    tmp2 = c(min(c(4/(d-1), ROC$prec)), ROC$prec[ord.p], 1)
+    tmp1 = c(1, ROC$rec[ord.p], 0)
     if (plot) {
         par(mfrow = c(1, 1))
-        plot(tmp1, tmp2, type = "b", main = "PR Curve", xlab = "Precision",
-            ylab = "Recall", ylim = c(0, 1))
+        plot(tmp1, tmp2, type = "b", main = "PR Curve", xlab = "Recall",
+            ylab = "Precision", ylim = c(0, 1))
     }
-    ROC$AUC = sum(diff(tmp1) * (tmp2[-1] + tmp2[-length(tmp2)]))/2
+    tmax <- diff(range(tmp2))*diff(range(tmp1))
+    ROC$AUC = sum(diff(tmp2) * (tmp1[-1] + tmp1[-length(tmp1)]))/(2*tmax)
     rm(ord.p, tmp1, tmp2)
     gc()
     class(ROC) = "roc"
