@@ -18,11 +18,11 @@
 #'   \item getOptBeta: the optimal coefficient matrix (mb only)
 #'}
 #' @export
-getOptInd <- function(est)   getOptX(est, 'index')
+getOptInd <- function(est) getOptX(est, 'index')
 
 #' @rdname getOptInd
 #' @export
-getOptLambda <- function(est)   getOptX(est, 'lambda')
+getOptLambda <- function(est) getOptX(est, 'lambda')
 
 #' @rdname getOptInd
 #' @export
@@ -30,33 +30,34 @@ getOptMerge <- function(est) getOptX(est, 'merge')
 
 #' @rdname getOptInd
 #' @export
-getStability <- function(est)  getOptX(est, 'stars')
+getStability <- function(est) getOptX(est, 'stars')
 
 #' @rdname getOptInd
 #' @export
-getOptNet <- function(est)   getOptX(est, 'refit')
+getOptNet <- function(est) getOptX(est, 'refit')
 
 #' @rdname getOptInd
 #' @export
-getRefit <- function(est)    getOptNet(est)
+getRefit <- function(est) getOptNet(est)
 
 #' @rdname getOptInd
 #' @export
-getOptBeta <- function(est)  getOptX(est, 'beta')
+getOptBeta <- function(est) getOptX(est, 'beta')
 
 #' @rdname getOptInd
 #' @export
-getOptCov <- function(est)   getOptX(est, 'cov')
+getOptCov <- function(est) getOptX(est, 'cov')
 
 #' @rdname getOptInd
 #' @export
-getOptiCov <- function(est)  getOptX(est, 'icov')
+getOptiCov <- function(est) getOptX(est, 'icov')
 
 #' @keywords internal
-getOptX <- function(est, ...) {
-  UseMethod('getOptX', est)
+getOptX <- function(est, getter) {
+  UseMethod('getOptX')
 }
 
+#' @exportS3Method
 #' @keywords internal
 getOptX.pulsar.refit <- function(est, getter='index') {
   if (length(est$refit) > 0) {
@@ -103,7 +104,6 @@ getOptX.pulsar.refit <- function(est, getter='index') {
 }
 
 
-
 #' sym beta
 #'
 #' Symmetrize a beta (coefficient) matrix, ie. selected from MB neighborhood selection
@@ -147,14 +147,19 @@ symBeta <- function(beta, mode='ave') {
   as(symbeta, 'symmetricMatrix')
 }
 
-
+#' Functions for triangular matrices
+#'
+#' Get or symmeterize the upper/lower triangle of a symmetric matrix with the other side zeroed out
 #' @export
-triu <- function(x, k=0) x[upper.tri(x, !k)]
+triu <- function(x, k=1) x[upper.tri(x, !k)]
 #' @export
-tril <- function(x, k=0) x[lower.tri(x, !k)]
+#' @rdname triu
+tril <- function(x, k=1) x[lower.tri(x, !k)]
 
+#' @rdname triu
 #' @export
 triu2diag <- function(x, diagval=0) {
+    stopifnot(is.null(dim(a)), TRUE)
     e <- length(x)
     n <- .5 * (sqrt(8*e + 1)+1)
     mat <- matrix(0, n, n)
@@ -165,7 +170,7 @@ triu2diag <- function(x, diagval=0) {
 }
 
 
-
+#' @exportS3Method '[[' Matrix
 '[[.Matrix' <- function(x, i, exact=TRUE) {
     if (exact) name <- attr(x, 'names')
     else name <- substr(attr(x, 'names'), 1, nchar(i))
@@ -175,7 +180,7 @@ triu2diag <- function(x, diagval=0) {
 }
 
 
-
+#' @exportS3Method  '$' Matrix
 '$.Matrix' <- function(x, name) {
     x[[ name, exact=FALSE]]
 }

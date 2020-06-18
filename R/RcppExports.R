@@ -33,6 +33,14 @@ ADMM <- function(SigmaO, lambda, I, Lambda, Y, beta = 0, r = 0L, mu = 0, eta = 4
     .Call('_SpiecEasi_ADMM', PACKAGE = 'SpiecEasi', SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag)
 }
 
+MATAVE2 <- function(A, B) {
+    .Call('_SpiecEasi_MATAVE2', PACKAGE = 'SpiecEasi', A, B)
+}
+
+MATAVE3 <- function(A, B, C) {
+    .Call('_SpiecEasi_MATAVE3', PACKAGE = 'SpiecEasi', A, B, C)
+}
+
 sqrtmNewt <- function(C, sqrt0, errTol = 1e-3) {
     .Call('_SpiecEasi_sqrtmNewt', PACKAGE = 'SpiecEasi', C, sqrt0, errTol)
 }

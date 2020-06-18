@@ -3,7 +3,7 @@
 #' Run the whole SPIEC-EASI pipeline, from data transformation, sparse inverse covariance estimation and model selection.
 #' Inputs are a non-normalized OTU table and pipeline options.
 #' @export
-#' @importFrom pulsar pulsar batch.pulsar
+#' @importFrom pulsar pulsar batch.pulsar getMaxCov getLamPath
 spiec.easi <- function(data, ...) {
   UseMethod('spiec.easi', data)
 }
@@ -157,7 +157,7 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                     args$method <- method
                     X <- .spiec.easi.norm(data)
                     if (is.null(args[['lambda.max']]))
-                      args$lambda.max <- pulsar::getMaxCov(cor(X))
+                      args$lambda.max <- getMaxCov(cor(X))
                  },
 
         mb     = {

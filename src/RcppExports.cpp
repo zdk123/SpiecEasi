@@ -47,6 +47,18 @@ BEGIN_RCPP
     return R_NilValue;
 END_RCPP
 }
+// svdPowSym2
+List svdPowSym2(arma::mat& M, int k);
+RcppExport SEXP _SpiecEasi_svdPowSym2(SEXP MSEXP, SEXP kSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    rcpp_result_gen = Rcpp::wrap(svdPowSym2(M, k));
+    return rcpp_result_gen;
+END_RCPP
+}
 // softSVT3
 arma::mat softSVT3(arma::mat& M, int k, double beta);
 RcppExport SEXP _SpiecEasi_softSVT3(SEXP MSEXP, SEXP kSEXP, SEXP betaSEXP) {
@@ -70,6 +82,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type k(kSEXP);
     Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
     rcpp_result_gen = Rcpp::wrap(softSVT2(M, k, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// SVD2
+List SVD2(arma::mat& M);
+RcppExport SEXP _SpiecEasi_SVD2(SEXP MSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat& >::type M(MSEXP);
+    rcpp_result_gen = Rcpp::wrap(SVD2(M));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -175,14 +198,14 @@ BEGIN_RCPP
 END_RCPP
 }
 
-RcppExport void LPGM_neighborhood(void *, void *, void *, void *, void *, void *, void *, void *, void *);
-
 static const R_CallMethodDef CallEntries[] = {
     {"_SpiecEasi_sqrtmNewt2", (DL_FUNC) &_SpiecEasi_sqrtmNewt2, 3},
     {"_SpiecEasi_SOFTTHRESH2", (DL_FUNC) &_SpiecEasi_SOFTTHRESH2, 3},
     {"_SpiecEasi_svdPowSym", (DL_FUNC) &_SpiecEasi_svdPowSym, 6},
+    {"_SpiecEasi_svdPowSym2", (DL_FUNC) &_SpiecEasi_svdPowSym2, 2},
     {"_SpiecEasi_softSVT3", (DL_FUNC) &_SpiecEasi_softSVT3, 3},
     {"_SpiecEasi_softSVT2", (DL_FUNC) &_SpiecEasi_softSVT2, 3},
+    {"_SpiecEasi_SVD2", (DL_FUNC) &_SpiecEasi_SVD2, 1},
     {"_SpiecEasi_ADMM", (DL_FUNC) &_SpiecEasi_ADMM, 15},
     {"_SpiecEasi_MATAVE2", (DL_FUNC) &_SpiecEasi_MATAVE2, 2},
     {"_SpiecEasi_MATAVE3", (DL_FUNC) &_SpiecEasi_MATAVE3, 3},
@@ -190,7 +213,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SpiecEasi_solveCpp", (DL_FUNC) &_SpiecEasi_solveCpp, 2},
     {"_SpiecEasi_SOFTTHRESH", (DL_FUNC) &_SpiecEasi_SOFTTHRESH, 3},
     {"_SpiecEasi_softSVT", (DL_FUNC) &_SpiecEasi_softSVT, 3},
-    {"LPGM_neighborhood", (DL_FUNC) &LPGM_neighborhood, 9},
     {NULL, NULL, 0}
 };
 

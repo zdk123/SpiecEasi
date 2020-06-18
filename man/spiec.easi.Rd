@@ -3,17 +3,9 @@
 \name{spiec.easi}
 \alias{spiec.easi}
 \alias{spiec.easi.phyloseq}
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> fixed imports
 \alias{spiec.easi.otu_table}
 \alias{spiec.easi.default}
 \title{SPIEC-EASI pipeline}
-=======
-\alias{spiec.easi.default}
-\title{SPIEC-EASI}
->>>>>>> many changes
 \usage{
 spiec.easi(data, ...)
 
@@ -21,10 +13,18 @@ spiec.easi(data, ...)
 
 \method{spiec.easi}{otu_table}(data, ...)
 
-\method{spiec.easi}{default}(data, method = "glasso",
-  sel.criterion = "stars", verbose = TRUE, pulsar.select = TRUE,
-  pulsar.params = list(), icov.select = pulsar.select,
-  icov.select.params = pulsar.params, lambda.log = TRUE, ...)
+\method{spiec.easi}{default}(
+  data,
+  method = "glasso",
+  sel.criterion = "stars",
+  verbose = TRUE,
+  pulsar.select = TRUE,
+  pulsar.params = list(),
+  icov.select = pulsar.select,
+  icov.select.params = pulsar.params,
+  lambda.log = TRUE,
+  ...
+)
 }
 \arguments{
 \item{data}{For a matrix, non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also by phyloseq or otu_table object.}
@@ -41,15 +41,9 @@ spiec.easi(data, ...)
 
 \item{pulsar.params}{list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.}
 
-<<<<<<< HEAD
 \item{icov.select}{deprecated.}
 
 \item{icov.select.params}{deprecated.}
-=======
-\item{icov.select.params}{defunct. can be set for backwards compatability, but ignored if pulsar.select and/or pulsar.params are given}
-
-\item{dist.lambda}{how should lambdas be distributed between lambda.max and lmax*lambda.min.ratio, 'log' or 'linear'.}
->>>>>>> many changes
 }
 \description{
 Run the whole SPIEC-EASI pipeline, from data transformation, sparse inverse covariance estimation and model selection.

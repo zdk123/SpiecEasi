@@ -1,6 +1,6 @@
 #' @importFrom graphics abline legend par plot
 #' @importFrom methods as
-#' @importFrom stats cor cov cov2cor lm median  na.exclude na.omit optim pnorm ppoints qlnorm rmultinom rnorm rpois sd var
+#' @importFrom stats cor cov cov2cor lm median na.exclude na.omit optim pnorm ppoints qlnorm rmultinom rnorm rpois sd var
 #' @keywords internal
 "_PACKAGE"
 

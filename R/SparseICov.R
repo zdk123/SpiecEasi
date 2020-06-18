@@ -66,7 +66,6 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   # }
   return(est)
 }
-}
 
 
 #' Neighborhood net estimates

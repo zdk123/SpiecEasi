@@ -4,8 +4,13 @@
 \alias{adj2igraph}
 \title{Adjacency to igraph}
 \usage{
-adj2igraph(Adj, rmEmptyNodes = FALSE, diag = FALSE,
-  edge.attr = list(), vertex.attr = list(name = 1:ncol(Adj)))
+adj2igraph(
+  Adj,
+  rmEmptyNodes = FALSE,
+  diag = FALSE,
+  edge.attr = list(),
+  vertex.attr = list(name = 1:ncol(Adj))
+)
 }
 \arguments{
 \item{Adj}{an Adjacency matrix}

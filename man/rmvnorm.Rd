@@ -5,8 +5,13 @@
 \title{Draw samples from multivariate, correlated normal distribution
 with counts correlated according to Sigma}
 \usage{
-rmvnorm(n = 100, mu = rep(0, 10), Sigma = diag(10), tol = 1e-06,
-  empirical = TRUE)
+rmvnorm(
+  n = 100,
+  mu = rep(0, 10),
+  Sigma = diag(10),
+  tol = 1e-06,
+  empirical = TRUE
+)
 }
 \arguments{
 \item{n}{number of samples to draw}

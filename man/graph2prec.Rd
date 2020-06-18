@@ -4,8 +4,14 @@
 \alias{graph2prec}
 \title{Convert a symmetric graph (extension of R matrix class)}
 \usage{
-graph2prec(Graph, posThetaLims = c(2, 3), negThetaLims = -posThetaLims,
-  targetCondition = 100, epsBin = 0.01, numBinSearch = 100)
+graph2prec(
+  Graph,
+  posThetaLims = c(2, 3),
+  negThetaLims = -posThetaLims,
+  targetCondition = 100,
+  epsBin = 0.01,
+  numBinSearch = 100
+)
 }
 \arguments{
 \item{Graph}{graph adjacency matrix}

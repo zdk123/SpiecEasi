@@ -143,5 +143,13 @@ adaptive.thresh <- function(S, lam, shrinkDiag=FALSE, eta=1) {
 sdprod <- function(x, y) sd(x*y)
 
 getThetaMat <- function(X) {
-    kernlab::kernelMatrix(sdprod, t(X))@.Data
+#    kernlab::kernelMatrix(sdprod, t(X))@.Data
+  n <- ncol(X)
+  theta <- matrix(0, n,n)
+  for (i in 1:n) {
+    for (j in i:n) {
+      theta[j,i] <- theta[i,j] <- sdprod(X[,i], X[,j])
+    }
+  }
+  theta
 }

@@ -9,8 +9,7 @@
 \usage{
 clr(x.f, ...)
 
-\method{clr}{default}(x.f, base = exp(1), tol = .Machine$double.eps,
-  ...)
+\method{clr}{default}(x.f, base = exp(1), tol = .Machine$double.eps, ...)
 
 \method{clr}{matrix}(x.f, mar = 2, ...)
 
