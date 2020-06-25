@@ -175,7 +175,7 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
     d   <- length(munbs)
     normd  <- rmvnorm(n, rep(0, d), Sigma=Cor)
     unif   <- pnorm(normd)
-    data <- matrix(VGAM::qzinegbin(unif, munb=munbs, size=ks, pstr0=ps, ...), n, d)
+    data <- matrix(VGAM::qzinegbin(t(unif), munb=munbs, size=ks, pstr0=ps, ...), n, d, byrow=TRUE)
     data <- .fixInf(data)
     return(data)
 }

@@ -66,12 +66,13 @@ test_that("VGAM::qzinegbin is applied correctly to normal samples", {
     normal_samps <- rmvnorm(n=n, mu=rep(0, ncol(amgut1.filt.cs)), Sigma=cors)
     unif_probs <- pnorm(normal_samps)
 
-    seRes <- matrix(VGAM::qzinegbin(unif_probs, size=paramat$size, 
-				    munb=paramat$munb, pstr0=paramat$pstr0), n, ncol(amgut1.filt.cs))
+    seRes <- matrix(VGAM::qzinegbin(t(unif_probs), size=paramat$size, 
+				    munb=paramat$munb, pstr0=paramat$pstr0), 
+		    n, ncol(amgut1.filt.cs), byrow=TRUE)
 
     col3res <- VGAM::qzinegbin(unif_probs[,3], size=paramat$size[3], 
 			       munb=paramat$munb[3], pstr0=paramat$pstr0[3])
 
-    show(seRes[,3] == col3res)
+    # show(seRes[,3] == col3res)
     expect( all(seRes[,3] == col3res), "After application of the quantile function, did we get the correct counts back?")
 })
