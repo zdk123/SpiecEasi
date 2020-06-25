@@ -48,3 +48,30 @@ test_that("Synthetic data has correct attributes: lognorm", {
     expect_equal(ncol(X), d)
     expect_equal(nrow(X), n)
 })
+
+context("marginal distribuitions applied correctly")
+# This test has been structured to mimic the relevant functionality,
+# since currently we do not have a way to access the normal samples used internally.
+test_that("VGAM::qzinegbin is applied correctly to normal samples", {
+    
+    # setup, mimics internal functioning of synth_comm_from_counts and rmvzingbin
+    cors <- cor(amgut1.filt.cs)
+    distr <- "zinegbin"
+    params <- get_comm_params(comm=amgut1.filt.cs, distr=distr)
+
+    paramat <- do.call('rbind', params)
+    paramat <- data.frame(apply(paramat, 2, as.numeric))
+    
+    # Follows the implementation of rmvzingbin
+    normal_samps <- rmvnorm(n=n, mu=rep(0, ncol(amgut1.filt.cs)), Sigma=cors)
+    unif_probs <- pnorm(normal_samps)
+
+    seRes <- matrix(VGAM::qzinegbin(unif_probs, size=paramat$size, 
+				    munb=paramat$munb, pstr0=paramat$pstr0), n, ncol(amgut1.filt.cs))
+
+    col3res <- VGAM::qzinegbin(unif_probs[,3], size=paramat$size[3], 
+			       munb=paramat$munb[3], pstr0=paramat$pstr0[3])
+
+    show(seRes[,3] == col3res)
+    expect( all(seRes[,3] == col3res), "After application of the quantile function, did we get the correct counts back?")
+})
