@@ -4,7 +4,7 @@
 using namespace Rcpp;
 using namespace arma;
 
-// [[Rcpp::export]]
+
 arma::mat sqrtmNewt2(arma::mat& C, arma::mat& sqrt0, const double& errTol) {
     arma::mat X(sqrt0);
     arma::mat X_new;
@@ -18,7 +18,8 @@ arma::mat sqrtmNewt2(arma::mat& C, arma::mat& sqrt0, const double& errTol) {
     return X_new;
 }
 
-// [[Rcpp::export]]
+
+
 arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrinkDiag = true) {
     arma::mat A = symmatu(Sig);
     int n = A.n_cols;
@@ -30,7 +31,7 @@ arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrink
     return M % S;
 }
 
-// [[Rcpp::export]]
+
 void svdPowSym(arma::mat& U, arma::vec& d, arma::mat& V, arma::mat& A, int k, int q) {
     int l = k;
     int m = A.n_rows;
@@ -45,7 +46,6 @@ void svdPowSym(arma::mat& U, arma::vec& d, arma::mat& V, arma::mat& A, int k, in
     svd_econ(U, d, V, A*Q);
 }
 
-// [[Rcpp::export]]
 List svdPowSym2(arma::mat& M, int k) {
     arma::mat U, V;
     arma::vec d;
@@ -54,7 +54,6 @@ List svdPowSym2(arma::mat& M, int k) {
 }
 
 
-// [[Rcpp::export]]
 arma::mat softSVT3(arma::mat& M, int k, double beta=0) {
     arma::mat U, V;
     arma::vec d;
@@ -69,7 +68,6 @@ arma::mat softSVT3(arma::mat& M, int k, double beta=0) {
 }
 
 
-// [[Rcpp::export]]
 arma::mat softSVT2(arma::mat& M, int k, double beta=0) {
     arma::mat U, V;
     arma::vec d;
@@ -81,7 +79,7 @@ arma::mat softSVT2(arma::mat& M, int k, double beta=0) {
     return U*diagmat(tmpd)*V.t();
 }
 
-// [[Rcpp::export]]
+
 List SVD2(arma::mat& M) {
     arma::mat U, V;
     arma::vec d;
@@ -89,7 +87,6 @@ List SVD2(arma::mat& M) {
     return List::create(_["d"] = d, _["U"] = U, _["V"] = V) ;
 }
 
-// // [[Rcpp::export]]
 // Rcpp::List SVD3(arma::mat& A, int k=5) {
 //
 //   Rcpp::Environment base("package:irlba");
@@ -146,7 +143,7 @@ List SVD2(arma::mat& M) {
 //   return U*diagmat(tmpd)*V.t();
 // }
 
-
+//' @noRd
 // [[Rcpp::export]]
 List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
           arma::mat& Lambda, arma::mat& Y, double beta=0, int r=0, double mu=0,

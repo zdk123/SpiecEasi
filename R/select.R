@@ -1,4 +1,11 @@
-#' Extended BIC on SpiecEasi estimated object
+#' Extended BIC
+#'
+#' Calculate the extended BIC criterion on a sparse (refit) network and the input data
+#'
+#' @param refit adjacency matrix, getOpt from SpiecEasi output
+#' @param data input data set used to get the network
+#' @param loglik log likeihood of the graphical model
+#' @param gamma the model likeihood/complexity tradeoff parameter
 #' @export
 ebic <- function(refit, data, loglik, gamma=.5) {
   df <- sum(refit)/2

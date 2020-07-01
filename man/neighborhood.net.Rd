@@ -4,8 +4,21 @@
 \alias{neighborhood.net}
 \title{Neighborhood net estimates}
 \usage{
-neighborhood.net(Z, lambda, method = "ising", ncores = 1, sym = "or", ...)
+neighborhood.net(data, lambda, method = "ising", ncores = 1, sym = "or", ...)
+}
+\arguments{
+\item{data}{n x p input (pre-transformed) data}
+
+\item{lambda}{the lambda path}
+
+\item{method}{ising and poisson models currently supported.}
+
+\item{ncores}{number of cores for distributing the model fitting}
+
+\item{sym}{symmetrize the neighborhood using the 'or' (default)/'and' rule}
+
+\item{...}{further arguments to glmnet}
 }
 \description{
-Neighborhood net estimates
+Select a sparse inverse covariance matrix using neighborhood selection and glmnet from various exponential models.
 }

@@ -5,7 +5,6 @@
 #' huge package functions.
 #'
 #' @param data data matrix with features/OTUs in the columns and samples in the rows. Should be transformed by clr for meaningful results, if the data is compositional
-#' @param lambda numeric lambda path
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann)
 #' @param npn perform Nonparanormal (npn) transformation before estimation?
 #' @param verbose print progress to standard out
@@ -70,15 +69,22 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 
 #' Neighborhood net estimates
 #'
+#' Select a sparse inverse covariance matrix using neighborhood selection and glmnet from various exponential models.
+#' @param data n x p input (pre-transformed) data
+#' @param lambda the lambda path
+#' @param method ising and poisson models currently supported.
+#' @param ncores number of cores for distributing the model fitting
+#' @param sym symmetrize the neighborhood using the 'or' (default)/'and' rule
+#' @param ... further arguments to glmnet
 #' @importFrom Matrix t
-neighborhood.net <- function(Z, lambda, method="ising", ncores=1, sym='or', ...) {
-    p <- ncol(Z)
+neighborhood.net <- function(data, lambda, method="ising", ncores=1, sym='or', ...) {
+    p <- ncol(data)
     l <- length(lambda)
     args <- list(...)
       match.fun(switch(method,
         ising   ={ nbFun <- glm.neighborhood ; args$link <- 'binomial' },
-        poisson ={ nbFun <- glm.neighborhood ; args$link <- 'poisson' },
-        loglin  ={ nbFun <- llgm.neighborhood}
+        poisson ={ nbFun <- glm.neighborhood ; args$link <- 'poisson' }
+        # loglin  ={ nbFun <- llgm.neighborhood}
       ))
 
     ### Remove 0/1 binomials/ zero variance features
@@ -87,9 +93,9 @@ neighborhood.net <- function(Z, lambda, method="ising", ncores=1, sym='or', ...)
           xtab <- table(x)
           length(xtab) == 1 || min(xtab) == 1
       }
-      zvind  <- which(apply(Z, 2, mintab))
+      zvind  <- which(apply(data, 2, mintab))
     } else {
-      zvind <- which(apply(Z, 2, var)==0)
+      zvind <- which(apply(data, 2, var)==0)
     }
 
     estFun <- function(i) {
@@ -97,7 +103,7 @@ neighborhood.net <- function(Z, lambda, method="ising", ncores=1, sym='or', ...)
       if (!(i %in% zvind)) {
         suppressWarnings(
           out <- do.call(nbFun,
-              c(list(Z[,-c(i, zvind)], Z[,i,drop=FALSE], lambda), args)))
+              c(list(data[,-c(i, zvind)], data[,i,drop=FALSE], lambda), args)))
         lsub <- ncol(out)
         if (lsub<l) {
           ## extend missing lambdas value if glmnet
@@ -124,6 +130,7 @@ neighborhood.net <- function(Z, lambda, method="ising", ncores=1, sym='or', ...)
 
 
 #' @importFrom glmnet glmnet
+#' @noRd
 glm.neighborhood <- function(X, Y, lambda, link='binomial', ...) {
     return(as.matrix(Bmat <- glmnet::glmnet(X, Y, family=link, lambda=lambda, ...)$beta))
 }
@@ -161,7 +168,5 @@ glm.neighborhood <- function(X, Y, lambda, link='binomial', ...) {
 #   return(Bmat)
 # }
 
-#' @keywords internal
 dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
-#' @keywords internal
 dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)

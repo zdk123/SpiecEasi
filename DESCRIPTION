@@ -21,7 +21,6 @@ Imports:
    MASS,
    VGAM,
    Matrix,
-   Rcpp,
    glmnet
 Suggests:
    parallel,

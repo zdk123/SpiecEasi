@@ -24,12 +24,14 @@ rzipois <- function(n, lambda, pstr0 = 0) {
 }
 
 
+#' @noRd
 #' @keywords internal
 .zipois_getLam <- function(mu, S) {
     S <- max(sqrt(mu), S)
     (S^2/mu) + mu - 1
 }
 
+#' @noRd
 #' @keywords internal
 .zipois_getP <- function(mu, S) {
     S <- max(sqrt(mu), S)
@@ -93,6 +95,7 @@ rmvpois <- function(n, mu, Sigma, ...) {
     return(data)
 }
 
+#' @noRd
 #' @keywords internal
 .negbin_getK <- function(mu, S) {
     S <- max(sqrt(mu), S)
@@ -129,17 +132,20 @@ rmvnegbin <- function(n, mu, Sigma, ks, ...) {
 }
 
 
+#' @noRd
 #' @keywords internal
 .zinegbin_getLam <- function(mu, S) {
     S   <- max(sqrt(mu)+1e-3, S)
     (mu + (mu^2 - mu + S^2) / mu) / 2
 }
 
+#' @noRd
 #' @keywords internal
 .zinegbin_getP <- function(mu, lam) {
     1 - (mu / lam)
 }
 
+#' @noRd
 #' @keywords internal
 .zinegbin_getK <- function(mu, S, lam) {
     S   <- max(sqrt(mu)+1e-3, S)

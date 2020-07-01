@@ -11,22 +11,13 @@
    \item hmp216S: 16S data, phyloseq object 45 taxa and 47 samples.
    \item hmp2prot: protein data, A phyloseq object, 43 'taxa' and 47 samples.
  }
-
-An object of class \code{phyloseq} of length 1.
-
-An object of class \code{phyloseq} of length 1.
 }
 \source{
 https://www.hmpdacc.org/ihmp/
 }
 \usage{
 data(hmp2)
-
-hmp216S
-
-hmp2prot
 }
 \description{
 Pre-filtered data from the intregrated human microbiome project.
 }
-\keyword{datasets}

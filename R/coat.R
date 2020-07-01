@@ -1,3 +1,22 @@
+#' COAT
+#'
+#' Compositional-adjusted thresholding by  doi.org/10.1080/01621459.2018.1442340 by Cao, Lin & Li (2018)
+#' @param data a clr-transformed data or covariance matrix
+#' @param lambda threshold parameter(s)
+#' @param thresh "soft" or "hard" thresholding
+#' @param adaptive use adative-version of the lambda as in the original COAT paper. See details.
+#' @param shrinkDiag flag to exclude the covariance diagonal from the shrinkage operation
+#' @param ret.icov flag to also return the inverse covariance matrix (inverse of all thresholded COAT matrices)
+#' @param ... Arguments to automatically calculating the lambda path. See details.
+#' @details If \code{adaptive=TRUE}, and \code{data} is a covariance matrix, the adaptive penalty is calculated by assuming the underlying data is jointly Gaussian in the infinite sample setting. The results may differ from the 'empirical' adaptive setting.
+#'
+#' There are a few undocumented arguments useful for computing a lambda path on the fly:
+#' \itemize{
+#'  \item{lambda.max: }{Maximum lambda. Default: max absolute covariance}
+#'  \item{lambda.min.ratio: }{lambda.min is lambda.min.ratio*lambda.max is the smallest lambda evaluated. Defailt: 1e-3}
+#'  \item{nlambda: }{Number of values of lambda between lambda.max and lambda.min. Default: 30}
+#'}
+#' @export
 coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=TRUE, ret.icov=FALSE, ...) {
 
     if (isSymmetric(data)) {
@@ -9,7 +28,7 @@ coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=TRUE, re
     }
     if (adaptive) {
       theta <- switch(adapt,
-                '1'=getThetaMat(data),
+                '1'=.getThetaMat(data),
                 '2'=sqrt(S^2 + diag(S)%*%t(diag(S))) ## assume joint gaussian model
                )
     } else
@@ -64,17 +83,17 @@ coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=TRUE, re
     est
 }
 
-
+#' @noRd
 spMat2Adj <- function(A, class="lsCMatrix") {
     if (inherits(A, "sparseMatrix")) {
-      return(as(forceSymmetric(Matrix::triu(A, k=1)), class))
+      return(as(Matrix::forceSymmetric(Matrix::triu(A, k=1)), class))
     } else if (inherits(A, "matrix")) {
-      return(as(forceSymmetric(Matrix::triu(A, k=1)), 'lsyMatrix'))
+      return(as(Matrix::forceSymmetric(Matrix::triu(A, k=1)), 'lsyMatrix'))
     } else
       stop("Class is not recognized")
 }
 
-
+#' @noRd
 soft.thresh <- function(S, lam, shrinkDiag=FALSE) {
     if (inherits(S, "sparseMatrix")) {
         return(.sparseThresh(S, lam, shrinkDiag, thresh="soft"))
@@ -89,9 +108,10 @@ soft.thresh <- function(S, lam, shrinkDiag=FALSE) {
         stop('Class not recognized')
 }
 
+#' @noRd
 hard.thresh <- function(S, lam, shrinkDiag=FALSE) {
     if (inherits(S, "matrix")) {
-        M <- Matrix(S*(abs(S) >= lam), sparse=TRUE)
+        M <- Matrix::Matrix(S*(abs(S) >= lam), sparse=TRUE)
         if (!shrinkDiag) diag(M) <- diag(S)
         return(M)
     } else if (inherits(S, "sparseMatrix")) {
@@ -102,6 +122,7 @@ hard.thresh <- function(S, lam, shrinkDiag=FALSE) {
         stop('Class not recognized')
 }
 
+#' @noRd
 adaptive.thresh <- function(S, lam, shrinkDiag=FALSE, eta=1) {
     if (inherits(S, "matrix")) {
         p <- ncol(S)
@@ -117,6 +138,7 @@ adaptive.thresh <- function(S, lam, shrinkDiag=FALSE, eta=1) {
         stop('Class not recognized')
 }
 
+#' @noRd
 .sparseThresh <- function(S, lam, shrinkDiag, thresh="soft", eta=1) {
     k <- if (shrinkDiag) 0 else 1
     p <- ncol(S)
@@ -134,21 +156,19 @@ adaptive.thresh <- function(S, lam, shrinkDiag=FALSE, eta=1) {
 
     nzind  <- which(newx != 0)
     newx <- if (thresh=='soft') sign(ilist[nzind,3])*newx[nzind] else newx[nzind]
-    M <- sparseMatrix(ilist[nzind,1], ilist[nzind,2], x=newx, dims=dim(S))
+    M <- Matrix::sparseMatrix(ilist[nzind,1], ilist[nzind,2], x=newx, dims=dim(S))
     if (!shrinkDiag) Matrix::diag(M) <- Matrix::diag(S)
-    return(forceSymmetric(M))
+    return(Matrix::forceSymmetric(M))
 
 }
 
-sdprod <- function(x, y) sd(x*y)
-
-getThetaMat <- function(X) {
-#    kernlab::kernelMatrix(sdprod, t(X))@.Data
+#' @noRd
+.getThetaMat <- function(X) {
   n <- ncol(X)
   theta <- matrix(0, n,n)
   for (i in 1:n) {
     for (j in i:n) {
-      theta[j,i] <- theta[i,j] <- sdprod(X[,i], X[,j])
+      theta[j,i] <- theta[i,j] <- sd(X[,i]*X[,j])
     }
   }
   theta

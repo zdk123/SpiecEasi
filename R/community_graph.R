@@ -88,7 +88,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
     return(Theta)
 }
 
-
+#' @noRd
 .binSearchCond <- function(Theta, condTheta, numBinSearch, epsBin) {
 # Internal function that determines the constant in the diagonal to satisfy the
 # condition constraint on the Precision/Covariance matrix
@@ -157,8 +157,7 @@ make_graph <- function(method, D, e, enforce=TRUE, ...) {
     return(structure(Graph, class='graph'))
 }
 
-
-#' @keywords internal
+#' @noRd
 enforceE <- function(Graph, e) {
 
     nedges <- edge_count(Graph)
@@ -193,8 +192,7 @@ enforceE <- function(Graph, e) {
     else Graph
 }
 
-
-#' @keywords internal
+#' @noRd
 scale_free <- function(D, e, pfun) {
 # Make a scale free graph
 # Args:
@@ -249,7 +247,7 @@ scale_free <- function(D, e, pfun) {
     return(Graph)
 }
 
-#' @keywords internal
+#' @noRd
 erdos_renyi <- function(D, e, p=e/(D*(D-1)/2)) {
 # Make a random graph:
 # Args:
@@ -264,7 +262,7 @@ erdos_renyi <- function(D, e, p=e/(D*(D-1)/2)) {
     return(Graph)
 }
 
-#' @keywords internal
+#' @noRd
 hub <- function(D, e, numHubs=ceiling(D/20)) {
 # Make hub graph
 # Args:
@@ -287,7 +285,7 @@ hub <- function(D, e, numHubs=ceiling(D/20)) {
     return(Graph)
 }
 
-#' @keywords internal
+#' @noRd
 cluster <- function(D, e, numHubs=floor((D/15)+(e/D))-1) {
 # Make a cluster graph (groups of random graphs)
 # Args:
@@ -309,7 +307,7 @@ cluster <- function(D, e, numHubs=floor((D/15)+(e/D))-1) {
     return(Graph)
 }
 
-#' @keywords internal
+#' @noRd
 band <- function(D, e) {
 # Make a banded graph
 # Args:
@@ -334,7 +332,7 @@ band <- function(D, e) {
     return(Graph)
 }
 
-#' @keywords internal
+#' @noRd
 block <- function(D, e, numHubs) {  #blocksize=20, p=D/((D/blocksize)*(blocksize*(blocksize)/2)), u=NULL, v=NULL) {
 # Make precision matrix for block graph (note the difference from other functions)
 # Args:
@@ -371,13 +369,13 @@ block <- function(D, e, numHubs) {  #blocksize=20, p=D/((D/blocksize)*(blocksize
 }
 
 
-#' @keywords internal
+#' @noRd
 edge_count <- function(Graph) {
     # return number of edges in a [square matrix] graph
     length(which(Graph[upper.tri(Graph)] != 0))
 }
 
-#' @keywords internal
+#' @noRd
 eigGraph <- function(G, tol=1e-12) {
     D <- diag(rowSums(G))
     L <- D-G
@@ -387,14 +385,13 @@ eigGraph <- function(G, tol=1e-12) {
     return(list(specGap=specGap, nCC=nCC, eigsG=eigsG))
 }
 
-#' @keywords internal
 graphReport <- function(Graph) {
     nedges   <- edge_count(Graph)
     eigGraph <- eigGraph(Graph)
     return(c(list(NumEdges=nedges), eigGraph))
 }
 
-#' @keywords internal
+#' @noRd
 covReport <- function(Cov, Prec) {
     condCov <- kappa(Cov)
     condPrec <- kappa(Prec)

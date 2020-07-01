@@ -8,7 +8,6 @@ spiec.easi <- function(data, ...) {
   UseMethod('spiec.easi', data)
 }
 
-#' @keywords internal
 .phy2mat <- function(OTU) {
   if (inherits(OTU, 'phyloseq'))
     OTU <- OTU@otu_table
@@ -19,7 +18,6 @@ spiec.easi <- function(data, ...) {
   return(OTU)
 }
 
-#' @keywords internal
 .data.checks <- function(data) {
   ## data checks ##
   if (inherits(data, 'list')) {
@@ -58,8 +56,7 @@ spiec.easi.otu_table <- function(data, ...) {
 }
 
 
-
-#' @keywords internal
+#' @noRd
 .spiec.easi.norm <- function(data) {
 # internal function to normalize a data matrix
   if (inherits(data, 'matrix')) {
@@ -98,7 +95,7 @@ spiec.easi.otu_table <- function(data, ...) {
 #' @seealso \code{\link[pulsar]{pulsar}} \code{\link[pulsar]{batch.pulsar}} \code{\link{spiec.easi}}
 NULL
 
-#' @keywords internal
+#' @noRd
 .check_pulsar_params <- function(fun, args=list()) {
   if (!inherits(args, 'list') || (length(args) >0 && is.null(names(args))) || any('' %in% names(args))) {
     stop('pulsar.params must be a named list')
@@ -135,6 +132,7 @@ NULL
 #' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
 #' @param icov.select deprecated.
 #' @param icov.select.params deprecated.
+#' @param lambda.log should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?
 #' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
 #' @method spiec.easi default
 #' @rdname spiec.easi

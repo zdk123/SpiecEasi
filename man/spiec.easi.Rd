@@ -44,6 +44,8 @@ spiec.easi(data, ...)
 \item{icov.select}{deprecated.}
 
 \item{icov.select.params}{deprecated.}
+
+\item{lambda.log}{should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?}
 }
 \description{
 Run the whole SPIEC-EASI pipeline, from data transformation, sparse inverse covariance estimation and model selection.

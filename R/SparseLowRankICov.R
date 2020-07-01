@@ -1,7 +1,23 @@
-#' sparse plus low rank inverse covariance
+#' Sparse plus Low Rank inverse covariance
 #'
-#' TODO: add description
-#' @export
+#' Select an inverse covariance matrix that is a sparse plus low rank decomposition.
+#'
+#' @param data the n x p data matrix
+#' @param npn flag to first fit nonparametric normal transform to the data
+#' @param verbose flag to turn on verbose output
+#' @param cor flag to use correlation matrix as the input (default: false - uses covariance)
+#' @param ... arguments to override default algorithm settings (see details)
+#' @details
+#' This is a wrapper function for sparse plus low rank iCov estimations performed by a custom ADMM algorithm.
+#'
+#' Therefore, arguments \code{...} should be named. Typically, these are for specifying a penalty parameter, \code{lambda}, or the number of penalties to use.
+#' By default 10 pentalties are used, ranging logarithmically between \code{lambda.min.ratio}*MAX and MAX.
+#' Max is the theoretical upper bound on \code{lambda} and us \code{max|S|}, the maximum absolute value in the data correlation matrix.
+#' \code{lambda.min.ratio} is 1e-3 by default. Lower values of \code{lambda} require more memory/cpu time to compute, and sometimes huge will throw an error.
+#'
+#' The argument \code{nlambda} determines the number of penalties - somewhere between 10-100 is usually good, depending on how the values of empirical correlation are distributed.#' @export
+#'
+#' One of \code{beta} (penalty for the nuclear norm) or \code{r} (number of ranks) should be supplied or \code{r=2} is chosen by default.
 sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 ## TODO: make args to admm2 explicit
   args <- list(...)
@@ -46,7 +62,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
     tmp <- est$S
     icov [[i]] <- tmp
     resid[[i]] <- est$L
-    tmp <- forceSymmetric(Matrix::triu(tmp,k=1))
+    tmp <- Matrix::forceSymmetric(Matrix::triu(tmp,k=1))
     path [[i]] <- as(tmp, 'lsCMatrix')
     args$opts$Lambda <- est$Lambda
     args$opts$Y      <- est$Y
@@ -62,7 +78,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 }
 
 #' @useDynLib SpiecEasi
-#' @exportPattern "^[^\\.]"
+#' @noRd
 admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
   defopts <- list(mu=n, eta=75/100, muf=1e-4, maxiter=100, newtol=1e-4)
@@ -85,6 +101,27 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
        maxiter=opts$maxiter, mu=opts$mu, eta=opts$eta, newtol=opts$newtol, muf=opts$muf)
 }
 
+#' robust PCA
+#'
+#' Form a robust PCA from clr-transformed data and [the low rank component of] an inverse covariance matrix
+#'
+#' @param X the n x p [clr-transformed] data
+#' @param L the p x p rank-r ('residual') inverse covariance matrix from \code{spiec.easi} run argument method='slr'.
+#' @param inverse flag to indicate the L is the inverse covariance matrix
+#' @returns a named list with n x r matrix of scores and r x r matrix of loadings
+#' @export
+robustPCA <- function(X, L, inverse=TRUE) {
+  Lsvd <- svd(L)
+  ind <- Lsvd$d>1e-9
+  if (inverse) {
+    loadings <- diag(sqrt(1/Lsvd$d[ind])) %*% t(Lsvd$v[,ind])
+  } else {
+    loadings <- diag(sqrt(Lsvd$d[ind])) %*% t(Lsvd$v[,ind])
+  }
+
+  scores <- X %*% t(loadings)
+  return(list(scores=scores, loadings=loadings))
+}
 # #' @importFrom Matrix sparseMatrix forceSymmetric
 # admm <- function(SigmaO, lambda, beta, r, LPD=FALSE, eigsolve=FALSE, tol=1e-5, shrinkDiag=TRUE, opts) {
 #   n  <- nrow(SigmaO)

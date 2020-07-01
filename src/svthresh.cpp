@@ -1,12 +1,11 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
- 
+
 using namespace Rcpp;
 using namespace arma;
 
 
 //soft thresholding operator of symmetric matrix
-// [[Rcpp::export]]
 arma::sp_mat SOFTTHRESH(arma::mat Sig, float lambda, bool shrinkDiag = true) {
     arma::mat A = symmatu(Sig);
     int n = A.n_cols;
@@ -19,7 +18,6 @@ arma::sp_mat SOFTTHRESH(arma::mat Sig, float lambda, bool shrinkDiag = true) {
 }
 
 
-// [[Rcpp::export]]
 List softSVT(arma::mat M, float tau=0, int k=0) {
     arma::mat U, V;
     arma::vec d;

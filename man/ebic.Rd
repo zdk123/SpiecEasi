@@ -2,10 +2,19 @@
 % Please edit documentation in R/select.R
 \name{ebic}
 \alias{ebic}
-\title{Extended BIC on SpiecEasi estimated object}
+\title{Extended BIC}
 \usage{
 ebic(refit, data, loglik, gamma = 0.5)
 }
+\arguments{
+\item{refit}{adjacency matrix, getOpt from SpiecEasi output}
+
+\item{data}{input data set used to get the network}
+
+\item{loglik}{log likeihood of the graphical model}
+
+\item{gamma}{the model likeihood/complexity tradeoff parameter}
+}
 \description{
-Extended BIC on SpiecEasi estimated object
+Calculate the extended BIC criterion on a sparse (refit) network and the input data
 }

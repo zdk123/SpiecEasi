@@ -2,10 +2,13 @@
 % Please edit documentation in R/normalization.R
 \name{norm_rdiric}
 \alias{norm_rdiric}
-\title{'Normalize' by sampling once from a dirichlet}
+\title{Normalize via dirichlet sampling}
 \usage{
 norm_rdiric(x)
 }
+\arguments{
+\item{x}{count data vector}
+}
 \description{
-'Normalize' by sampling once from a dirichlet
+"Normalize" a count vector by drawing a single sample from a Dirichlet distribution, using the count vector as the prior.
 }

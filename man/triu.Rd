@@ -12,6 +12,13 @@ tril(x, k = 1)
 
 triu2diag(x, diagval = 0)
 }
+\arguments{
+\item{x}{the data matrix or vector}
+
+\item{k}{(0/1 flag indicate diagonal should be selected)}
+
+\item{diagval}{value to be added to the diagonal if converting from upper triangular matrix.}
+}
 \description{
 Get or symmeterize the upper/lower triangle of a symmetric matrix with the other side zeroed out
 }

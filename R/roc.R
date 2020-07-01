@@ -34,7 +34,7 @@ merge2path <- function(merge, length.out) {
  lapply(path, function(i) merge > i)
 }
 
-
+#' @noRd
 huge.pr <- function (path, theta, verbose = TRUE, plot = TRUE) {
     gcinfo(verbose = FALSE)
     ROC = list()
@@ -81,4 +81,40 @@ huge.pr <- function (path, theta, verbose = TRUE, plot = TRUE) {
     gc()
     class(ROC) = "roc"
     return(ROC)
+}
+
+#' Edge set dissimilarity
+#'
+#' Compute the dissimilarity between the edge sets of two networks via:
+#' \enumerate{
+#'  \item maximum overlap: |x  y| / max\{|x|,|y|\}
+#'  \item jaccard index (default):   |x  y|/(|x U y|)
+#' }
+#' Input networks do not have to have the same node sets.
+#' @param x pxp adjacency matrix (\code{Matrix::sparseMatrix} class)
+#' @param y other qxq adjacency matrix (\code{Matrix::sparseMatrix} class)
+#' @param metric 'jaccard' or 'max'
+#' @param otux taxa names of adjacency x
+#' @param otuy taxa names of adjacency y
+#' @export
+edge.diss <- function(x, y, metric='jaccard', otux=NULL, otuy=NULL) {
+  stopifnot(inherits(x, 'sparseMatrix'), TRUE)
+  stopifnot(inherits(y, 'sparseMatrix'), TRUE)
+  xli <- Matrix::summary(Matrix::triu(x))
+  yli <- Matrix::summary(Matrix::triu(y))
+  if (!is.null(otux)) {
+    xli[,1] <- otux[xli[,1]]
+    xli[,2] <- otux[xli[,2]]
+  }
+  if (!is.null(otuy)) {
+    yli[,1] <- otuy[yli[,1]]
+    yli[,2] <- otuy[yli[,2]]
+  }
+  xedges <- apply(xli[,1:2], 1, paste, collapse="-")
+  yedges <- apply(yli[,1:2], 1, paste, collapse="-")
+  if (metric=="jaccard") {
+    return(length(intersect(xedges, yedges)) / length(unique(c(xedges, yedges))))
+  } else {
+    return(length(intersect(xedges, yedges)) / max(length(xedges), length(yedges)))
+  }
 }

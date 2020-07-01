@@ -52,13 +52,13 @@ getOptCov <- function(est) getOptX(est, 'cov')
 #' @export
 getOptiCov <- function(est) getOptX(est, 'icov')
 
-#' @keywords internal
+#' @noRd
 getOptX <- function(est, getter) {
   UseMethod('getOptX')
 }
 
 #' @exportS3Method
-#' @keywords internal
+#' @noRd
 getOptX.pulsar.refit <- function(est, getter='index') {
   if (length(est$refit) > 0) {
     if (names(est$refit) %in% "stars") {
@@ -150,6 +150,9 @@ symBeta <- function(beta, mode='ave') {
 #' Functions for triangular matrices
 #'
 #' Get or symmeterize the upper/lower triangle of a symmetric matrix with the other side zeroed out
+#' @param x the data matrix or vector
+#' @param k (0/1 flag indicate diagonal should be selected)
+#' @param diagval value to be added to the diagonal if converting from upper triangular matrix.
 #' @export
 triu <- function(x, k=1) x[upper.tri(x, !k)]
 #' @export
@@ -159,7 +162,7 @@ tril <- function(x, k=1) x[lower.tri(x, !k)]
 #' @rdname triu
 #' @export
 triu2diag <- function(x, diagval=0) {
-    stopifnot(is.null(dim(a)), TRUE)
+    stopifnot(is.null(dim(x)), TRUE)
     e <- length(x)
     n <- .5 * (sqrt(8*e + 1)+1)
     mat <- matrix(0, n, n)
@@ -171,6 +174,7 @@ triu2diag <- function(x, diagval=0) {
 
 
 #' @exportS3Method '[[' Matrix
+#' @noRd
 '[[.Matrix' <- function(x, i, exact=TRUE) {
     if (exact) name <- attr(x, 'names')
     else name <- substr(attr(x, 'names'), 1, nchar(i))
@@ -181,6 +185,7 @@ triu2diag <- function(x, diagval=0) {
 
 
 #' @exportS3Method  '$' Matrix
+#' @noRd
 '$.Matrix' <- function(x, name) {
     x[[ name, exact=FALSE]]
 }
