@@ -186,8 +186,7 @@ plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
 ## Learning latent variable graphical models ##
-We recently introduced a new method for inferring sparse, compositionally robust
-microbial networks. It can be shown that unobserved, latent variables introduce
+It can be shown that unobserved, latent variables introduce
 artifacts into empirical estimates of OTU-OTU associations. These effects can be
 removed from the network by treating the inverse covariance selection problem as
 a sparse + low-rank decomposition (SPIEC-EASI slr), where the sparse component are the
