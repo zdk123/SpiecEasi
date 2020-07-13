@@ -1,6 +1,6 @@
 #' @importFrom graphics abline legend par plot
 #' @importFrom methods as
-#' @importFrom stats cor cov cov2cor lm median  na.exclude na.omit optim pnorm ppoints qlnorm rmultinom rnorm rpois sd var
+#' @importFrom stats cor cov cov2cor lm median na.exclude na.omit optim pnorm ppoints qlnorm rmultinom rnorm rpois sd var
 #' @keywords internal
 "_PACKAGE"
 
@@ -39,8 +39,10 @@ NULL
 #' @source https://www.hmpdacc.org/ihmp/
 NULL
 
+#' @name hmp216S
 #' @rdname hmp2
-"hmp216S"
+NULL
 
+#' @name hmp2prot
 #' @rdname hmp2
-"hmp2prot"
+NULL

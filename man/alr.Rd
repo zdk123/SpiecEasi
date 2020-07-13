@@ -9,11 +9,24 @@
 \usage{
 alr(x.f, ...)
 
-\method{alr}{default}(x.f, divcomp = 1, base = exp(1),
-  removeDivComp = TRUE, tol = .Machine$double.eps, ...)
+\method{alr}{default}(
+  x.f,
+  divcomp = 1,
+  base = exp(1),
+  removeDivComp = TRUE,
+  tol = .Machine$double.eps,
+  ...
+)
 
-\method{alr}{matrix}(x.f, mar = 2, divcomp = 1, base = exp(1),
-  removeDivComp = TRUE, tol = .Machine$double.eps, ...)
+\method{alr}{matrix}(
+  x.f,
+  mar = 2,
+  divcomp = 1,
+  base = exp(1),
+  removeDivComp = TRUE,
+  tol = .Machine$double.eps,
+  ...
+)
 
 \method{alr}{data.frame}(x.f, mar = 2, ...)
 }

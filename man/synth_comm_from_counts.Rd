@@ -4,8 +4,16 @@
 \alias{synth_comm_from_counts}
 \title{synth_comm_from_counts}
 \usage{
-synth_comm_from_counts(comm, mar = 2, distr, Sigma = cov(comm), params,
-  n = nrow(comm), retParams = FALSE, ...)
+synth_comm_from_counts(
+  comm,
+  mar = 2,
+  distr,
+  Sigma = cov(comm),
+  params,
+  n = nrow(comm),
+  retParams = FALSE,
+  ...
+)
 }
 \arguments{
 \item{comm}{community: matrix of counts}

@@ -47,13 +47,9 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
 
   args <- list(...)
+  method <- switch(method, glasso = "glasso", mb = "mb", stop("Method not supported"))
 
-  method <- switch(method, glasso = "glasso", mb = "mb",
-                   stop("Method not supported"))
-
-  if (is.null(args$lambda.min.ratio))
-    args$lambda.min.ratio <- 1e-3
-
+  if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
   est <- do.call(huge::huge, c(args, list(x=data,
                                           method=method,
                                           verbose=verbose,
@@ -69,3 +65,108 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   # }
   return(est)
 }
+
+
+#' Neighborhood net estimates
+#'
+#' Select a sparse inverse covariance matrix using neighborhood selection and glmnet from various exponential models.
+#' @param data n x p input (pre-transformed) data
+#' @param lambda the lambda path
+#' @param method ising and poisson models currently supported.
+#' @param ncores number of cores for distributing the model fitting
+#' @param sym symmetrize the neighborhood using the 'or' (default)/'and' rule
+#' @param ... further arguments to glmnet
+#' @importFrom Matrix t
+neighborhood.net <- function(data, lambda, method="ising", ncores=1, sym='or', ...) {
+    p <- ncol(data)
+    l <- length(lambda)
+    args <- list(...)
+      match.fun(switch(method,
+        ising   ={ nbFun <- glm.neighborhood ; args$link <- 'binomial' },
+        poisson ={ nbFun <- glm.neighborhood ; args$link <- 'poisson' }
+        # loglin  ={ nbFun <- llgm.neighborhood}
+      ))
+
+    ### Remove 0/1 binomials/ zero variance features
+    if (method=='ising') {
+      mintab <- function(x) {
+          xtab <- table(x)
+          length(xtab) == 1 || min(xtab) == 1
+      }
+      zvind  <- which(apply(data, 2, mintab))
+    } else {
+      zvind <- which(apply(data, 2, var)==0)
+    }
+
+    estFun <- function(i) {
+      betamat      <- matrix(0, p, l)
+      if (!(i %in% zvind)) {
+        suppressWarnings(
+          out <- do.call(nbFun,
+              c(list(data[,-c(i, zvind)], data[,i,drop=FALSE], lambda), args)))
+        lsub <- ncol(out)
+        if (lsub<l) {
+          ## extend missing lambdas value if glmnet
+          ## returns only larger solution ##
+          out <- cbind(out, out[,rep(lsub, l-lsub)])
+        }
+        betamat[-c(i, zvind),] <- out
+      }
+      betamat
+    }
+
+    est <- parallel::mcmapply(estFun, 1:p,
+                mc.cores=ncores, SIMPLIFY='array')
+    beta <- vector('list', length(lambda))
+    path <- vector('list', length(lambda))
+    for (i in 1:dim(est)[2]) {
+        tmp       <- as(est[,i,], 'dgCMatrix')
+        beta[[i]] <- tmp
+        tmp       <- as(tmp, 'lgCMatrix')
+        path[[i]] <- if (sym == "or") sign(tmp | t(tmp)) else sign(tmp & t(tmp))
+    }
+    list(beta=beta, path=path)
+}
+
+
+#' @importFrom glmnet glmnet
+#' @noRd
+glm.neighborhood <- function(X, Y, lambda, link='binomial', ...) {
+    return(as.matrix(Bmat <- glmnet::glmnet(X, Y, family=link, lambda=lambda, ...)$beta))
+}
+
+# #' @useDynLib SpiecEasi LPGM_neighborhood
+# llgm.neighborhood <- function(X, Y, lambda, startb=0, th=1e-6, intercept=FALSE) {
+#   n = nrow(X); p = ncol(X);
+#   p_new = p
+#   nlams <- length(lambda)
+#   X <- scale(X)
+#   # NOTE: here check if intercept, change X and
+#   if(intercept){
+#     Xorig = X;
+#     X = cbind(t(t(rep(1,n))),Xorig);
+#     p_new = ncol(X);
+#   }
+#
+#   if(length(startb) == 1 & startb == 0){startb = rep(0, p_new)}
+#
+#   alphasin = rep(0, nlams)
+#   Bmatin = matrix(0,p,nlams);
+#
+#   out <- .C("LPGM_neighborhood",
+#             X=as.double(t(X)), Y=as.double(Y), startb=as.double(startb),
+#             lambda=as.double(lambda), n=as.integer(n), p=as.integer(p_new), nlams=as.integer(length(lambda)),
+#             alphas=as.double(alphasin), Bmat=as.double(Bmatin), PACKAGE="SpiecEasi")
+#
+#   alphas = out$alphas
+#   if(is.null(out$Bmat)) {
+#     Bmat = NULL
+#   } else {
+#     Bmat = matrix(out$Bmat, nrow=nrow(Bmatin), byrow=TRUE)
+#     Bmat <- Bmat*(abs(Bmat)>th)
+#   }
+#   return(Bmat)
+# }
+
+dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
+dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)

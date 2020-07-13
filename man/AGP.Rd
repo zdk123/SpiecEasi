@@ -5,10 +5,12 @@
 \alias{amgut1.filt}
 \alias{amgut2.filt.phy}
 \title{American Gut Project}
-\format{\enumerate{
+\format{
+\enumerate{
  \item amgut1.filt: A matrix with 289 samples (rows) and 127 OTUs (cols).
 \item amgut2.filt.phy: A phyloseq object
-}}
+}
+}
 \source{
 http://humanfoodproject.com/americangut/
 }

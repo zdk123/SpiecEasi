@@ -24,12 +24,14 @@ rzipois <- function(n, lambda, pstr0 = 0) {
 }
 
 
+#' @noRd
 #' @keywords internal
 .zipois_getLam <- function(mu, S) {
     S <- max(sqrt(mu), S)
     (S^2/mu) + mu - 1
 }
 
+#' @noRd
 #' @keywords internal
 .zipois_getP <- function(mu, S) {
     S <- max(sqrt(mu), S)
@@ -64,7 +66,7 @@ rmvzipois <- function(n, mu, Sigma=diag(length(mu)), lambdas, ps, ...) {
 
     normd  <- rmvnorm(n, rep(0, d), Cor)
     unif   <- pnorm(normd)
-    data <- matrix(VGAM::qzipois(unif, lambdas, pstr0=ps, ...), n, d)
+    data <- t(matrix(VGAM::qzipois(t(unif), lambdas, pstr0=ps, ...), d, n))
     data <- .fixInf(data)
     return(data)
 }
@@ -88,11 +90,12 @@ rmvpois <- function(n, mu, Sigma, ...) {
     if (length(mu) == 1) stop("Need more than 1 variable")
     normd  <- rmvnorm(n, rep(0, d), Cor)
     unif   <- pnorm(normd)
-    data <- matrix(qpois(unif, mu, ...), n, d)
+    data <- t(matrix(qpois(t(unif), mu, ...), d, n))
     data <- .fixInf(data)
     return(data)
 }
 
+#' @noRd
 #' @keywords internal
 .negbin_getK <- function(mu, S) {
     S <- max(sqrt(mu), S)
@@ -129,17 +132,20 @@ rmvnegbin <- function(n, mu, Sigma, ks, ...) {
 }
 
 
+#' @noRd
 #' @keywords internal
 .zinegbin_getLam <- function(mu, S) {
     S   <- max(sqrt(mu)+1e-3, S)
     (mu + (mu^2 - mu + S^2) / mu) / 2
 }
 
+#' @noRd
 #' @keywords internal
 .zinegbin_getP <- function(mu, lam) {
     1 - (mu / lam)
 }
 
+#' @noRd
 #' @keywords internal
 .zinegbin_getK <- function(mu, S, lam) {
     S   <- max(sqrt(mu)+1e-3, S)
@@ -175,7 +181,7 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
     d   <- length(munbs)
     normd  <- rmvnorm(n, rep(0, d), Sigma=Cor)
     unif   <- pnorm(normd)
-    data <- matrix(VGAM::qzinegbin(unif, munb=munbs, size=ks, pstr0=ps, ...), n, d)
+    data <- t(matrix(VGAM::qzinegbin(t(unif), munb=munbs, size=ks, pstr0=ps, ...), d, n))
     data <- .fixInf(data)
     return(data)
 }
@@ -216,7 +222,7 @@ rmvnorm <- function(n=100, mu=rep(0,10), Sigma=diag(10), tol=1e-6, empirical=TRU
     ev <- eS$values
     if (!all(ev >= -tol * abs(ev[1L])))
         stop("'Sigma' is not positive definite")
-    X <- matrix(rnorm(p * n), n)
+    X <- matrix(rnorm(p * n), n, p)
     if (empirical) {
         X <- scale(X, TRUE, FALSE)
         X <- X %*% svd(X, nu = 0, nv = length(mu))$v

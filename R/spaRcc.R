@@ -90,7 +90,7 @@ pval.sparccboot <- function(x, sided='both') {
 
 
 
-#' @keywords internal
+#' @noRd
 sparccinner <- function(data.f, T=NULL, iter=10, th=0.1) {
     if (is.null(T))   T  <- av(data.f)
     res.bv <- basis_var(T)
@@ -119,7 +119,7 @@ sparccinner <- function(data.f, T=NULL, iter=10, th=0.1) {
     list(Cov=Cov, Cor=Cor, i=i, M=M, excluded=excluded)
 }
 
-#' @keywords internal
+#' @noRd
 exclude_pairs <- function(Cor, M, th=0.1, excluded=NULL) {
 # exclude pairs with high correlations
     break_flag <- FALSE
@@ -137,7 +137,7 @@ exclude_pairs <- function(Cor, M, th=0.1, excluded=NULL) {
     list(M=M, excluded=excluded_new, break_flag=break_flag)
 }
 
-#' @keywords internal
+#' @noRd
 basis_cov <- function(data.f) {
 # data.f -> relative abundance data
 # OTUs in columns, samples in rows (yes, I know this is transpose of normal)
@@ -152,7 +152,7 @@ basis_cov <- function(data.f) {
     list(Cov=Cov, M=M)
 }
 
-#' @keywords internal
+#' @noRd
 basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
                       M = matrix(1, nrow(T), ncol(T)) + (diag(ncol(T))*(ncol(T)-2)),
                       excluded = NULL, Vmin=1e-4) {
@@ -169,7 +169,6 @@ basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
     list(Vbase=Vbase, M=M)
 }
 
-#' @keywords internal
 C_from_V <- function(T, Vbase) {
     J      <- matrix(1, nrow(T), ncol(T))
     Vdiag  <- diag(c(Vbase))
@@ -182,7 +181,7 @@ C_from_V <- function(T, Vbase) {
     list(Cov=CovMat, Cor=CorMat)
 }
 
-#' @keywords internal
+#' @noRd
 av <- function(data) {
     cov.clr <- cov(clr(data))
     J <- matrix(1, ncol(data), ncol(data))
@@ -191,7 +190,7 @@ av <- function(data) {
 
 
 #' @importFrom VGAM rdiric
-#' @keywords internal
+#' @noRd
 norm_diric   <- function(x, rep=1) {
     dmat <- VGAM::rdiric(rep, x+1)
     norm_to_total(colMeans(dmat))

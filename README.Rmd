@@ -29,6 +29,7 @@ One small point on notation: we refer to the method as "SPIEC-EASI" and reserve 
 2. [Basic Usage](#basic-usage)
 3. [American Gut Data](#analysis-of-american-gut-data)
 4. [Using phyloseq](#working-with-phyloseq)
+5. [Learning latent variable graphical models](#learning-latent-variable-graphical-models)
 5. [Cross Domain SPIEC-EASI](#cross-domain-interactions)
 6. [pulsar & batch options](#pulsar-parallel-utilities-for-model-selection)
 7. [Troubleshooting](#troubleshooting)
@@ -184,9 +185,71 @@ ig2.mb <- adj2igraph(getRefit(se.mb.amgut2),  vertex.attr=list(name=taxa_names(a
 plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
+## Learning latent variable graphical models ##
+It can be shown that unobserved, latent variables introduce
+artifacts into empirical estimates of OTU-OTU associations. These effects can be
+removed from the network by treating the inverse covariance selection problem as
+a sparse + low-rank decomposition (SPIEC-EASI slr), where the sparse component are the
+associations encoded as a conditional independence graph, and the low-rank components
+are the isolated latent effects.
+
+Please see the [preprint](https://www.biorxiv.org/content/10.1101/2019.12.21.885889v1.full)
+and the manuscript [Synapse project](https://www.synapse.org/#!Synapse:syn20843558)
+or [github repository](https://github.com/zdk123/SpiecEasiSLR_manuscript) for more details.
+
+To demonstrate this in action we can show that removing latent effects improves
+a consistency measure between round 1 and round 2 of the American Gut project data.
+
+First we fit the networks, assuming that there are 10 latent components in the dataset:
+```{r, eval=FALSE}
+se1.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+se2.mb.amgut <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+
+
+se1.slr.amgut <- spiec.easi(amgut1.filt, method='slr', r=10, lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+se2.slr.amgut <- spiec.easi(amgut2.filt.phy, method='slr', r=10, lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+```
+
+Then we compare the consistency between the edge sets within each method using
+the Jaccard index.
+```{r, eval=FALSE}
+otu1 <- colnames(amgut1.filt)
+otu2 <- taxa_names(amgut2.filt.phy)
+edge.diss(getRefit(se1.mb.amgut), getRefit(se2.mb.amgut), 'jaccard', otu1, otu2)
+edge.diss(getRefit(se1.slr.amgut), getRefit(se2.slr.amgut), 'jaccard', otu1, otu2)
+```
+Consistency should be a bit better for the slr networks.
+
+
+Construct the robust PCA from amgut2 data
+```{r, eval=FALSE}
+X <- se2.slr.amgut$est$data
+L <- se2.slr.amgut$est$resid[[getOptInd(se2.slr.amgut)]]
+pca <- robustPCA(X, L)
+```
+
+We can also check the correlation between AGP meta-data and the latent factors
+(scores of the robust PCA).
+```{r, eval=FALSE}
+age <- as.numeric(as.character(sample_data(amgut2.filt.phy)$AGE))
+bmi <- as.numeric(as.character(sample_data(amgut2.filt.phy)$BMI))
+depth <- colSums(otu_table(amgut2.filt.phy))
+
+cor(age, pca$scores, use='pairwise')
+cor(bmi, pca$scores, use='pairwise')
+cor(depth, pca$scores, use='pairwise')
+
+```
+
 ## Cross domain interactions ##
 
-SpiecEasi now includes a convenience wrapper for dealing with multiple taxa sequenced on the same samples, such as 16S and ITS, as seen in [Tipton, Müller, et. al. (2018)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0393-0). It assumes that each taxa is in it's own data matrix and that all samples are in all data matrices in the same order.
+SpiecEasi now includes a convenience wrapper for dealing with multiple taxa sequenced on the same samples,
+such as 16S and ITS, as seen in [Tipton, Müller, et. al. (2018)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0393-0).
+It assumes that each taxa is in it's own data matrix and that all samples are in all data matrices in the same order.
 
 Here's an example run from the [HMP2 project](https://ibdmdb.org/tunnel/public/summary.html) with 16S and Proteomics data.
 
@@ -249,7 +312,7 @@ t2[3] > t4[3]
 Pulsar gives us the option of running stability selection in batch mode, using the [batchtools](https://mllg.github.io/batchtools/) package. This will be useful to anyone with access to an hpc/distributing computing system. Each subsample will be independently executed using a system-specific cluster function.
 
 This requires an external config file which will instruct the batchtools registry how to construct the cluster function which will execute the individual jobs. `batch.pulsar` has some built in config files that are useful for testing purposes (serial mode, "parallel", "snow", etc), but it is advisable to create your own config file and pass in the absolute path. See the [batchtools docs](https://mllg.github.io/batchtools/articles/batchtools.html#configuration-file) for instructions on how to construct config file and template files (i.e. to interact with a queueing system such as TORQUE or SGE).
-```{r, run=FALSE}
+```{r, eval=FALSE}
 
 ## bargs <- list(rep.num=50, seed=10010, conffile="path/to/conf.txt")
 bargs <- list(rep.num=50, seed=10010, conffile="parallel")
@@ -261,6 +324,7 @@ pulsar::findConfFile('parallel')
 se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
             sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs)
 ```
+
 
 ## Troubleshooting ##
 

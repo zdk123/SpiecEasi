@@ -4,11 +4,17 @@
 \alias{sparccboot}
 \title{Bootstrap SparCC}
 \usage{
-sparccboot(data, sparcc.params = list(), statisticboot = function(data,
-  indices) triu(do.call("sparcc", c(list(data[indices, , drop = FALSE]),
-  sparcc.params))$Cor), statisticperm = function(data, indices)
-  triu(do.call("sparcc", c(list(apply(data[indices, ], 2, sample)),
-  sparcc.params))$Cor), R, ncpus = 1, ...)
+sparccboot(
+  data,
+  sparcc.params = list(),
+  statisticboot = function(data, indices) triu(do.call("sparcc", c(list(data[indices, ,
+    drop = FALSE]), sparcc.params))$Cor),
+  statisticperm = function(data, indices) triu(do.call("sparcc",
+    c(list(apply(data[indices, ], 2, sample)), sparcc.params))$Cor),
+  R,
+  ncpus = 1,
+  ...
+)
 }
 \arguments{
 \item{data}{Community count data}

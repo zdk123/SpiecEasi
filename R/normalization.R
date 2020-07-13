@@ -21,6 +21,15 @@ norm_pseudo  <- function(x) norm_to_total(x+1)
 norm_to_total <- function(x) x/sum(x)
 
 
+#' Normalize via dirichlet sampling
+#'
+#' "Normalize" a count vector by drawing a single sample from a Dirichlet distribution, using the count vector as the prior.
+#' @param x count data vector
+#' @export
+norm_rdiric <- function(x) {
+  VGAM::rdiric(n=1, shape=x)[1,]
+}
+
 #' compute the shannon entropy from a vector (normalized internally)
 #'
 #' Shannon entropy is:

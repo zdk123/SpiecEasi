@@ -5,8 +5,15 @@
 \alias{spiec.easi.list}
 \title{multi domain SPIEC-EASI}
 \usage{
-multi.spiec.easi(datalist, method = "glasso", sel.criterion = "stars",
-  verbose = TRUE, pulsar.select = TRUE, pulsar.params = list(), ...)
+multi.spiec.easi(
+  datalist,
+  method = "glasso",
+  sel.criterion = "stars",
+  verbose = TRUE,
+  pulsar.select = TRUE,
+  pulsar.params = list(),
+  ...
+)
 
 \method{spiec.easi}{list}(data, ...)
 }

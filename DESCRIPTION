@@ -1,6 +1,6 @@
 Package: SpiecEasi
 Title: Sparse Inverse Covariance for Ecological Statistical Inference
-Version: 1.0.7
+Version: 1.1.0
 Authors@R: c(
     person("Zachary", "Kurtz", role = c("aut", "cre"), email="zdkurtz@gmail.com"),
     person("Christian", "Mueller", role = "aut"),
@@ -10,7 +10,7 @@ Authors@R: c(
 Description: Estimate networks from the precision matrix of compositional microbial abundance data.
 Encoding: UTF-8
 Depends:
-   R (>= 3.3.0),
+   R (>= 3.6.0),
 Imports:
    stats,
    methods,
@@ -20,7 +20,8 @@ Imports:
    pulsar (>= 0.3.4),
    MASS,
    VGAM,
-   Matrix
+   Matrix,
+   glmnet
 Suggests:
    parallel,
    boot,
@@ -30,5 +31,5 @@ Suggests:
    testthat
 biocViews:
 License: GPL (>= 2)
-LazyData: true
-RoxygenNote: 6.1.1
+LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 7.1.0
