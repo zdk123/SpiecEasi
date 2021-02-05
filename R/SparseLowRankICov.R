@@ -7,6 +7,7 @@
 #' @param verbose flag to turn on verbose output
 #' @param cor flag to use correlation matrix as the input (default: false - uses covariance)
 #' @param ... arguments to override default algorithm settings (see details)
+#' @export
 #' @details
 #' This is a wrapper function for sparse plus low rank iCov estimations performed by a custom ADMM algorithm.
 #'

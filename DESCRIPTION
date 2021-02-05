@@ -32,4 +32,4 @@ Suggests:
 biocViews:
 License: GPL (>= 2)
 LinkingTo: Rcpp, RcppArmadillo
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
