@@ -38,15 +38,39 @@ TOC
 Installation
 ------------
 
-I assume that all auxiliary packages are already installed - for example
-pulsar, huge, MASS, etc. If you get an unexpected error, you may need to
-download and install a missing dependency.
+### devtools ###
+I assume that all auxiliary packages are already installed - for example pulsar, huge, MASS, etc.
+If you get an unexpected error, you may need to download and install a missing dependency.
 
 From an interactive R session:
 
-    library(devtools)
-    install_github("zdk123/SpiecEasi")
-    library(SpiecEasi)
+```{r, eval=FALSE}
+library(devtools)
+install_github("zdk123/SpiecEasi")
+library(SpiecEasi)
+```
+
+### conda ###
+
+SpiecEasi is also available via conda sources and should always be up to date with the main branch of this repo.
+
+```sh
+conda install -c bioconda r-spieceasi
+```
+
+### OSX users ###
+
+Since version 1.0, installing SpiecEasi requires compiling source code,
+which seems to cause trouble for some Mac users due to missing a gfortran package.
+
+It is recommended to get [gfortan from xcode](https://kingaa.github.io/mac-fortran.html)
+by running the following code in a terminal (OSX 10.10 and later):
+```sh
+xcode-select --install
+```
+
+Alternatively, the officially-supported fortran binaries [are on CRAN](https://cran.r-project.org/bin/macosx/tools/).
+
 
 News
 ----
