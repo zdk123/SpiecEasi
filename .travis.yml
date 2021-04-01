@@ -1,5 +1,3 @@
 language: r
 cache: packages
-sudo: false
-use_bioc: true
 bioc_required: true
