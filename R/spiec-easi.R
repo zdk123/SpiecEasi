@@ -272,7 +272,8 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
 
     obj <- list(call=call)
     class(obj) <- 'pulsar'
-    call <- do.call('update',
+    # stats::update will also dispatch to pulsar:::update.*
+    call <- do.call(stats::update,
               c(pulsar.params, list(object=obj, evaluate=FALSE)))
 
     if (verbose)
