@@ -22,7 +22,7 @@ arma::mat sqrtmNewt2(arma::mat& C, arma::mat& sqrt0, const double& errTol) {
 
 arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrinkDiag = true) {
     arma::mat A = symmatu(Sig);
-    int n = A.n_cols;
+//    int n = A.n_cols;
     arma::sp_mat S(sign(A));
     arma::mat    M(abs(A)-lambda);
     M.elem(find(M < 0)).zeros();
@@ -33,9 +33,9 @@ arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrink
 
 
 void svdPowSym(arma::mat& U, arma::vec& d, arma::mat& V, arma::mat& A, int k, int q) {
-    int l = k;
+//    int l = k;
     int m = A.n_rows;
-    int n = A.n_cols;
+//    int n = A.n_cols;
     arma::mat P = randu<mat>(m,k-1);
     arma::mat Q, R;
     qr(Q, R, (P.t()*A).t());
@@ -190,7 +190,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       }
 
       X.cols(0  , n-1  ) = R;
-      X.cols(n  , n*2-1) = S;
+      X.cols(n  , n*2-1) = arma::mat(S);
       X.cols(n*2, n*3-1) = L;
 
       RO = over_relax_par*R + (1-over_relax_par)*RY;
