@@ -8,7 +8,7 @@ using namespace arma;
 //soft thresholding operator of symmetric matrix
 arma::sp_mat SOFTTHRESH(arma::mat Sig, float lambda, bool shrinkDiag = true) {
     arma::mat A = symmatu(Sig);
-    int n = A.n_cols;
+//    int n = A.n_cols;
     arma::sp_mat S(sign(A));
     arma::mat    M(abs(A)-lambda);
     M.elem(find(M < 0)).zeros();

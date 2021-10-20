@@ -6,6 +6,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // ADMM
 List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda, arma::mat& Y, double beta, int r, double mu, const double& eta, const double& muf, const int& maxiter, const double& newtol, const double& tol, const double& over_relax_par, bool shrinkDiag);
 RcppExport SEXP _SpiecEasi_ADMM(SEXP SigmaOSEXP, SEXP lambdaSEXP, SEXP ISEXP, SEXP LambdaSEXP, SEXP YSEXP, SEXP betaSEXP, SEXP rSEXP, SEXP muSEXP, SEXP etaSEXP, SEXP mufSEXP, SEXP maxiterSEXP, SEXP newtolSEXP, SEXP tolSEXP, SEXP over_relax_parSEXP, SEXP shrinkDiagSEXP) {
