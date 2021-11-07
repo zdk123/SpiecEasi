@@ -42,15 +42,20 @@
 #'  image(as.matrix(est.log$path[[3]][1:5,1:5]))
 #'  image(as.matrix(est.clr$path[[3]][1:5,1:5]))
 #'  image(as.matrix(est.f$path[[3]][1:5,1:5]))
-sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE, ...) {
+sparseiCov <- function(data, method, cov.fun='cor', npn=FALSE, verbose=FALSE, cov.output = TRUE, ...) {
 
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
+  if (isSymmetric(data)) SigmaO <- data
+  else {
+    stopifnot(cov.fun %in% c('cor', 'cov', 'latentcor'))
+    SigmaO <- match.fun(cov.fun)(data)
+  }
 
   args <- list(...)
   method <- switch(method, glasso = "glasso", mb = "mb", stop("Method not supported"))
 
   if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
-  est <- do.call(huge::huge, c(args, list(x=data,
+  est <- do.call(huge::huge, c(args, list(x=SigmaO,
                                           method=method,
                                           verbose=verbose,
                                           cov.output = cov.output)))
@@ -63,6 +68,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   #   est$data <- data
   #   est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
   # }
+  est$data <- data
   return(est)
 }
 

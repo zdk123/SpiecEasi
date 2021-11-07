@@ -5,7 +5,8 @@
 #' @param data the n x p data matrix
 #' @param npn flag to first fit nonparametric normal transform to the data
 #' @param verbose flag to turn on verbose output
-#' @param cor flag to use correlation matrix as the input (default: false - uses covariance)
+# DEPRECATED
+## #' @param cor flag to use correlation matrix as the input (default: false - uses covariance)
 #' @param ... arguments to override default algorithm settings (see details)
 #' @export
 #' @details
@@ -19,7 +20,7 @@
 #' The argument \code{nlambda} determines the number of penalties - somewhere between 10-100 is usually good, depending on how the values of empirical correlation are distributed.#' @export
 #'
 #' One of \code{beta} (penalty for the nuclear norm) or \code{r} (number of ranks) should be supplied or \code{r=2} is chosen by default.
-sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
+sparseLowRankiCov <- function(data, cov.fun='cor', npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 ## TODO: make args to admm2 explicit
   args <- list(...)
   if (length(args$r) > 1 || length(args$beta) > 1)
@@ -27,8 +28,13 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
   if (isSymmetric(data)) SigmaO <- data
-  else SigmaO <- cov(data)
-  if (cor) SigmaO <- cov2cor(SigmaO)
+  else {
+    stopifnot(cov.fun %in% c('cor', 'cov', 'latentcor'))
+    fcor <- match.fun(cov.fun)
+    SigmaO <- fcor(data)
+  }
+  # else SigmaO <- cov(data)
+  # if (cor) SigmaO <- cov2cor(SigmaO)
 
   if (!is.null(args[[ "lambda.max" ]])) maxlam <- args$lambda.max
   else maxlam <- 1
