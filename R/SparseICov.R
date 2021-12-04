@@ -69,6 +69,7 @@ sparseiCov <- function(data, method, cov.fun='cor', npn=FALSE, verbose=FALSE, co
   #   est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
   # }
   est$data <- data
+  est$types <- types
   return(est)
 }
 
