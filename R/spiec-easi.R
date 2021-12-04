@@ -66,9 +66,9 @@ spiec.easi.otu_table <- function(data, ...) {
     types <- attr(data, 'types')
     if (is.null(types)) types <- get_types(data)
     ## all columns are counts or comp - normalize ##
-    # TODO: create message if dataset is partially normalized
     comp <- is.normalized(data)
     if (comp || all(grepl("count", types))) {
+      message(sprintf("  Compositional or count dataset detected... %s normalizing", method))
       if (comp & (method == "plcr")) {
         message("input data is already total-sum-normalized, Is pseudocount needed?")
       }
