@@ -196,6 +196,14 @@ alr.data.frame <- function(x.f, mar=2, ...) {
     alr(as.matrix(x.f), mar, ...)
 }
 
+# TODO: should these be exported
+#' @keywords internal
+dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
+
+#' @keywords internal
+dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)
+
+
 #' @keywords internal
 triu <- function(x) x[upper.tri(x)]
 #' @keywords internal

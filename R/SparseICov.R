@@ -173,6 +173,3 @@ glm.neighborhood <- function(X, Y, lambda, link='binomial', ...) {
 #   }
 #   return(Bmat)
 # }
-
-dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
-dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)
