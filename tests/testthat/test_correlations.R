@@ -1,5 +1,5 @@
 context('setup')
-
+## Test various correlation methods
 p <- 20
 e <- p
 n <- 100
@@ -14,6 +14,8 @@ context("Correlation fit")
 # lmx  <- 1
 lmr  <- 5e-2
 nlam <- 10
+
+test_that("execution succeeds", {
 ## Default ##
 out_default <- spiec.easi(X, method='mb', cov.method='default', verbose=FALSE, lambda.min.ratio=lmr, nlambda=nlam, pulsar.select=FALSE)
 out_cor <- spiec.easi(X, method='mb', cov.method='cor', verbose=FALSE, lambda.min.ratio=lmr, nlambda=nlam, pulsar.select=FALSE)
@@ -21,9 +23,4 @@ out_cov <- spiec.easi(X, method='mb', cov.method='cor', verbose=FALSE, lambda.mi
 out_lcor <- spiec.easi(X, method='mb', cov.method='latentcor', verbose=FALSE, lambda.min.ratio=lmr, nlambda=nlam, pulsar.select=FALSE)
 
 ## TODO: test some outputs here
-
-## test normalizations: TODO; break this out
-out_mlcor <- spiec.easi(X, method='mb', cov.method='latentcor',
-                      norm.params=list(method='mclr'),
-                      verbose=FALSE, lambda.min.ratio=lmr, nlambda=nlam,
-                      pulsar.select=FALSE)
+})

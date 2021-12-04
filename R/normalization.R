@@ -85,6 +85,71 @@ clr.data.frame <- function(x.f, mar=2, ...) {
     clr(as.matrix(x.f), mar, ...)
 }
 
+#' Centered log-ratio functions
+#' @param x input count data
+#' @param pseudo value of the pseudocount
+#' @param ... pass through arguments
+#' @rdname clr
+#' @export
+pclr <- function(x, mar=2, pseudo=1, ...) {
+    clr(x+pseudo, mar=mar, ...)
+}
+
+
+#' Modified central log ratio (mclr) transformation
+#'
+#' Introduced by GraceYoon/SPRING
+#'
+#' @param data raw count data or compositional data (n by p) does not matter.
+#' @param base exp(1) for natural log
+#' @param tol tolerance for checking zeros
+
+# For eps and atleast, users do not have to specify any values. Default should be enough.
+#' @param eps epsilon in eq (2) of the paper "Yoon, Gaynanova, M\"{u}ller (2019), Frontiers in Genetics". positive shifts to all non-zero compositions. Refer to the paper for more details. eps = absolute value of minimum of log ratio counts plus c.
+#' @param atleast default value is 1. Constant c which ensures all nonzero values to be strictly positive. default is 1.
+#'
+#'
+#' @return \code{mclr} returns a data matrix of the same dimension with input data matrix.
+#' @export
+## from GraceYoon/SPRING/src/R/helpers.R
+mclr <- function(data, base = exp(1), tol = 1e-16, eps = NULL, atleast = 1){
+  data <- as.matrix(data)
+  nzero <- (data >= tol)  # index for nonzero part
+  LOG <- ifelse(nzero, log(data, base), 0.0) # take log for only nonzero values. zeros stay as zeros.
+
+  # centralize by the log of "geometric mean of only nonzero part" # it should be calculated by each row.
+  if (nrow(data) > 1){
+    clrdata <- ifelse(nzero, LOG - rowMeans(LOG)/rowMeans(nzero), 0.0)
+  } else if (nrow(data) == 1){
+    clrdata <- ifelse(nzero, LOG - mean(LOG)/mean(nzero), 0.0)
+  }
+
+  if (is.null(eps)){
+    if(atleast < 0){
+      warning("atleast should be positive. The functions uses default value 1 instead.")
+      atleast = 1
+    }
+    if( min(clrdata) < 0 ){ # to find the smallest negative value and add 1 to shift all dataa larger than zero.
+      positivecst <- abs(min(clrdata)) + atleast # "atleast" has default 1.
+    }else{
+      positivecst <- 0
+    }
+    # positive shift
+    ADDpos <- ifelse(nzero, clrdata + positivecst, 0.0) ## make all non-zero values strictly positive.
+    return(ADDpos)
+  } else if(eps == 0){
+    ## no shift. clr transform applied to non-zero proportions only. without pseudo count.
+    return(clrdata)
+  } else if(eps > 0){
+    ## use user-defined eps for additional positive shift.
+    ADDpos <- ifelse(nzero, clrdata + eps, 0.0)
+    return(ADDpos)
+  } else {
+    stop("check your eps value for additional positive shift. Otherwise, leave it as NULL.")
+  }
+}
+
+
 #' Additive log-ratio functions
 #' @param x.f input data
 #' @param ... pass through arguments

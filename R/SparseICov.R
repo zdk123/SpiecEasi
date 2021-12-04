@@ -9,6 +9,7 @@
 #' @param npn perform Nonparanormal (npn) transformation before estimation?
 #' @param verbose print progress to standard out
 #' @param cov.output return the covariance matrix as well.
+#' @param types if cov.method is latentcor, the column types parameter can be supplied as a character vector or (if NULL) inferred
 #' @param ... further arguments to huge/estimation functions. See details.
 #' @details
 #' This is a wrapper function for sparse iCov estimations performed by glasso in the huge package.
@@ -42,13 +43,12 @@
 #'  image(as.matrix(est.log$path[[3]][1:5,1:5]))
 #'  image(as.matrix(est.clr$path[[3]][1:5,1:5]))
 #'  image(as.matrix(est.f$path[[3]][1:5,1:5]))
-sparseiCov <- function(data, method, cov.fun='cor', npn=FALSE, verbose=FALSE, cov.output = TRUE, ...) {
+sparseiCov <- function(data, method, cov.fun='cor', npn=FALSE, verbose=FALSE, cov.output = TRUE, types=NULL, ...) {
 
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
   if (isSymmetric(data)) SigmaO <- data
   else {
-    stopifnot(cov.fun %in% c('cor', 'cov', 'latentcor'))
-    SigmaO <- match.fun(cov.fun)(data)
+    SigmaO <- .match.cov(cov.fun, data, types)
   }
 
   args <- list(...)

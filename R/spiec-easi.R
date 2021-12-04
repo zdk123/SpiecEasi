@@ -18,21 +18,22 @@ spiec.easi <- function(data, ...) {
   return(OTU)
 }
 
-.data.checks <- function(data) {
-  ## data checks ##
-  if (inherits(data, 'list')) {
-    sink <- lapply(data, .data.checks)
-    return(NULL)
-  }
-  if (isTRUE(all.equal(rowSums(data), rep(1L, nrow(data))))) {
-    warning('Data is normalized, but raw counts are expected')
-  }
-
-  if (any(data<0)) {
-    warning('Negative values detected, but raw counts are expected')
-  }
-  return(NULL)
-}
+# DEPRECATED IN FAVOR OF TYPE DETECTION
+# .data.checks <- function(data) {
+#   ## data checks ##
+#   if (inherits(data, 'list')) {
+#     sink <- lapply(data, .data.checks)
+#     return(NULL)
+#   }
+#   if (isTRUE(all.equal(rowSums(data), rep(1L, nrow(data))))) {
+#     warning('Data is normalized, but raw counts are expected')
+#   }
+#
+#   if (any(data<0)) {
+#     warning('Negative values detected, but raw counts are expected')
+#   }
+#   return(NULL)
+# }
 
 #' @method spiec.easi phyloseq
 #' @rdname spiec.easi
@@ -57,14 +58,50 @@ spiec.easi.otu_table <- function(data, ...) {
 
 
 #' @noRd
-.spiec.easi.norm <- function(data) {
+#' @keywords internal
+.spiec.easi.norm <- function(data, method='pclr', types=NULL, ...) {
 # internal function to normalize a data matrix
   if (inherits(data, 'matrix')) {
+    ## TODO: check that types argument and data attr are not both supplied
+    types <- attr(data, 'types')
+    if (is.null(types)) types <- get_types(data)
+    ## all columns are counts or comp - normalize ##
+    # TODO: create message if dataset is partially normalized
+    comp <- is.normalized(data)
+    if (comp || all(grepl("count", types))) {
+      if (comp & (method == "plcr")) {
+        message("input data is already total-sum-normalized, Is pseudocount needed?")
+      }
+      if (method=='pclr') {
+        data <- t(pclr(data, mar=1, ...))
+        types[types == "tru_count"] <- 'con'
+      } else if (method == 'clr') {
+        data <- t(clr(data, mar=1, ...))
+        types[types == "tru_count"] <- 'con'
+      } else if (method == 'alr') {
+        data <- t(alr(data, mar=1, ...))
+        types[types == "tru_count"] <- 'con'
+      } else if (method == "mclr") {
+        data <- mclr(data, ...)
+      } else {
+        stop(sprintf("method '%s' not recognized", method))
+      }
+      ## log ratio transforms won't be counts any longer
+      types <- gsub("_count", "", types)
+    }
+    attr(data, 'types') <- types
+    return(data)
     ## standard data pipeline
-    return(t(clr(data+1, 1)))
   } else if (inherits(data, 'list')) {
     ## multi domain spiec.easi, data must be list of numeric matrices
-    return(do.call('cbind', lapply(data, .spiec.easi.norm)))
+    ## types must be a list of types
+    data <- lapply(seq_along(data), function(i) {
+      .spiec.easi.norm(data[[i]], method=method, types=types[[i]])
+    })
+    types <- lapply(data, attr, which='types')
+    data <- do.call('cbind', data)
+    attr(data, 'types') <- unlist(types)
+    return(data)
   } else {
     stop('input data must be a numeric matrix')
   }
@@ -125,46 +162,65 @@ NULL
 
 
 #' @param data For a matrix, non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also by phyloseq or otu_table object.
-#' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)
+#' @param types if data is a list, specify count, compositional or environmental covariates types. #TODO: flesh out this argument
+#' @param method inverse covariance estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)
 #' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' [default], 'bstars' (Bounded StARS)
 #' @param verbose flag to show progress messages
 #' @param pulsar.select flag to perform model selection. Choices are TRUE/FALSE/'batch'
 #' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
+#' @param lambda.log should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?
+#' @param norm.params method and other named arguments for the function which should normalize compositional (count) data [method can be 'clr', 'pclr', 'mclr' or 'alr'].
+#' @param cov.method method for inferring the empirical covariance matrix. 'Default' choice depends on the method and input data but can be `cov`, `cor` or `latentcor`.
 #' @param icov.select deprecated.
 #' @param icov.select.params deprecated.
-#' @param lambda.log should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?
 #' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
 #' @method spiec.easi default
 #' @rdname spiec.easi
 #' @seealso multi.spiec.easi
 #' @export
-spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
-                        verbose=TRUE, pulsar.select=TRUE, pulsar.params=list(),
-                        icov.select=pulsar.select,
-                        icov.select.params=pulsar.params,
-                        lambda.log=TRUE, ...) {
+spiec.easi.default <- function(data, types=NULL,
+                               method='glasso',
+                               sel.criterion='stars',
+                               verbose=TRUE,
+                               pulsar.select=TRUE, pulsar.params=list(),
+                               lambda.log=TRUE,
+                               norm.params=list(method='pclr', pseudo=1),
+                               cov.method='default',
+                               icov.select=pulsar.select,
+                               icov.select.params=pulsar.params, ...) {
 
   args <- list(...)
   if (verbose) msg <- .makeMessage("Applying data transformations...")
   else msg <- .makeMessage('')
 
+  # TODO: check that norm.params is a list with valid method
+  norm.params[['data']] <- data
+  # TODO: check that cov.params is a list with valid method
+  stopifnot(cov.method %in% c('default', 'cor', 'cov', 'latentcor'))
+
   switch(method,
-        glasso = {
+         glasso = {
                     message(msg, appendLF=verbose)
                     estFun <- "sparseiCov"
                     args$method <- method
-                    X <- .spiec.easi.norm(data)
+                    X <- do.call(.spiec.easi.norm, norm.params)
+                    args$types <- attr(X, 'types')
+                    if (cov.method=='default') args$cov.fun <- 'cor'
+                    else args$cov.fun <- cov.method
                     if (is.null(args[['lambda.max']]))
-                      args$lambda.max <- getMaxCov(cor(X))
+                      args$lambda.max <- getMaxCov(.match.cov(args$cov.fun, X, args$types))
                  },
 
         mb     = {
                     message(msg, appendLF=verbose)
                     estFun <- "sparseiCov"
                     args$method <- method
-                    X <- .spiec.easi.norm(data)
+                    X <- do.call(.spiec.easi.norm, norm.params)
+                    args$types <- attr(X, 'types')
+                    if (cov.method=='default') args$cov.fun <- 'cor'
+                    else args$cov.fun <- cov.method
                     if (is.null(args[['lambda.max']]))
-                      args$lambda.max <- getMaxCov(cor(X))
+                      args$lambda.max <- getMaxCov(.match.cov(args$cov.fun, X, args$types))
                   },
 
         slr    = {
@@ -186,15 +242,20 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                     }
                     message(msg, appendLF=verbose)
                     estFun <- "sparseLowRankiCov"
-                    X <- .spiec.easi.norm(data)
+                    X <- do.call(.spiec.easi.norm, norm.params)
+                    args$types <- attr(X, 'types')
+                    if (cov.method=='default') args$cov.fun <- 'cov'
+                    else args$cov.fun <- cov.method
                     if (is.null(args[['lambda.max']]))
-                      args$lambda.max <- getMaxCov(cov(X))
+                      args$lambda.max <- getMaxCov(.match.cov(args$cov.fun, X, args$types))
                   },
 
         coat   = {
                     message(msg, appendLF=verbose)
                     estFun <- "coat"
-                    X <- .spiec.easi.norm(data)
+                    X <- do.call(.spiec.easi.norm, norm.params)
+                    types <- attr(X, 'types')
+                    ## TODO: implement cov/cor/latentcor for COAT
                     if (is.null(args[['lambda.max']]))
                       args$lambda.max <- getMaxCov(X)
                   },
@@ -212,8 +273,8 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                   },
 
         poisson= {
-                  if (inherits(data, 'list'))
-                    stop('method "poisson" does not support list data')
+                    if (inherits(data, 'list'))
+                      stop('method "poisson" does not support list data')
 
                     message(msg, appendLF=verbose)
                     estFun <- "neighborhood.net"
@@ -318,6 +379,7 @@ multi.spiec.easi <- function(datalist, method='glasso', sel.criterion='stars',
                         verbose=TRUE, pulsar.select=TRUE, pulsar.params=list(),
                         ...) {
 ## functional wrapper for spiec.easi.list
+## check that datalist is all compositional types
   spiec.easi.list(datalist, method=method, sel.criterion=sel.criterion,
                   verbose=verbose, pulsar.select=pulsar.select,
                   pulsar.params=pulsar.params, ...)
@@ -328,13 +390,17 @@ multi.spiec.easi <- function(datalist, method='glasso', sel.criterion='stars',
 #' @rdname multi.spiec.easi
 #' @export
 spiec.easi.list <- function(data, ...) {
-  classes <- sapply(data, class)
-  if (length(unique(classes)) != 1)
-    warning('input list contains data of mixed classes.')
+  args <- list(...)
+  # TODO: move this check to to after types detection
+  # classes <- sapply(data, function(x) class(x)[1])
+  # if ((length(unique(classes)) != 1) & (args$cov.method!='latentcor'))
+  #   message("input list contains data of mixed classes. 'latentcor' is the recommended `cov.method`")
 
   ## convert phyloseq objects to matrices
   if (any('phyloseq' %in% classes) || any('otu_table' %in% classes))
     data <- lapply(data, .phy2mat)
+
+  ## TODO: allow phyloseq sample_data for env metadata
 
   ## Finally, check the number of rows (samples) are equal
   ## and sample names are identical (sample names can be NULL)

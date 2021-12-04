@@ -5,6 +5,7 @@
 \alias{clr.default}
 \alias{clr.matrix}
 \alias{clr.data.frame}
+\alias{pclr}
 \title{Centered log-ratio functions}
 \usage{
 clr(x.f, ...)
@@ -14,6 +15,8 @@ clr(x.f, ...)
 \method{clr}{matrix}(x.f, mar = 2, ...)
 
 \method{clr}{data.frame}(x.f, mar = 2, ...)
+
+pclr(x, mar = 2, pseudo = 1, ...)
 }
 \arguments{
 \item{x.f}{input data}
@@ -25,7 +28,13 @@ clr(x.f, ...)
 \item{tol}{tolerance for a numerical zero}
 
 \item{mar}{margin to apply the transformation (rows: 1 or cols: 2)}
+
+\item{x}{input count data}
+
+\item{pseudo}{value of the pseudocount}
 }
 \description{
+Centered log-ratio functions
+
 Centered log-ratio functions
 }
