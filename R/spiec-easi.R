@@ -392,7 +392,7 @@ multi.spiec.easi <- function(datalist, method='glasso', sel.criterion='stars',
 spiec.easi.list <- function(data, ...) {
   args <- list(...)
   # TODO: move this check to to after types detection
-  # classes <- sapply(data, function(x) class(x)[1])
+  classes <- sapply(data, function(x) class(x)[1])
   # if ((length(unique(classes)) != 1) & (args$cov.method!='latentcor'))
   #   message("input list contains data of mixed classes. 'latentcor' is the recommended `cov.method`")
 
