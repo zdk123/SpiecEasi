@@ -164,7 +164,8 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                     args$method <- method
                     X <- .spiec.easi.norm(data)
                     ## set the lower limit of maxdf for pulsar subsamples
-                    args$maxdf <- min(ncol(X), nrow(X))
+                    if (is.null(args[['maxdf']]))
+                      args$maxdf <- min(ncol(X), nrow(X))
                     if (is.null(args[['lambda.max']]))
                       args$lambda.max <- getMaxCov(cor(X))
                   },
