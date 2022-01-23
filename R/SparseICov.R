@@ -144,12 +144,14 @@ huge.mb2 <- function (x, lambda = NULL, nlambda = NULL, lambda.min.ratio = NULL,
       flush.console()
     }
     fit$idx_mat = NULL
-    print(sprintf("d is: %s", d))
-    print(sprintf("nlambda is: %s", length(lambda)))
-    print(sprintf("nlambda is: %s", nlambda))
-    print(sprintf("maxdf is: %s", maxdf))
 
-    out = .Call("_huge_SPMBgraph", S, lambda, nlambda, d, maxdf, PACKAGE = "huge")
+    out = tryCatch( .Call("_huge_SPMBgraph", S, lambda, nlambda, d, maxdf, PACKAGE = "huge"),
+      ## perhaps using huge v1.3.3 or older
+      error = function(e) {
+        out = .Call("_huge_SPMBgraphlasso", x, lambda, nlambda,
+              d, scr, as.matrix(0), 0, PACKAGE = "huge")
+      }
+    )
   }
 
   for (i in 1:d) {
