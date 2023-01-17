@@ -6,3 +6,4 @@
 ^README\.Rmd$
 ^inst/extdata\.*
 ^inst/TUTORIAL*
+^LICENSE\.md$

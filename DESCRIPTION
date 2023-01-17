@@ -30,6 +30,6 @@ Suggests:
    batchtools,
    testthat
 biocViews:
-License: GPL (>= 2)
+License: GPL (>= 3)
 LinkingTo: Rcpp, RcppArmadillo
 RoxygenNote: 7.1.1
