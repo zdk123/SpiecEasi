@@ -25,6 +25,7 @@ cov2prec <- function(Cov, tol=1e-4) {
               warning("Warning: Precision matrix not invertible, trying generalized inverse instead")
               ginv(Cov) })
     Precision[which(Precision == 0)] <- tol
+    Precision
 }
 
 
