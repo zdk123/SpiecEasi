@@ -82,11 +82,12 @@ runtests <- function(out) {
                Matrix::drop0(out$refit$stars))
   expect_equal(getRefit(out),
                Matrix::drop0(out$refit$stars))
+  expect_equal( class(adj2igraph(getRefit(out))), 'igraph' )
   expect_equal(getOptLambda(out), out$lambda[i])
   expect_equal(getOptMerge(out),
                Matrix::drop0(out$select$stars$merge[[i]]))
-  expect_equal(getOptBeta(out),
-               Matrix::drop0(out$est$beta[[i]]))
+  expect_equal( symBeta(getOptBeta(out)),
+               symBeta(Matrix::drop0(out$est$beta[[i]])))
 }
 
 test_that("Getter API, pulsar / stars ", {
