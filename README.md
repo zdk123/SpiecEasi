@@ -3,7 +3,6 @@
 SpiecEasi
 =========
 
-[![Build Status](https://app.travis-ci.com/zdk123/SpiecEasi.svg?branch=master)](https://app.travis-ci.com/zdk123/SpiecEasi)
 
 Sparse InversE Covariance estimation for Ecological Association and
 Statistical Inference
