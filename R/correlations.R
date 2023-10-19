@@ -9,8 +9,11 @@ latentcor <- function(data, types = NULL) {
 
 #' @keywords internal
 .match.cov <- function(cov.fun, data, types) {
+  # match string or function's name
+  cov.fun <- rev(as.character(substitute(base::cov)))[1]
   switch(cov.fun,
-                cor=cor(data),
-                cov=cov(data),
-                latentcor=latentcor(data, types=types))
+         cor=cor(data),
+         cov=cov(data),
+         latentcor=SpiecEasi::latentcor(data, types=types),
+        stop("covariance function not recognized"))
 }
