@@ -63,7 +63,9 @@ spiec.easi.otu_table <- function(data, ...) {
 # internal function to normalize a data matrix
   if (inherits(data, 'matrix')) {
     ## TODO: check that types argument and data attr are not both supplied
-    types <- attr(data, 'types')
+    if (!is.null(types) && !is.null(attr(data, 'types'))) {
+      stop('supply types as an argument or data attribute but not both.')
+    }
     if (is.null(types)) types <- get_types(data)
     ## all columns are counts or comp - normalize ##
     comp <- is.normalized(data)
