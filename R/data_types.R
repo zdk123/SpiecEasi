@@ -2,7 +2,7 @@
 is.count <- function(x) {
   stopifnot(is.vector(x))
   if (!is.numeric(x) && !is.integer(x)) return(FALSE)
-  if (isFALSE(all.equal(x, as.integer(x)))) return(FALSE)
+  if (!isTRUE(all.equal(as.numeric(x), as.integer(x)))) return(FALSE)
   if (any(x<0)) return(FALSE)
   return(TRUE)
 }
