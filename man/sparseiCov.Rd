@@ -4,7 +4,16 @@
 \alias{sparseiCov}
 \title{Sparse/penalized estimators of covariance matrices}
 \usage{
-sparseiCov(data, method, npn = FALSE, verbose = FALSE, cov.output = TRUE, ...)
+sparseiCov(
+  data,
+  method,
+  cov.fun = "cor",
+  npn = FALSE,
+  verbose = FALSE,
+  cov.output = TRUE,
+  types = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{data matrix with features/OTUs in the columns and samples in the rows. Should be transformed by clr for meaningful results, if the data is compositional}
@@ -16,6 +25,8 @@ sparseiCov(data, method, npn = FALSE, verbose = FALSE, cov.output = TRUE, ...)
 \item{verbose}{print progress to standard out}
 
 \item{cov.output}{return the covariance matrix as well.}
+
+\item{types}{if cov.method is latentcor, the column types parameter can be supplied as a character vector or (if NULL) inferred}
 
 \item{...}{further arguments to huge/estimation functions. See details.}
 }

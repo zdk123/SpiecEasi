@@ -9,6 +9,7 @@
 #' @param npn perform Nonparanormal (npn) transformation before estimation?
 #' @param verbose print progress to standard out
 #' @param cov.output return the covariance matrix as well.
+#' @param types if cov.method is latentcor, the column types parameter can be supplied as a character vector or (if NULL) inferred
 #' @param ... further arguments to huge/estimation functions. See details.
 #' @details
 #' This is a wrapper function for sparse iCov estimations performed by glasso in the huge package.
@@ -42,15 +43,19 @@
 #'  image(as.matrix(est.log$path[[3]][1:5,1:5]))
 #'  image(as.matrix(est.clr$path[[3]][1:5,1:5]))
 #'  image(as.matrix(est.f$path[[3]][1:5,1:5]))
-sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE, ...) {
+sparseiCov <- function(data, method, cov.fun='cor', npn=FALSE, verbose=FALSE, cov.output = TRUE, types=NULL, ...) {
 
   if (npn) data <- huge::huge.npn(data, verbose=verbose)
+  if (isSymmetric(data)) SigmaO <- data
+  else {
+    SigmaO <- .match.cov(cov.fun, data, types)
+  }
 
   args <- list(...)
   method <- switch(method, glasso = "glasso", mb = "mb", stop("Method not supported"))
 
   if (is.null(args$lambda.min.ratio)) args$lambda.min.ratio <- 1e-3
-  est <- do.call(huge::huge, c(args, list(x=data,
+  est <- do.call(huge::huge, c(args, list(x=SigmaO,
                                           method=method,
                                           verbose=verbose,
                                           cov.output = cov.output)))
@@ -63,6 +68,8 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
   #   est$data <- data
   #   est$sym  <- ifelse(!is.null(args$sym), args$sym, 'or')
   # }
+  est$data <- data
+  est$types <- types
   return(est)
 }
 
@@ -167,6 +174,3 @@ glm.neighborhood <- function(X, Y, lambda, link='binomial', ...) {
 #   }
 #   return(Bmat)
 # }
-
-dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
-dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)

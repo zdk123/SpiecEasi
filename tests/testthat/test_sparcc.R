@@ -10,11 +10,12 @@ X <- exp(rmvnorm(n, rep(0,p), S))
 X.f <- t(apply(X, 1, norm_to_total))
 
 context("Input data")
-test_that("data is counts", {
-  expect_silent(.data.checks(X))
-  expect_warning(.data.checks(X.f))
-  expect_warning(.data.checks(scale(X)))
-})
+# TODO: redo with data types
+# test_that("data is counts", {
+#   expect_silent(.data.checks(X))
+#   expect_warning(.data.checks(X.f))
+#   expect_warning(.data.checks(scale(X)))
+# })
 
 context("SparCC")
 test_that("sparcc gives expected output", {

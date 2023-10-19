@@ -15,14 +15,17 @@ spiec.easi(data, ...)
 
 \method{spiec.easi}{default}(
   data,
+  types = NULL,
   method = "glasso",
   sel.criterion = "stars",
   verbose = TRUE,
   pulsar.select = TRUE,
   pulsar.params = list(),
+  lambda.log = TRUE,
+  norm.params = list(method = "pclr", pseudo = 1),
+  cov.method = "default",
   icov.select = pulsar.select,
   icov.select.params = pulsar.params,
-  lambda.log = TRUE,
   ...
 )
 }
@@ -31,7 +34,9 @@ spiec.easi(data, ...)
 
 \item{...}{further arguments to \code{\link{sparseiCov}} / \code{huge}}
 
-\item{method}{estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
+\item{types}{if data is a list, specify count, compositional or environmental covariates types. #TODO: flesh out this argument}
+
+\item{method}{inverse covariance estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
 
 \item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' [default], 'bstars' (Bounded StARS)}
 
@@ -41,11 +46,15 @@ spiec.easi(data, ...)
 
 \item{pulsar.params}{list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.}
 
+\item{lambda.log}{should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?}
+
+\item{norm.params}{method and other named arguments for the function which should normalize compositional (count) data [method can be 'clr', 'pclr', 'mclr' or 'alr'].}
+
+\item{cov.method}{method for inferring the empirical covariance matrix. 'Default' choice depends on the method and input data but can be `cov`, `cor` or `latentcor`.}
+
 \item{icov.select}{deprecated.}
 
 \item{icov.select.params}{deprecated.}
-
-\item{lambda.log}{should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?}
 }
 \description{
 Run the whole SPIEC-EASI pipeline, from data transformation, sparse inverse covariance estimation and model selection.

@@ -4,7 +4,14 @@
 \alias{sparseLowRankiCov}
 \title{Sparse plus Low Rank inverse covariance}
 \usage{
-sparseLowRankiCov(data, npn = FALSE, verbose = FALSE, cor = FALSE, ...)
+sparseLowRankiCov(
+  data,
+  cov.fun = "cor",
+  npn = FALSE,
+  verbose = FALSE,
+  cor = FALSE,
+  ...
+)
 }
 \arguments{
 \item{data}{the n x p data matrix}
@@ -12,8 +19,6 @@ sparseLowRankiCov(data, npn = FALSE, verbose = FALSE, cor = FALSE, ...)
 \item{npn}{flag to first fit nonparametric normal transform to the data}
 
 \item{verbose}{flag to turn on verbose output}
-
-\item{cor}{flag to use correlation matrix as the input (default: false - uses covariance)}
 
 \item{...}{arguments to override default algorithm settings (see details)}
 }
