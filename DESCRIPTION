@@ -42,4 +42,5 @@ Suggests:
     RefManageR,
     sessioninfo
 LinkingTo: Rcpp, RcppArmadillo
+VignetteBuilder: knitr
 Config/testthat/edition: 3
