@@ -40,7 +40,6 @@ Suggests:
     knitr,
     BiocStyle,
     RefManageR,
-    sessioninfo,
-    rmarkdown
+    sessioninfo
+LinkingTo: Rcpp, RcppArmadillo
 Config/testthat/edition: 3
-VignetteBuilder: knitr
