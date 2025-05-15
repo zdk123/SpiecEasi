@@ -1,11 +1,22 @@
-<!-- README.md is generated from README.Rmd. Please edit that file -->
 ---
-title: "SpecEasi"
-author: Zachary D Kurtz
-date: May 13, 2025
-output: github_document
+title: "Introduction to SpiecEasi"
+author: 
+  - name: Zachary Kurtz
+    email: zdkurtz@gmail.com
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r doc_date()`"
+package: "`r pkg_ver('SpiecEasi')`"
+vignette: >
+  %\VignetteIndexEntry{Introduction to SpiecEasi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
 ---
-
 
 
 ```{r setup, echo = FALSE, eval=TRUE}
@@ -19,7 +30,7 @@ knitr::opts_chunk$set(
 runchunks = TRUE
 saveout   = runchunks
 
-if (!runchunks) load('.README.RData')
+if (!runchunks) load('.VIGNETTE.RData')
 ```
 SpiecEasi
 =========
@@ -30,11 +41,6 @@ This package will be useful to anybody who wants to infer graphical models for a
 
 One small point on notation: we refer to the method as "SPIEC-EASI" and reserve "SpiecEasi" for this package.
 
-<!-- badges: start -->
-[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
-[![R-CMD-check-bioc](https://github.com/zdk123/SpiecEasi/actions/workflows/R-CMD-check-bioc.yaml/badge.svg)](https://github.com/zdk123/SpiecEasi/actions/workflows/R-CMD-check-bioc.yaml)
-[![Codecov test coverage](https://codecov.io/gh/zdk123/SpiecEasi/graph/badge.svg)](https://app.codecov.io/gh/zdk123/SpiecEasi)
-<!-- badges: end -->
 
 ## TOC ##
 0. [Installation](#installation)
@@ -414,9 +420,5 @@ sum(getRefit(se))/2
 
 ```{r, echo = FALSE, eval=runchunks}
 if (saveout)
- save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".README.RData")
+ save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".VIGNETTE.RData")
 ```
-
-
-## Code of Conduct ##
-Please note that the SpiecEasi project is released with a [Contributor Code of Conduct](http://bioconductor.org/about/code-of-conduct/). By contributing to this project, you agree to abide by its terms.
