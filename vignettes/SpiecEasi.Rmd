@@ -43,7 +43,6 @@ One small point on notation: we refer to the method as "SPIEC-EASI" and reserve 
 
 
 ## TOC ##
-0. [Installation](#installation)
 1. [News](#news)
 2. [Basic Usage](#basic-usage)
 3. [American Gut Data](#analysis-of-american-gut-data)
@@ -54,63 +53,6 @@ One small point on notation: we refer to the method as "SPIEC-EASI" and reserve 
 7. [Troubleshooting](#troubleshooting)
 8. [Code of Conduct](#code-of-conduct)
 
-## Installation ##
-
-
-### devtools ###
-I assume that all auxiliary packages are already installed - for example pulsar, huge, MASS, etc.
-If you get an unexpected error, you may need to download and install a missing dependency.
-
-From an interactive R session:
-```{r, eval=FALSE}
-if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-
-BiocManager::install("SpiecEasi")
-```
- 
-Or for a development version:
-```{r eval=FALSE}
-if (!require("remotes", quietly = TRUE)) install.packages("remotes")
-
-remotes::install_github("zdk123/SpiecEasi")
-```
-
-And load the installed package:
-```r
-library(SpiecEasi)
-```
-
-### conda ###
-
-SpiecEasi is also available via conda sources and should always be up to date with the main branch of this repo.
-
-```sh
-conda install -c bioconda r-spieceasi
-```
-
-### OSX users ###
-
-Since version 1.0, installing SpiecEasi requires compiling source code,
-which seems to cause trouble for some Mac users due to missing a gfortran package.
-
-It is recommended to get [gfortan from xcode](https://kingaa.github.io/mac-fortran.html)
-by running the following code in a terminal (OSX 10.10 and later):
-```sh
-xcode-select --install
-```
-
-Alternatively, the officially-supported fortran binaries [are on CRAN](https://cran.r-project.org/bin/macosx/tools/).
-
-
-## News ##
-
-The latest SpiecEasi (version 1.0.0 and higher) now uses the [pulsar package](https://cran.r-project.org/package=pulsar) for stability-based model selection. The methods are similar to previous releases, but contains some additional methods for [speeding up computations](#pulsar-parallel-utilities-for-model-selection)
-
-The input arguments have changed slightly (but are backwards compatible) but the data structure that is returned from `spiec.easi` has changed.
-
-The output to spiec.easi-fit models structure can be easily processed using new getter functions. See `?getOptInd` for usage.
-
-You can revert to the previous release ([0.1.4](https://github.com/zdk123/SpiecEasi/releases/tag/v0.1.4)) to avoid code-breaking changes.
 
 ## Basic Usage ##
 
@@ -128,6 +70,7 @@ Lets simulate some multivariate data under zero-inflated negative binomial model
 Obviously, for real data, skip 1-4.
 
 ```{r, eval=runchunks}
+library(SpiecEasi)
 data(amgut1.filt)
 depths <- rowSums(amgut1.filt)
 amgut1.filt.n  <- t(apply(amgut1.filt, 1, norm_to_total))
