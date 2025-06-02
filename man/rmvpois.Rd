@@ -23,3 +23,9 @@ rmvpois(n, mu, Sigma, ...)
 Generate multivariate poisson data,
 with counts approximately correlated according to Sigma
 }
+\examples{
+# Generate 50 samples from 3 correlated Poisson variables
+mu <- c(2, 5, 8)
+Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+data <- rmvpois(50, mu=mu, Sigma=Sigma)
+}

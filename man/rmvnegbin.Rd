@@ -25,3 +25,13 @@ rmvnegbin(n, mu, Sigma, ks, ...)
 Generate multivariate, Zero-inflated negative binomial data,
 with counts approximately correlated according to Sigma
 }
+\examples{
+# Generate 50 samples from 3 correlated negative binomial variables
+mu <- c(2, 5, 8)
+Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+data <- rmvnegbin(50, mu=mu, Sigma=Sigma)
+
+# Generate with explicit shape parameters
+ks <- c(2, 3, 4)
+data2 <- rmvnegbin(50, mu=mu, Sigma=Sigma, ks=ks)
+}

@@ -22,3 +22,15 @@ neighborhood.net(data, lambda, method = "ising", ncores = 1, sym = "or", ...)
 \description{
 Select a sparse inverse covariance matrix using neighborhood selection and glmnet from various exponential models.
 }
+\examples{
+# Generate binary data for Ising model
+set.seed(123)
+data <- matrix(rbinom(100, 1, 0.5), nrow=20, ncol=5)
+lambda <- c(0.1, 0.2, 0.3)
+
+# Fit neighborhood selection model
+result <- neighborhood.net(data, lambda, method="ising")
+
+# Check adjacency matrices
+length(result$path)  # Number of lambda values
+}

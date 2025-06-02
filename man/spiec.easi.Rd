@@ -33,7 +33,7 @@ spiec.easi(data, ...)
 
 \item{method}{estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
 
-\item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' [default], 'bstars' (Bounded StARS)}
+\item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' \link{default}, 'bstars' (Bounded StARS)}
 
 \item{verbose}{flag to show progress messages}
 
@@ -50,6 +50,14 @@ spiec.easi(data, ...)
 \description{
 Run the whole SPIEC-EASI pipeline, from data transformation, sparse inverse covariance estimation and model selection.
 Inputs are a non-normalized OTU table and pipeline options.
+}
+\examples{
+# Generate random data
+data <- exp(matrix(rnorm(100), nrow=10))
+
+# Run SPIEC-EASI
+result <- spiec.easi(data)
+
 }
 \seealso{
 multi.spiec.easi

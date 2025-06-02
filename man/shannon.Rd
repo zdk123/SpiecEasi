@@ -14,5 +14,9 @@ shannon entropy in base e
 }
 \description{
 Shannon entropy is:
-    sum [ x_i log(x_i) ]
+sum \link{ x_i log(x_i) }
+}
+\examples{
+x <- c(1, 2, 3, 4)
+shannon(x)  # Returns Shannon entropy of normalized vector
 }

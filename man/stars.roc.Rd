@@ -22,7 +22,7 @@ stars.pr(optmerge, theta, verbose = TRUE, plot = TRUE, ll = 15)
 }
 \description{
 Plot a ROC (reciever operator characteristic) or a Precision-Recall curve
-along the stars 'confidence path'. Each edge is a number in [0,1],
+along the stars 'confidence path'. Each edge is a number in \link{0,1},
 which is on the fraction of inferred graphs over subsamples in which that edge
 appeared in stars.
 }

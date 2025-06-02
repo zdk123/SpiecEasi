@@ -19,3 +19,10 @@ Covariance matrix of sample dimension as cor
 Convert a symmetric correlation matrix to a covariance matrix
 given the standard deviation
 }
+\examples{
+# Create a correlation matrix and standard deviations
+cor <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+sds <- c(2, 3, 4)
+# Convert to covariance matrix
+cov <- cor2cov(cor, sds)
+}

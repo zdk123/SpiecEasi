@@ -39,3 +39,12 @@ community
 from count data (ex HMP) fit parameters to OTU margins
 and simulate a new community with those properties
 }
+\examples{
+# Create a simple community matrix
+comm <- matrix(rpois(20, lambda=5), nrow=4, ncol=5)
+# Simulate new community using Poisson distribution
+new_comm <- synth_comm_from_counts(comm, distr="pois")
+# Simulate using negative binomial with custom parameters
+params <- get_comm_params(comm, distr="negbin")
+new_comm_nb <- synth_comm_from_counts(comm, distr="negbin", params=params)
+}

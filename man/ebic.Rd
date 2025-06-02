@@ -18,3 +18,16 @@ ebic(refit, data, loglik, gamma = 0.5)
 \description{
 Calculate the extended BIC criterion on a sparse (refit) network and the input data
 }
+\examples{
+# Generate a random adjacency matrix
+refit <- matrix(rbinom(100, size=1, prob=0.5), nrow=10)
+
+# Generate random data
+data <- matrix(rnorm(100), nrow=10)
+
+# Calculate log likelihood
+loglik <- sum(dnorm(data, mean=0, sd=1, log=TRUE))
+
+# Calculate extended BIC
+ebic(refit, data, loglik)
+}

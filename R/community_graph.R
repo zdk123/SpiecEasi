@@ -4,6 +4,11 @@
 #' @param tol tolerance to define a zero eigenvalue (ie - is Prec positive definite)
 #' @importFrom MASS ginv
 #' @export
+#' @examples
+#' # Create a simple precision matrix
+#' prec <- matrix(c(2, -1, 0, -1, 2, -1, 0, -1, 2), nrow=3)
+#' # Convert to covariance matrix
+#' cov <- prec2cov(prec)
 prec2cov <- function(Precision, tol=1e-4) {
     eigval <- eigen(Precision)$values
     if (any(eigval < tol)) {
@@ -20,6 +25,11 @@ prec2cov <- function(Precision, tol=1e-4) {
 #' @param tol tolerance to define a zero eigenvalue (ie - is Prec positive definite)
 #' @importFrom MASS ginv
 #' @export
+#' @examples
+#' # Create a simple covariance matrix
+#' cov <- matrix(c(1, 0.5, 0, 0.5, 1, 0.5, 0, 0.5, 1), nrow=3)
+#' # Convert to precision matrix
+#' prec <- cov2prec(cov)
 cov2prec <- function(Cov, tol=1e-4) {
     Precision <- tryCatch(solve(Cov), error = function(e) {
               warning("Warning: Precision matrix not invertible, trying generalized inverse instead")
@@ -43,6 +53,11 @@ cov2prec <- function(Cov, tol=1e-4) {
 #' @param targetCondition sets the condition of the precision matrix by modulating the magnitude of the diagonal
 #' @param epsBin the convergence tolerance of the condition number binary search
 #' @param numBinSearch maximum number of iterations
+#' @examples
+#' # Create a simple graph
+#' g <- make_graph("erdos_renyi", D=10, e=15)
+#' # Convert to precision matrix
+#' prec <- graph2prec(g)
 graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, targetCondition=100, epsBin=1e-2,
                         numBinSearch=100) {
 
@@ -137,6 +152,14 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
 #' @param enforce add/remove edges to enforce graph has e edges
 #' @param ... additional options to graph method
 #' @export
+#' @examples
+#' # Generate different types of graphs
+#' g1 <- make_graph("erdos_renyi", D=10, e=15)
+#' g2 <- make_graph("hub", D=10, e=15, numHubs=2)
+#' g3 <- make_graph("scale_free", D=10, e=15)
+#' g4 <- make_graph("cluster", D=10, e=15)
+#' g5 <- make_graph("band", D=10, e=15)
+#' g6 <- make_graph("block", D=10, e=15, numHubs=2)
 make_graph <- function(method, D, e, enforce=TRUE, ...) {
     if (e>((D-1)*D)/2) stop('Number of edges e must smaller than D(D-1)/2')
 
@@ -413,6 +436,10 @@ covReport <- function(Cov, Prec) {
 #' @param x graph adjacency matrix
 #' @param ... Arguments to base as.data.frame
 #' @export
+#' @examples
+#' # Create a graph and convert to graph adjacency data.frame
+#' g <- make_graph("erdos_renyi", D=5, e=6)
+#' df <- as.data.frame(g)
 as.data.frame.graph <- function(x, ...) {
     as.data.frame(as.matrix(x), ...)
 }
@@ -421,6 +448,10 @@ as.data.frame.graph <- function(x, ...) {
 #' @param x graph adjacency matrix
 #' @param ... Arguments to base as.matrix
 #' @export
+#' @examples
+#' # Create a graph and convert to graph adjacency matrix
+#' g <- make_graph("erdos_renyi", D=5, e=6)
+#' mat <- as.matrix(g)
 as.matrix.graph <- function(x, ...) {
     class(x) <- 'matrix'
     return(x)

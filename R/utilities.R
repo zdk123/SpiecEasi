@@ -120,6 +120,15 @@ getOptX.pulsar.refit <- function(est, getter='index') {
 #'}
 #' @return a symmetric coefficient matrix
 #' @export
+#' @examples
+#' # Create an asymmetric coefficient matrix
+#' beta <- matrix(c(0, 0.5, 0.2, 0.3, 0, 0.1, 0, 0.4, 0), nrow=3)
+#' 
+#' # Symmetrize using different methods
+#' sym_ave <- symBeta(beta, mode='ave')      # Average
+#' sym_max <- symBeta(beta, mode='maxabs')   # Maximum absolute
+#' sym_upper <- symBeta(beta, mode='upper')  # Upper triangle
+
 symBeta <- function(beta, mode='ave') {
   t <- Matrix::t
   if (nrow(beta) != ncol(beta)) {

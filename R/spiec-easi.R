@@ -4,6 +4,13 @@
 #' Inputs are a non-normalized OTU table and pipeline options.
 #' @export
 #' @importFrom pulsar pulsar batch.pulsar getMaxCov getLamPath
+#' @examples
+#' # Generate random data
+#' data <- exp(matrix(rnorm(100), nrow=10))
+#' 
+#' # Run SPIEC-EASI
+#' result <- spiec.easi(data)
+#' 
 spiec.easi <- function(data, ...) {
   UseMethod('spiec.easi', data)
 }
@@ -314,6 +321,14 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
 #' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
 #' @seealso spiec.easi
 #' @export
+#' @examples
+#' # Generate random data
+#' data <- exp(matrix(rnorm(100), nrow=10))
+#' data2 <- exp(matrix(rnorm(100, sd=2, mean=20), nrow=10))
+#' datalist <- list(data, data2)
+#' # Run SPIEC-EASI
+#' result <- spiec.easi(datalist)
+#' 
 multi.spiec.easi <- function(datalist, method='glasso', sel.criterion='stars',
                         verbose=TRUE, pulsar.select=TRUE, pulsar.params=list(),
                         ...) {

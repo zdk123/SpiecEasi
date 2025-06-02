@@ -17,6 +17,19 @@
 #'  \item{nlambda: }{Number of values of lambda between lambda.max and lambda.min. Default: 30}
 #'}
 #' @export
+#' @examples
+#' # simulate data with 1 negative correlation
+#'  set.seed(10010)
+#'  Sigma <- diag(10)*2
+#'  Sigma[1,2] <- Sigma[2,1] <- -.9
+#'  data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+#'
+#' # normalize
+#'  data.clr <- t(clr(data, 1))
+#'
+#' # apply COAT
+#'  est.coat <- coat(data.clr, lambda=0.15, thresh="soft")
+#'  image(as.matrix(est.coat$cov))
 coat <- function(data, lambda, thresh="soft", adaptive=TRUE, shrinkDiag=TRUE, ret.icov=FALSE, ...) {
 
     if (isSymmetric(data)) {

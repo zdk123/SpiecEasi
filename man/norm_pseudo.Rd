@@ -12,3 +12,7 @@ norm_pseudo(x)
 \description{
 add pseudocount before normalizing a count vector
 }
+\examples{
+x <- c(1, 2, 0, 4)
+norm_pseudo(x)  # Adds 1 to each value before normalizing
+}

@@ -14,3 +14,16 @@ pval.sparccboot(x, sided = "both")
 \description{
 Get empirical p-values from bootstrap SparCC output.
 }
+\examples{
+# simulate data with 1 negative correlation
+ set.seed(10010)
+ Sigma <- diag(10)*2
+ Sigma[1,2] <- Sigma[2,1] <- -.9
+ data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+
+# estimate
+ est.sparcc  <- sparccboot(data, R=100)
+# find significant correlations
+ out <- pval.sparccboot(est.sparcc)
+ out$cors[out$pvals < .05]
+}

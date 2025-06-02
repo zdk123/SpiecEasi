@@ -20,3 +20,12 @@ make_graph(method, D, e, enforce = TRUE, ...)
 \description{
 Procedure to generate graph topologies for Gaussian Graphical Models
 }
+\examples{
+# Generate different types of graphs
+g1 <- make_graph("erdos_renyi", D=10, e=15)
+g2 <- make_graph("hub", D=10, e=15, numHubs=2)
+g3 <- make_graph("scale_free", D=10, e=15)
+g4 <- make_graph("cluster", D=10, e=15)
+g5 <- make_graph("band", D=10, e=15)
+g6 <- make_graph("block", D=10, e=15, numHubs=2)
+}

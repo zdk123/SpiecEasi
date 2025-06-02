@@ -7,8 +7,18 @@
 #' @param th absolute value of correlations below this threshold are considered zero by the inner SparCC loop.
 #' @seealso \code{\link{sparccboot}}
 #' @export
+#' @examples
+#' # simulate data with 1 negative correlation
+#'  set.seed(10010)
+#'  Sigma <- diag(10)*2
+#'  Sigma[1,2] <- Sigma[2,1] <- -.9
+#'  data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+#'
+#' # estimate
+#'  est.sparcc  <- sparcc(data)
+#'  est.sparcc$Cor[1,2]
 sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
-##
+
 #  without all the 'frills'
     sparccs <- lapply(1:iter, function(i)
                       sparccinner(t(apply(data, 1, norm_diric)),
@@ -36,6 +46,16 @@ sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 #' @param ncpus number of cores to use for parallelization
 #' @param ... additional arguments that are passed to \code{boot::boot}
 #' @export
+#' @examples
+#' # simulate data with 1 negative correlation
+#'  set.seed(10010)
+#'  Sigma <- diag(10)*2
+#'  Sigma[1,2] <- Sigma[2,1] <- -.9
+#'  data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+#'
+#' # estimate
+#'  est.sparcc  <- sparccboot(data, R=100)
+#'  mean(est.sparcc$t[,1]) # bootstrap estimate of true correlation
 sparccboot <- function(data, sparcc.params=list(),
                         statisticboot=function(data, indices) triu(do.call("sparcc",
                       c(list(data[indices,,drop=FALSE]), sparcc.params))$Cor),
@@ -58,6 +78,18 @@ sparccboot <- function(data, sparcc.params=list(),
 #' @param x output from \code{sparccboot}
 #' @param sided type of p-value to compute. Only two sided (sided="both") is implemented.
 #' @export
+#' @examples
+#' # simulate data with 1 negative correlation
+#'  set.seed(10010)
+#'  Sigma <- diag(10)*2
+#'  Sigma[1,2] <- Sigma[2,1] <- -.9
+#'  data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+#'
+#' # estimate
+#'  est.sparcc  <- sparccboot(data, R=100)
+#' # find significant correlations
+#'  out <- pval.sparccboot(est.sparcc)
+#'  out$cors[out$pvals < .05]
 pval.sparccboot <- function(x, sided='both') {
 # calculate 1 or 2 way pseudo p-val from boot object
 # Args: a boot object

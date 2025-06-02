@@ -18,6 +18,17 @@ sparcc(data, iter = 20, inner_iter = 10, th = 0.1)
 \description{
 A reimplementation of SparCC algorithm (Friedman et Alm 2012, PLoS Comp Bio, 2012).
 }
+\examples{
+# simulate data with 1 negative correlation
+ set.seed(10010)
+ Sigma <- diag(10)*2
+ Sigma[1,2] <- Sigma[2,1] <- -.9
+ data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+
+# estimate
+ est.sparcc  <- sparcc(data)
+ est.sparcc$Cor[1,2]
+}
 \seealso{
 \code{\link{sparccboot}}
 }

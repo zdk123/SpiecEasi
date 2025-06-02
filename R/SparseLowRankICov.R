@@ -19,6 +19,27 @@
 #' The argument \code{nlambda} determines the number of penalties - somewhere between 10-100 is usually good, depending on how the values of empirical correlation are distributed.#' @export
 #'
 #' One of \code{beta} (penalty for the nuclear norm) or \code{r} (number of ranks) should be supplied or \code{r=2} is chosen by default.
+#' @examples
+#' # simulate data with 1 negative correlation
+#'  set.seed(10010)
+#'  Sigma <- diag(10)*2
+#'  Sigma[1,2] <- Sigma[2,1] <- -.9
+#'  data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+#'
+#' # normalize
+#'  data.f   <- t(apply(data, 1, norm_to_total))
+#'  data.clr <- t(clr(data.f, 1))
+#'
+#' # estimate
+#'  est.clr  <- sparseLowRankiCov(data.clr, cor=TRUE, r=2)
+#'  est.f    <- sparseLowRankiCov(data.f, cor=TRUE, r=2)
+#'  est.log  <- sparseLowRankiCov(log(data), cor=TRUE, r=2)
+#'
+#' # visualize results
+#'  par(mfrow=c(1,3))
+#'  image(as.matrix(est.log$path[[6]][1:5,1:5]))
+#'  image(as.matrix(est.clr$path[[6]][1:5,1:5]))
+#'  image(as.matrix(est.f$path[[6]][1:5,1:5]))
 sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 ## TODO: make args to admm2 explicit
   args <- list(...)

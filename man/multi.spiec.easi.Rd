@@ -22,7 +22,7 @@ multi.spiec.easi(
 
 \item{method}{estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
 
-\item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' [default]}
+\item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' \link{default}}
 
 \item{verbose}{flag to show progress messages}
 
@@ -39,6 +39,15 @@ A SPIEC-EASI pipeline for inferring a sparse inverse covariance matrix within an
 }
 \details{
 Can also run \code{spiec.easi} on a list and S3 will dispatch the proper function.
+}
+\examples{
+# Generate random data
+data <- exp(matrix(rnorm(100), nrow=10))
+data2 <- exp(matrix(rnorm(100, sd=2, mean=20), nrow=10))
+datalist <- list(data, data2)
+# Run SPIEC-EASI
+result <- spiec.easi(datalist)
+
 }
 \seealso{
 spiec.easi

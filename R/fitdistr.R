@@ -13,6 +13,14 @@
 #' @param ... additional parameters to parameter fitting
 #' @return community
 #' @export
+#' @examples
+#' # Create a simple community matrix
+#' comm <- matrix(rpois(20, lambda=5), nrow=4, ncol=5)
+#' # Simulate new community using Poisson distribution
+#' new_comm <- synth_comm_from_counts(comm, distr="pois")
+#' # Simulate using negative binomial with custom parameters
+#' params <- get_comm_params(comm, distr="negbin")
+#' new_comm_nb <- synth_comm_from_counts(comm, distr="negbin", params=params)
 synth_comm_from_counts <- function(comm, mar=2, distr, Sigma=cov(comm),
                                    params, n=nrow(comm), retParams=FALSE, ...) {
     D <- nrow(comm)
@@ -45,6 +53,13 @@ synth_comm_from_counts <- function(comm, mar=2, distr, Sigma=cov(comm),
 #' @param ... arguments passed to fitdistr
 #' @return list of parameters
 #' @export
+#' @examples
+#' # Create a simple community matrix
+#' comm <- matrix(rpois(20, lambda=5), nrow=4, ncol=5)
+#' # Get parameters for Poisson distribution
+#' params <- get_comm_params(comm, distr="pois")
+#' # Get parameters for negative binomial distribution
+#' params_nb <- get_comm_params(comm, distr="negbin")
 get_comm_params <- function(comm, mar=2, distr, ...) {
     apply(comm, mar, function(x) {
         x <- as.numeric(x)
@@ -64,8 +79,23 @@ get_comm_params <- function(comm, mar=2, distr, ...) {
 #' @importFrom VGAM dzinegbin dzipois
 #' @importFrom stats dnbinom
 #' @export
+#' @examples
+#' # Fit Poisson distribution
+#' x <- rpois(100, lambda=5)
+#' fit_pois <- fitdistr(x, "pois")
+#' fit_pois$par$lambda
+#' 
+#' # Fit negative binomial distribution
+#' x_nb <- rnbinom(100, size=1, mu=5)
+#' fit_nb <- fitdistr(x_nb, "negbin")
+#' fit_nb$par$mu
+
+#' # Fit zero-inflated Poisson
+#' x_zip <- c(rpois(80, lambda=5), rep(0, 20))
+#' fit_zip <- fitdistr(x_zip, "zipois")
+#' fit_zip$par$lambda
 fitdistr <- function (x, densfun, start, control, ...)  {
-    if (class(x) != "numeric") stop("Error: input must be numeric vector")
+    if (!(class(x) %in% c("numeric", "integer"))) stop("Error: input must be numeric vector")
     Call <- match.call(expand.dots = TRUE)
     if (missing(start))
         start <- NULL
@@ -213,8 +243,15 @@ logLikzip <- function(param, x, ddistr, ...) {
 #' @param plot graph the output
 #' @param ... pass arguments to qqplot
 #' @export
+#' @examples
+#' # Create a simple community matrix
+#' comm <- matrix(rpois(100, lambda=5), nrow=10, ncol=10)
+#' # Get parameters for Poisson distribution
+#' params <- get_comm_params(comm, distr="pois")
+#' # Create QQ plot
+#' qqdplot_comm(comm, distr="pois", param=params)
 qqdplot_comm <- function(comm, distr, param, plot=TRUE, ...) {
-    if (class(comm) != 'qqdcomm') {
+    if (class(comm)[1] != 'qqdcomm') {
         if (!missing(param)) {
             fit <- t(sapply(1:nrow(comm), function(i) qqdplot(comm[i,], distr=distr, param=param[[i]], plot=FALSE)))
         } else {

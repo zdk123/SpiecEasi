@@ -14,3 +14,8 @@
 \description{
 s3 method for graph to other data types
 }
+\examples{
+# Create a graph and convert to graph adjacency matrix
+g <- make_graph("erdos_renyi", D=5, e=6)
+mat <- as.matrix(g)
+}

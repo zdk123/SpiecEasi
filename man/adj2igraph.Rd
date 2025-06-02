@@ -26,3 +26,10 @@ adj2igraph(
 \description{
 Convert an adjacency matrix (ie - from the \code{sparseiCov} function) to an igraph object
 }
+\examples{
+# Create a symmetric adjacency matrix
+adj <- matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), nrow=3, byrow=TRUE)
+
+# Convert to igraph
+g <- adj2igraph(adj, vertex.attr=list(name=c('A', 'B', 'C')))
+}

@@ -29,3 +29,15 @@ rmvzinegbin(n, mu, Sigma, munbs, ks, ps, ...)
 Generate multivariate, negative binomial data,
 with counts approximately correlated according to Sigma
 }
+\examples{
+# Generate 50 samples from 3 correlated ZINB variables
+mu <- c(2, 5, 8)
+Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+data <- rmvzinegbin(50, mu=mu, Sigma=Sigma)
+
+# Generate with explicit parameters
+munbs <- c(2, 5, 8)
+ks <- c(2, 3, 4)
+ps <- c(0.1, 0.2, 0.3)
+data2 <- rmvzinegbin(50, Sigma=Sigma, munbs=munbs, ks=ks, ps=ps)
+}

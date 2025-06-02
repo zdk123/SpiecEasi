@@ -31,3 +31,13 @@ rmvnorm(
 Draw samples from multivariate, correlated normal distribution
 with counts correlated according to Sigma
 }
+\examples{
+# Generate 50 samples from 3 correlated normal variables
+mu <- c(0, 0, 0)
+Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+data <- rmvnorm(50, mu=mu, Sigma=Sigma)
+
+# Generate with different mean vector
+mu2 <- c(1, 2, 3)
+data2 <- rmvnorm(50, mu=mu2, Sigma=Sigma)
+}

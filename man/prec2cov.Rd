@@ -14,3 +14,9 @@ prec2cov(Precision, tol = 1e-04)
 \description{
 Precision matrix (inverse covariance) to a covariance matrix
 }
+\examples{
+# Create a simple precision matrix
+prec <- matrix(c(2, -1, 0, -1, 2, -1, 0, -1, 2), nrow=3)
+# Convert to covariance matrix
+cov <- prec2cov(prec)
+}

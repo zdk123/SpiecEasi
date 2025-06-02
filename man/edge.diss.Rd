@@ -20,8 +20,20 @@ edge.diss(x, y, metric = "jaccard", otux = NULL, otuy = NULL)
 \description{
 Compute the dissimilarity between the edge sets of two networks via:
 \enumerate{
- \item maximum overlap: |x  y| / max\{|x|,|y|\}
- \item jaccard index (default):   |x  y|/(|x U y|)
+\item maximum overlap: |x  y| / max\{|x|,|y|\}
+\item jaccard index (default):   |x  y|/(|x U y|)
 }
 Input networks do not have to have the same node sets.
+}
+\examples{
+# Create two sparse adjacency matrices
+library(Matrix)
+x <- Matrix(c(0,1,0,1,0,1,0,1,0), nrow=3, sparse=TRUE)
+y <- Matrix(c(0,1,1,1,0,0,1,0,0), nrow=3, sparse=TRUE)
+
+# Calculate Jaccard dissimilarity
+jaccard_sim <- edge.diss(x, y, metric='jaccard')
+
+# Calculate max overlap
+max_sim <- edge.diss(x, y, metric='max')
 }
