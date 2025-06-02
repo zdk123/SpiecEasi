@@ -88,7 +88,7 @@ get_comm_params <- function(comm, mar=2, distr, ...) {
 #' # Fit negative binomial distribution
 #' x_nb <- rnbinom(100, size=1, mu=5)
 #' fit_nb <- fitdistr(x_nb, "negbin")
-#' fit_nb$par$mu
+#' fit_nb$par['mu']
 
 #' # Fit zero-inflated Poisson
 #' x_zip <- c(rpois(80, lambda=5), rep(0, 20))
