@@ -93,7 +93,7 @@ get_comm_params <- function(comm, mar=2, distr, ...) {
 #' # Fit zero-inflated Poisson
 #' x_zip <- c(rpois(80, lambda=5), rep(0, 20))
 #' fit_zip <- fitdistr(x_zip, "zipois")
-#' fit_zip$par$lambda
+#' fit_zip$par['lambda']
 fitdistr <- function (x, densfun, start, control, ...)  {
     if (!(class(x) %in% c("numeric", "integer"))) stop("Error: input must be numeric vector")
     Call <- match.call(expand.dots = TRUE)
