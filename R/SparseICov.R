@@ -77,6 +77,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @param sym symmetrize the neighborhood using the 'or' (default)/'and' rule
 #' @param ... further arguments to glmnet
 #' @importFrom Matrix t
+#' @export
 #' @examples
 #' # Generate binary data for Ising model
 #' set.seed(123)
