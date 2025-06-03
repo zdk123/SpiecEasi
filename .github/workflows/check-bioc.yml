@@ -78,7 +78,7 @@ jobs:
          else
            echo "Finding the the R version for bioc version ${bioc_version}"
            biocversion=$(echo "$bioc_version")
-           rversion=$(echo "$bioc" | sed -En "/r_ver_for_bioc_ver/,/release_dates/p" | grep "$bioc_version\":" | grep -Eo ": \"[0-9]{1}\.[0-9]{1}" | grep -Eo "[0-9]{1}\.[0-9]{1}")
+           rversion=$(echo "$bioc" | sed -En "/r_ver_for_bioc_ver/,/release_dates/p" | grep "$bioc_version\:" | grep -Eo ": \"[0-9]{1}\.[0-9]{1}" | grep -Eo "[0-9]{1}\.[0-9]{1}")
            biocmajor=$(echo "$biocversion" | cut -c 1-1)
            biocminor=$(echo "$biocversion" | cut -c 3-4)
            bioccont=$(echo "bioconductor/bioconductor_docker:RELEASE_${biocmajor}_${biocminor}")
@@ -138,8 +138,30 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ matrix.config.os }}-${{ matrix.config.r }}-${{ matrix.config.bioc }}-${{ inputs.cache-version }}
-          restore-keys: ${{ matrix.config.os }}-${{ matrix.config.r }}-${{ matrix.config.bioc }}--${{ inputs.cache-version }}
+          key: ${{ matrix.config.os }}-${{ matrix.config.r }}-${{ matrix.config.bioc }}-${{ env.cache-version }}
+          restore-keys: ${{ matrix.config.os }}-${{ matrix.config.r }}-${{ matrix.config.bioc }}-${{ env.cache-version }}
+
+      ## Add after the R package cache step
+      - name: Cache system dependencies (macOS)
+        if: matrix.config.os == 'macOS-latest'
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/opt/libxml2
+            /usr/local/opt/imagemagick@6
+            /usr/local/opt/harfbuzz
+            /usr/local/opt/fribidi
+            /usr/local/opt/libgit2
+          key: macos-sysdeps-${{ env.cache-version }}
+          restore-keys: macos-sysdeps-
+
+      ## Cache BiocManager and core packages separately for faster builds
+      - name: Cache BiocManager
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.R_LIBS_USER }}/BiocManager
+          key: ${{ matrix.config.os }}-${{ matrix.config.r }}-biocmanager-${{ env.cache-version }}
+          restore-keys: ${{ matrix.config.os }}-${{ matrix.config.r }}-biocmanager-
 
       ## remotes is needed for isntalling the Linux system dependencies
       ## as well as other R packages later on.
