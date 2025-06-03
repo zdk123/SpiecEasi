@@ -33,5 +33,5 @@ fit_nb$par['mu']
 # Fit zero-inflated Poisson
 x_zip <- c(rpois(80, lambda=5), rep(0, 20))
 fit_zip <- fitdistr(x_zip, "zipois")
-fit_zip$par$lambda
+fit_zip$par['lambda']
 }

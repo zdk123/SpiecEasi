@@ -69,6 +69,12 @@ Lets simulate some multivariate data under zero-inflated negative binomial model
 
 Obviously, for real data, skip 1-4.
 
+Session info:
+```{r, eval=runchunks}
+sessionInfo()
+```
+
+Setup:
 ```{r, eval=runchunks}
 library(SpiecEasi)
 data(amgut1.filt)
@@ -201,16 +207,19 @@ a consistency measure between round 1 and round 2 of the American Gut project da
 
 First we fit the networks, assuming that there are 10 latent components in the dataset:
 ```{r, eval=FALSE}
+# Basic multicore processing doesn't work on Windows
+ncores <- if(.Platform$OS.type == "windows") 1 else 4
+
 se1.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
-                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=ncores))
 se2.mb.amgut <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
-                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=ncores))
 
 
 se1.slr.amgut <- spiec.easi(amgut1.filt, method='slr', r=10, lambda.min.ratio=1e-2,
-                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=ncores))
 se2.slr.amgut <- spiec.easi(amgut2.filt.phy, method='slr', r=10, lambda.min.ratio=1e-2,
-                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=ncores))
 ```
 
 Then we compare the consistency between the edge sets within each method using
@@ -275,7 +284,8 @@ se1 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
               sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs1)
 )
 ## Parallel multicore ##
-pargs2 <- list(rep.num=50, seed=10010, ncores=4)
+ncores <- if(.Platform$OS.type == "windows") 1 else 4
+pargs2 <- list(rep.num=50, seed=10010, ncores=ncores)
 t2 <- system.time(
 se2 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
               sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs2)
