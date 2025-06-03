@@ -22,7 +22,7 @@ multi.spiec.easi(
 
 \item{method}{estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
 
-\item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' \link{default}}
+\item{sel.criterion}{character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' [default]}
 
 \item{verbose}{flag to show progress messages}
 
@@ -50,5 +50,5 @@ result <- spiec.easi(datalist)
 
 }
 \seealso{
-spiec.easi
+\code{\link{spiec.easi}}
 }

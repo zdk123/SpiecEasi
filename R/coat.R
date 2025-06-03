@@ -11,11 +11,11 @@
 #' @details If \code{adaptive=TRUE}, and \code{data} is a covariance matrix, the adaptive penalty is calculated by assuming the underlying data is jointly Gaussian in the infinite sample setting. The results may differ from the 'empirical' adaptive setting.
 #'
 #' There are a few undocumented arguments useful for computing a lambda path on the fly:
-#' \itemize{
-#'  \item{lambda.max: }{Maximum lambda. Default: max absolute covariance}
-#'  \item{lambda.min.ratio: }{lambda.min is lambda.min.ratio*lambda.max is the smallest lambda evaluated. Defailt: 1e-3}
-#'  \item{nlambda: }{Number of values of lambda between lambda.max and lambda.min. Default: 30}
-#'}
+#' \describe{
+#'  \item{lambda.max}{Maximum lambda. Default: max absolute covariance}
+#'  \item{lambda.min.ratio}{lambda.min is lambda.min.ratio*lambda.max is the smallest lambda evaluated. Default: 1e-3}
+#'  \item{nlambda}{Number of values of lambda between lambda.max and lambda.min. Default: 30}
+#' }
 #' @export
 #' @examples
 #' # simulate data with 1 negative correlation

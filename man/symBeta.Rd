@@ -19,11 +19,11 @@ Symmetrize a beta (coefficient) matrix, ie. selected from MB neighborhood select
 }
 \details{
 Mode can be:
-\itemize{
-\item ave:  Arithmetic average between the two possible values of beta
-\item maxabs: The maximum \link{absolute} value between the two values
-\item upper:  Take the values from the upper triangle
-\item lower:  Take the values from the lower triangle
+\describe{
+\item{ave}{Arithmetic average between the two possible values of beta}
+\item{maxabs}{The maximum [absolute] value between the two values}
+\item{upper}{Take the values from the upper triangle}
+\item{lower}{Take the values from the lower triangle}
 }
 }
 \examples{

@@ -42,7 +42,7 @@ norm_rdiric <- function(x) {
 #' compute the shannon entropy from a vector (normalized internally)
 #'
 #' Shannon entropy is:
-#'     sum [ x_i log(x_i) ]
+#'     sum \[ x_i log(x_i) \]
 #'
 #' @param x data vector
 #' @return shannon entropy in base e

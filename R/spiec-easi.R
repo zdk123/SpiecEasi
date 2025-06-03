@@ -133,7 +133,7 @@ NULL
 
 #' @param data For a matrix, non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also by phyloseq or otu_table object.
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)
-#' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' [default], 'bstars' (Bounded StARS)
+#' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' \[default\], 'bstars' (Bounded StARS)
 #' @param verbose flag to show progress messages
 #' @param pulsar.select flag to perform model selection. Choices are TRUE/FALSE/'batch'
 #' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
@@ -143,7 +143,7 @@ NULL
 #' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
 #' @method spiec.easi default
 #' @rdname spiec.easi
-#' @seealso multi.spiec.easi
+#' @seealso \code{\link{multi.spiec.easi}}
 #' @export
 spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                         verbose=TRUE, pulsar.select=TRUE, pulsar.params=list(),
@@ -314,12 +314,12 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
 #' Can also run \code{spiec.easi} on a list and S3 will dispatch the proper function.
 #' @param datalist list of non-normalized count OTU/data tables (stored in a matrix, data.frame or phyloseq/otu_table) with samples on rows and features/OTUs in columns
 #' @param method estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)
-#' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' [default]
+#' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' \[default\]
 #' @param verbose flag to show progress messages
 #' @param pulsar.select flag to perform model selection. Choices are TRUE/FALSE/'batch'
 #' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
 #' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
-#' @seealso spiec.easi
+#' @seealso \code{\link{spiec.easi}}
 #' @export
 #' @examples
 #' # Generate random data

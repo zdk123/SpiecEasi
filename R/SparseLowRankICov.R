@@ -125,9 +125,9 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
 
 #' robust PCA
 #'
-#' Form a robust PCA from clr-transformed data and [the low rank component of] an inverse covariance matrix
+#' Form a robust PCA from clr-transformed data and \[the low rank component of\] an inverse covariance matrix
 #'
-#' @param X the n x p [clr-transformed] data
+#' @param X the n x p \[clr-transformed\] data
 #' @param L the p x p rank-r ('residual') inverse covariance matrix from \code{spiec.easi} run argument method='slr'.
 #' @param inverse flag to indicate the L is the inverse covariance matrix
 #' @returns a named list with n x r matrix of scores and r x r matrix of loadings

@@ -7,7 +7,7 @@
 robustPCA(X, L, inverse = TRUE)
 }
 \arguments{
-\item{X}{the n x p \link{clr-transformed} data}
+\item{X}{the n x p [clr-transformed] data}
 
 \item{L}{the p x p rank-r ('residual') inverse covariance matrix from \code{spiec.easi} run argument method='slr'.}
 
@@ -17,5 +17,5 @@ robustPCA(X, L, inverse = TRUE)
 a named list with n x r matrix of scores and r x r matrix of loadings
 }
 \description{
-Form a robust PCA from clr-transformed data and \link{the low rank component of} an inverse covariance matrix
+Form a robust PCA from clr-transformed data and [the low rank component of] an inverse covariance matrix
 }
