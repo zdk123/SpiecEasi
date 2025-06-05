@@ -39,6 +39,7 @@ Suggests:
     covr,
     knitr,
     BiocStyle,
+    rmarkdown,
     RefManageR,
     sessioninfo
 LinkingTo: Rcpp, RcppArmadillo

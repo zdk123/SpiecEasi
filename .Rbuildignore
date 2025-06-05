@@ -6,9 +6,9 @@
 ^README\.Rmd$
 ^inst/extdata\.*
 ^inst/TUTORIAL*
-^inst
 ^LICENSE\.md$
 ^\.github$
 ^codecov\.yml$
 ^doc$
 ^Meta$
+..Rcheck
