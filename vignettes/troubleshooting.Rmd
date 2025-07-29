@@ -97,12 +97,29 @@ sum(getRefit(se))/2
 **Problem**: The analysis takes too long or runs out of memory.
 
 **Solutions**:
-- Use parallel processing with `ncores` parameter
+- Use parallel processing with `ncores` parameter (Unix-like systems only)
 - Use B-StARS method for large datasets
 - Reduce `rep.num` in pulsar.params
 - Use batch mode for HPC clusters
 
-### 4. Convergence issues
+### 4. Windows parallel processing issues
+
+**Problem**: Error "'mc.cores' > 1 is not supported on Windows"
+
+**Solutions**:
+- Use `ncores=1` for serial processing on Windows
+- Use snow cluster for parallel processing on Windows:
+```{r, eval=FALSE}
+library(parallel)
+cl <- makeCluster(4, type = "SOCK")
+pargs.windows <- list(rep.num=50, seed=10010, cluster=cl)
+se.windows <- spiec.easi(data, method='mb', pulsar.params=pargs.windows)
+stopCluster(cl)
+```
+- Use batch mode which works on all platforms
+- Consider using WSL (Windows Subsystem for Linux) for Unix-like environment
+
+### 5. Convergence issues
 
 **Problem**: The algorithm doesn't converge or gives warnings.
 
@@ -112,7 +129,7 @@ sum(getRefit(se))/2
 - Try different starting values
 - Check for missing or infinite values
 
-### 5. Memory issues
+### 6. Memory issues
 
 **Problem**: R runs out of memory during analysis.
 
@@ -121,6 +138,19 @@ sum(getRefit(se))/2
 - Reduce dataset size by filtering rare taxa
 - Use batch processing for large datasets
 - Increase system memory if available
+
+## Platform-specific considerations
+
+### Windows users:
+- Default parallel processing (`mc.cores > 1`) is not supported
+- Use `ncores=1` for serial processing
+- Use snow cluster for parallel processing
+- Consider batch mode for large datasets
+
+### Unix-like systems (Linux, macOS):
+- Full support for parallel processing with `mc.cores`
+- Can use `ncores` parameter directly
+- Both multicore and snow clusters available
 
 ## Diagnostic functions
 
@@ -141,6 +171,9 @@ sum(getRefit(se))/2
 
 # Visualize stability curve
 plot(se$select$stars$summary)
+
+# Check platform information
+.Platform$OS.type
 ```
 
 ## Parameter tuning guidelines
@@ -154,7 +187,7 @@ plot(se$select$stars$summary)
 - `lambda.min.ratio = 1e-3`
 - `nlambda = 50-100`
 - `rep.num = 50-100`
-- Use parallel processing
+- Use parallel processing (Unix-like systems only)
 
 ### For large datasets (> 1000 samples, > 200 taxa):
 - `lambda.min.ratio = 1e-4`
@@ -162,6 +195,12 @@ plot(se$select$stars$summary)
 - `rep.num = 100+`
 - Use B-StARS method
 - Consider batch processing
+
+### Windows-specific recommendations:
+- Use `ncores=1` for serial processing
+- Use snow cluster for parallel processing
+- Consider batch mode for large datasets
+- Use B-StARS method to reduce computational time
 
 Session info:
 ```{r}

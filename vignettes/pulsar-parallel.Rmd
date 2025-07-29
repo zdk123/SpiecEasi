@@ -38,6 +38,8 @@ SpiecEasi is now using the [pulsar package](https://cran.r-project.org/package=p
 
 As in the previous version of SpiecEasi, we can supply the `ncores` argument to the pulsar.params list to break up the subsampled computations into parallel tasks.
 
+**Note**: On Windows systems, `mc.cores > 1` is not supported by default. For Windows users, we recommend using the `snow` cluster type or running in serial mode.
+
 In this example, we set the random seed to make consistent comparison across experiments:
 
 ```{r, message=FALSE, warning=FALSE}
@@ -50,8 +52,18 @@ t1 <- system.time(
 se1 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
               sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs1)
 )
-## Parallel multicore ##
-pargs2 <- list(rep.num=50, seed=10010, ncores=4)
+
+## Platform-specific parallel processing ##
+if (.Platform$OS.type == "windows") {
+  # On Windows, use snow cluster or run serial
+  pargs2 <- list(rep.num=50, seed=10010, ncores=1)  # Serial for Windows
+  cat("Running on Windows - using serial processing\n")
+} else {
+  # On Unix-like systems, use multicore
+  pargs2 <- list(rep.num=50, seed=10010, ncores=4)
+  cat("Running on Unix-like system - using parallel processing\n")
+}
+
 t2 <- system.time(
 se2 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
               sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs2)
@@ -84,6 +96,37 @@ identical(getRefit(se2), getRefit(se4))
 t2[3] > t4[3]
 ```
 
+## Windows-specific considerations
+
+For Windows users, there are several options for parallel processing:
+
+### Option 1: Use snow cluster
+```{r, eval=FALSE}
+# For Windows users who want parallel processing
+library(parallel)
+cl <- makeCluster(4, type = "SOCK")
+pargs.windows <- list(rep.num=50, seed=10010, cluster=cl)
+se.windows <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+                         sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs.windows)
+stopCluster(cl)
+```
+
+### Option 2: Use serial processing
+```{r, eval=FALSE}
+# Simple serial processing for Windows
+pargs.serial <- list(rep.num=50, seed=10010, ncores=1)
+se.serial <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+                        sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs.serial)
+```
+
+### Option 3: Use batch mode
+```{r, eval=FALSE}
+# Batch mode works on all platforms
+bargs <- list(rep.num=50, seed=10010, conffile="parallel")
+se.batch <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+                       sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs)
+```
+
 ## Batch Mode
 
 Pulsar gives us the option of running stability selection in batch mode, using the [batchtools](https://mllg.github.io/batchtools/) package. This will be useful to anyone with access to an hpc/distributing computing system. Each subsample will be independently executed using a system-specific cluster function.
@@ -109,29 +152,38 @@ Let's compare the performance of different approaches:
 ```{r, eval=FALSE}
 # Compare timing
 cat("Serial StARS:", t1[3], "seconds\n")
-cat("Parallel StARS:", t2[3], "seconds\n")
+cat("Platform-specific StARS:", t2[3], "seconds\n")
 cat("Serial B-StARS:", t3[3], "seconds\n")
-cat("Parallel B-StARS:", t4[3], "seconds\n")
+cat("Platform-specific B-StARS:", t4[3], "seconds\n")
 
-# Speedup factors
-cat("Parallel speedup (StARS):", t1[3]/t2[3], "\n")
-cat("B-StARS speedup (serial):", t1[3]/t3[3], "\n")
-cat("B-StARS speedup (parallel):", t2[3]/t4[3], "\n")
+# Speedup factors (only meaningful on Unix-like systems)
+if (.Platform$OS.type != "windows") {
+  cat("Parallel speedup (StARS):", t1[3]/t2[3], "\n")
+  cat("B-StARS speedup (serial):", t1[3]/t3[3], "\n")
+  cat("B-StARS speedup (parallel):", t2[3]/t4[3], "\n")
+}
 ```
 
 ## Key parameters
 
 - **`rep.num`**: Number of subsamples for stability selection (default: 50)
-- **`ncores`**: Number of cores for parallel processing
+- **`ncores`**: Number of cores for parallel processing (use 1 on Windows)
 - **`sel.criterion`**: Selection criterion ('stars' or 'bstars')
 - **`pulsar.select`**: Whether to use pulsar for model selection
 - **`pulsar.params`**: List of parameters passed to pulsar
 
-## Recommendations
+## Platform-specific recommendations
 
+### Unix-like systems (Linux, macOS):
 1. **For small datasets**: Use default StARS with serial processing
 2. **For medium datasets**: Use parallel StARS with 4-8 cores
 3. **For large datasets**: Use B-StARS with parallel processing
+4. **For HPC clusters**: Use batch mode with appropriate config files
+
+### Windows systems:
+1. **For small datasets**: Use default StARS with serial processing
+2. **For medium datasets**: Use B-StARS with serial processing
+3. **For large datasets**: Use batch mode or snow cluster
 4. **For HPC clusters**: Use batch mode with appropriate config files
 
 Session info:
