@@ -1,0 +1,174 @@
+---
+title: "Troubleshooting"
+author: 
+  - name: Zachary Kurtz
+    email: zdkurtz@gmail.com
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+package: "`r pkg_ver('SpiecEasi')`"
+vignette: >
+  %\VignetteIndexEntry{Troubleshooting}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+```{r setup, echo = FALSE, eval=TRUE}
+knitr::opts_knit$set(
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = TRUE
+saveout   = runchunks
+
+if (!runchunks) load('.VIGNETTE.RData')
+```
+
+# Troubleshooting
+
+A common issue that comes up when running `spiec.easi` is coming up with an empty network after running StARS.
+
+For example:
+
+```{r, echo=TRUE, message=FALSE, warning=TRUE}
+library(SpiecEasi)
+data(amgut1.filt)
+
+pargs <- list(seed=10010)
+se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=5e-1, nlambda=10, pulsar.params=pargs)
+getOptInd(se)
+sum(getRefit(se))/2
+```
+
+As the warning indicates, the network stability could not be determined from the lambda path. Looking at the stability along the lambda path, `se$select$stars$summary`, we can see that the maximum value of the StARS summary statistic never crosses the default threshold (0.05).
+
+This problem we can fix by lowering `lambda.min.ratio` to explore denser networks:
+
+```{r, message=FALSE, warning=FALSE}
+se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=10, pulsar.params=pargs)
+```
+
+We have now fit a network, but since we have only a rough, discrete sampling of networks along the lambda path, we should check how far we are from the target stability threshold (0.05):
+
+```{r}
+getStability(se)
+sum(getRefit(se))/2
+```
+
+To get closer to the mark, we should bump up `nlambda` to more finely sample of the lambda path, which gives a denser network:
+
+```{r, message=FALSE, warning=FALSE}
+se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=100, pulsar.params=pargs)
+getStability(se)
+sum(getRefit(se))/2
+```
+
+## Common issues and solutions
+
+### 1. Empty networks
+
+**Problem**: After running `spiec.easi`, you get an empty network (no edges).
+
+**Solutions**:
+- Lower `lambda.min.ratio` to explore denser networks
+- Increase `nlambda` for finer sampling of the lambda path
+- Check if your data has sufficient signal-to-noise ratio
+- Try different methods ('mb' vs 'glasso')
+
+### 2. Very dense networks
+
+**Problem**: The inferred network has too many edges.
+
+**Solutions**:
+- Increase `lambda.min.ratio` to explore sparser networks
+- Adjust the StARS threshold in `pulsar.params`
+- Use cross-validation instead of StARS
+
+### 3. Computational issues
+
+**Problem**: The analysis takes too long or runs out of memory.
+
+**Solutions**:
+- Use parallel processing with `ncores` parameter
+- Use B-StARS method for large datasets
+- Reduce `rep.num` in pulsar.params
+- Use batch mode for HPC clusters
+
+### 4. Convergence issues
+
+**Problem**: The algorithm doesn't converge or gives warnings.
+
+**Solutions**:
+- Check data preprocessing and normalization
+- Ensure data doesn't have constant columns
+- Try different starting values
+- Check for missing or infinite values
+
+### 5. Memory issues
+
+**Problem**: R runs out of memory during analysis.
+
+**Solutions**:
+- Use sparse matrices where possible
+- Reduce dataset size by filtering rare taxa
+- Use batch processing for large datasets
+- Increase system memory if available
+
+## Diagnostic functions
+
+SpiecEasi provides several functions to help diagnose issues:
+
+```{r, eval=FALSE}
+# Check stability along lambda path
+getStability(se)
+
+# Get optimal lambda index
+getOptInd(se)
+
+# Get summary statistics
+se$select$stars$summary
+
+# Check network density
+sum(getRefit(se))/2
+
+# Visualize stability curve
+plot(se$select$stars$summary)
+```
+
+## Parameter tuning guidelines
+
+### For small datasets (< 100 samples, < 50 taxa):
+- `lambda.min.ratio = 1e-2`
+- `nlambda = 20-50`
+- `rep.num = 20-50`
+
+### For medium datasets (100-1000 samples, 50-200 taxa):
+- `lambda.min.ratio = 1e-3`
+- `nlambda = 50-100`
+- `rep.num = 50-100`
+- Use parallel processing
+
+### For large datasets (> 1000 samples, > 200 taxa):
+- `lambda.min.ratio = 1e-4`
+- `nlambda = 100+`
+- `rep.num = 100+`
+- Use B-StARS method
+- Consider batch processing
+
+Session info:
+```{r}
+sessionInfo()
+```
+
+```{r, echo = FALSE, eval=runchunks}
+if (saveout)
+ save(se, pargs, file=".VIGNETTE.RData")
+``` 

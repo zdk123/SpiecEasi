@@ -1,0 +1,145 @@
+---
+title: "pulsar: parallel utilities for model selection"
+author: 
+  - name: Zachary Kurtz
+    email: zdkurtz@gmail.com
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+package: "`r pkg_ver('SpiecEasi')`"
+vignette: >
+  %\VignetteIndexEntry{pulsar: parallel utilities for model selection}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+```{r setup, echo = FALSE, eval=TRUE}
+knitr::opts_knit$set(
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = TRUE
+saveout   = runchunks
+
+if (!runchunks) load('.VIGNETTE.RData')
+```
+
+# pulsar: parallel utilities for model selection
+
+SpiecEasi is now using the [pulsar package](https://cran.r-project.org/package=pulsar) as the backend for performing model selection. In the default parameter setting, this uses the same [StARS](https://arxiv.org/abs/1006.3316) procedure as previous versions.
+
+As in the previous version of SpiecEasi, we can supply the `ncores` argument to the pulsar.params list to break up the subsampled computations into parallel tasks.
+
+In this example, we set the random seed to make consistent comparison across experiments:
+
+```{r, message=FALSE, warning=FALSE}
+library(SpiecEasi)
+data(amgut1.filt)
+
+## Default settings ##
+pargs1 <- list(rep.num=50, seed=10010)
+t1 <- system.time(
+se1 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+              sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs1)
+)
+## Parallel multicore ##
+pargs2 <- list(rep.num=50, seed=10010, ncores=4)
+t2 <- system.time(
+se2 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+              sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs2)
+)
+```
+
+We can further speed up StARS using the [bounded-StARS](https://arxiv.org/abs/1605.07072) ('bstars') method. The B-StARS approach computes network stability across the whole lambda path, but only for the first 2 subsamples. This is used to build an initial estimate of the summary statistic, which in turn gives us a lower/upper bound on the optimal lambda. The remaining subsamples are used to compute the stability over the restricted path. Since denser networks are more computational expensive to compute, this can significantly reduce computational time for datasets with many variables.
+
+```{r, message=FALSE, warning=FALSE}
+t3 <- system.time(
+se3 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+               sel.criterion='bstars', pulsar.select=TRUE, pulsar.params=pargs1)
+)
+t4 <- system.time(
+se4 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+               sel.criterion='bstars', pulsar.select=TRUE, pulsar.params=pargs2)
+)
+```
+
+We can see that in addition to the computational savings, the refit networks are identical:
+
+```{r, eval=FALSE}
+## serial vs parallel
+identical(getRefit(se1), getRefit(se2))
+t1[3] > t2[3]
+## stars vs bstars
+identical(getRefit(se1), getRefit(se3))
+t1[3] > t3[3]
+identical(getRefit(se2), getRefit(se4))
+t2[3] > t4[3]
+```
+
+## Batch Mode
+
+Pulsar gives us the option of running stability selection in batch mode, using the [batchtools](https://mllg.github.io/batchtools/) package. This will be useful to anyone with access to an hpc/distributing computing system. Each subsample will be independently executed using a system-specific cluster function.
+
+This requires an external config file which will instruct the batchtools registry how to construct the cluster function which will execute the individual jobs. `batch.pulsar` has some built in config files that are useful for testing purposes (serial mode, "parallel", "snow", etc), but it is advisable to create your own config file and pass in the absolute path. See the [batchtools docs](https://mllg.github.io/batchtools/articles/batchtools.html#configuration-file) for instructions on how to construct config file and template files (i.e. to interact with a queueing system such as TORQUE or SGE).
+
+```{r, eval=FALSE}
+## bargs <- list(rep.num=50, seed=10010, conffile="path/to/conf.txt")
+bargs <- list(rep.num=50, seed=10010, conffile="parallel")
+## See the config file stores:
+pulsar::findConfFile('parallel')
+
+## uncomment line below to turn off batchtools reporting
+# options(batchtools.verbose=FALSE)
+se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
+            sel.criterion='stars', pulsar.select='batch', pulsar.params=bargs)
+```
+
+## Performance comparison
+
+Let's compare the performance of different approaches:
+
+```{r, eval=FALSE}
+# Compare timing
+cat("Serial StARS:", t1[3], "seconds\n")
+cat("Parallel StARS:", t2[3], "seconds\n")
+cat("Serial B-StARS:", t3[3], "seconds\n")
+cat("Parallel B-StARS:", t4[3], "seconds\n")
+
+# Speedup factors
+cat("Parallel speedup (StARS):", t1[3]/t2[3], "\n")
+cat("B-StARS speedup (serial):", t1[3]/t3[3], "\n")
+cat("B-StARS speedup (parallel):", t2[3]/t4[3], "\n")
+```
+
+## Key parameters
+
+- **`rep.num`**: Number of subsamples for stability selection (default: 50)
+- **`ncores`**: Number of cores for parallel processing
+- **`sel.criterion`**: Selection criterion ('stars' or 'bstars')
+- **`pulsar.select`**: Whether to use pulsar for model selection
+- **`pulsar.params`**: List of parameters passed to pulsar
+
+## Recommendations
+
+1. **For small datasets**: Use default StARS with serial processing
+2. **For medium datasets**: Use parallel StARS with 4-8 cores
+3. **For large datasets**: Use B-StARS with parallel processing
+4. **For HPC clusters**: Use batch mode with appropriate config files
+
+Session info:
+```{r}
+sessionInfo()
+```
+
+```{r, echo = FALSE, eval=runchunks}
+if (saveout)
+ save(se1, se2, se3, se4, t1, t2, t3, t4, pargs1, pargs2, file=".VIGNETTE.RData")
+``` 
