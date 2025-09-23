@@ -53,14 +53,14 @@ se1 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
               sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs1)
 )
 
-## Platform-specific parallel processing ##
-if (.Platform$OS.type == "windows") {
+## Platform-specific or envrionment-specific parallel processing ##
+if (.Platform$OS.type == "windows" || Sys.getenv("CI") == "true" || nzchar(Sys.getenv("GITHUB_ACTIONS"))) {
   # On Windows, use snow cluster or run serial
   pargs2 <- list(rep.num=50, seed=10010, ncores=1)  # Serial for Windows
   cat("Running on Windows - using serial processing\n")
 } else {
-  # On Unix-like systems, use multicore if available
-  n_cores <- min(4, parallel::detectCores())
+  # On Unix-like systems, use multicore
+  n_cores <- min(2, parallel::detectCores())
   pargs2 <- list(rep.num=50, seed=10010, ncores=n_cores)
   cat("Running on Unix-like system - using parallel processing\n")
 }
