@@ -59,8 +59,9 @@ if (.Platform$OS.type == "windows") {
   pargs2 <- list(rep.num=50, seed=10010, ncores=1)  # Serial for Windows
   cat("Running on Windows - using serial processing\n")
 } else {
-  # On Unix-like systems, use multicore
-  pargs2 <- list(rep.num=50, seed=10010, ncores=4)
+  # On Unix-like systems, use multicore if available
+  n_cores <- min(4, parallel::detectCores())
+  pargs2 <- list(rep.num=50, seed=10010, ncores=n_cores)
   cat("Running on Unix-like system - using parallel processing\n")
 }
 
