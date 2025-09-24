@@ -41,7 +41,8 @@ Suggests:
     BiocStyle,
     rmarkdown,
     RefManageR,
-    sessioninfo
+    sessioninfo,
+    magick
 LinkingTo: Rcpp, RcppArmadillo
 VignetteBuilder: knitr
 Config/testthat/edition: 3

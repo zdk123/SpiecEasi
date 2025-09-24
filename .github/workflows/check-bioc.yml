@@ -174,12 +174,15 @@ jobs:
       ## This will work again once https://github.com/r-lib/remotes/commit/0e4e23051041d9f1b15a5ab796defec31af6190d
       ## makes it to the CRAN version of remotes
 
-      # - name: Install Linux system dependencies
-      #   if: runner.os == 'Linux'
-      #   run: |
-      #     sysreqs=$(Rscript -e 'cat("apt-get update -y && apt-get install -y", paste(gsub("apt-get install -y ", "", remotes::system_requirements("ubuntu", "24.04")), collapse = " "))')
-      #     echo $sysreqs
-      #     sudo -s eval "$sysreqs"
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: |
+          ## Install magick system dependencies for Ubuntu
+          apt-get update -y
+          apt-get install -y libmagick++-dev libmagick++-6.q16-dev
+          
+          ## Install other common system dependencies
+          apt-get install -y libxml2-dev libcurl4-openssl-dev libssl-dev libgit2-dev
 
       - name: Install macOS system dependencies
         if: matrix.config.os == 'macOS-latest'
