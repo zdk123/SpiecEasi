@@ -1,4 +1,3 @@
-context('setup')
 
 p <- 20
 e <- p
@@ -10,7 +9,6 @@ X <- exp(rmvnorm(n, rep(0,p), S))
 
 pargs <- list(seed=10010, rep.num=10)
 
-context("SPIEC-EASI fit")
 lmx  <- .7
 lmr  <- 1e-2
 nlam <- 20
@@ -35,44 +33,45 @@ bout.bstars <- spiec.easi(X, method='mb', verbose=FALSE, lambda.max=lmx,
   lambda.min.ratio=lmr, nlambda=nlam, sel.criterion='bstars',
   pulsar.select='batch', pulsar.params=pargs)
 
+describe("SPIEC-EASI model fitting", {
+  test_that("no pulsar has same output", {
+    tmp <- out.stars$select$stars$opt.index
+    expect_equal(as.matrix(Matrix::drop0(out$est$path[[tmp]])),
+                 as.matrix(out.stars$refit$stars))
+  })
 
-test_that("no pulsar has same output", {
-  tmp <- out.stars$select$stars$opt.index
-  expect_equal(as.matrix(Matrix::drop0(out$est$path[[tmp]])),
-               as.matrix(out.stars$refit$stars))
+  test_that("stars == bstars", {
+    expect_equal(as.matrix(out.bstars$refit$stars),
+                 as.matrix(out.stars$refit$stars))
+  })
+
+  test_that("stars == batch stars", {
+    expect_equal(as.matrix(bout.stars$refit$stars),
+                 as.matrix(out.stars$refit$stars))
+  })
+
+  test_that("batch stars == batch bstars", {
+    expect_equal(as.matrix(bout.stars$refit$stars),
+                 as.matrix(bout.bstars$refit$stars))
+  })
+
+  test_that("stars == batch bstars", {
+    expect_equal(as.matrix(out.stars$refit$stars),
+                 as.matrix(bout.bstars$refit$stars))
+  })
 })
 
-test_that("stars == bstars", {
-  expect_equal(as.matrix(out.bstars$refit$stars),
-               as.matrix(out.stars$refit$stars))
-})
-
-test_that("stars == batch stars", {
-  expect_equal(as.matrix(bout.stars$refit$stars),
-               as.matrix(out.stars$refit$stars))
-})
-
-test_that("batch stars == batch bstars", {
-  expect_equal(as.matrix(bout.stars$refit$stars),
-               as.matrix(bout.bstars$refit$stars))
-})
-
-test_that("stars == batch bstars", {
-  expect_equal(as.matrix(out.stars$refit$stars),
-               as.matrix(bout.bstars$refit$stars))
-})
-
-context('spiec.easi getters')
-
-test_that("Getter API throws errors if no pulsar selection", {
-  expect_error(getOptInd(out))
-  expect_error(getOptNet(out))
-  expect_error(getRefit(out))
-  expect_error(getOptLambda(out))
-  expect_error(getOptMerge(out))
-  expect_error(getOptCov(out))
-  expect_error(getOptiCov(out))
-  expect_error(getOptBeta(out))
+describe("Getter API error handling", {
+  test_that("Getter API throws errors if no pulsar selection", {
+    expect_error(getOptInd(out))
+    expect_error(getOptNet(out))
+    expect_error(getRefit(out))
+    expect_error(getOptLambda(out))
+    expect_error(getOptMerge(out))
+    expect_error(getOptCov(out))
+    expect_error(getOptiCov(out))
+    expect_error(getOptBeta(out))
+  })
 })
 
 runtests <- function(out) {
@@ -90,18 +89,20 @@ runtests <- function(out) {
                symBeta(Matrix::drop0(out$est$beta[[i]])))
 }
 
-test_that("Getter API, pulsar / stars ", {
-  runtests(out.stars)
-})
+describe("Getter API functionality", {
+  test_that("Getter API, pulsar / stars ", {
+    runtests(out.stars)
+  })
 
-test_that("Getter API, pulsar / bstars ", {
-  runtests(out.bstars)
-})
+  test_that("Getter API, pulsar / bstars ", {
+    runtests(out.bstars)
+  })
 
-test_that("Getter API, batch pulsar / stars ", {
-  runtests(bout.stars)
-})
+  test_that("Getter API, batch pulsar / stars ", {
+    runtests(bout.stars)
+  })
 
-test_that("Getter API, batch pulsar / bstars ", {
-  runtests(bout.bstars)
+  test_that("Getter API, batch pulsar / bstars ", {
+    runtests(bout.bstars)
+  })
 })

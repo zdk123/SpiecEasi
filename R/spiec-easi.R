@@ -345,7 +345,7 @@ multi.spiec.easi <- function(datalist, method='glasso', sel.criterion='stars',
 #' @rdname multi.spiec.easi
 #' @export
 spiec.easi.list <- function(data, ...) {
-  classes <- vapply(data, class, character(1))
+  classes <- vapply(data, function(x) class(x)[1], character(1))
   if (length(unique(classes)) != 1)
     warning('input list contains data of mixed classes.')
 
