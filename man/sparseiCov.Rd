@@ -19,6 +19,9 @@ sparseiCov(data, method, npn = FALSE, verbose = FALSE, cov.output = TRUE, ...)
 
 \item{...}{further arguments to huge/estimation functions. See details.}
 }
+\value{
+Sparse inverse covariance estimation result object
+}
 \description{
 This function estimates the sparse inverse covariance matrix/matrices
 given data (typically after clr transformation) and further arguments to

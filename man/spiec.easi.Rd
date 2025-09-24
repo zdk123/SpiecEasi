@@ -47,6 +47,9 @@ spiec.easi(data, ...)
 
 \item{lambda.log}{should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?}
 }
+\value{
+SPIEC-EASI result object
+}
 \description{
 Run the whole SPIEC-EASI pipeline, from data transformation, sparse inverse covariance estimation and model selection.
 Inputs are a non-normalized OTU table and pipeline options.

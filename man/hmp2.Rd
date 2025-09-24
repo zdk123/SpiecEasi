@@ -18,6 +18,9 @@ https://www.hmpdacc.org/ihmp/
 \usage{
 data(hmp2)
 }
+\value{
+List containing hmp216S and hmp2prot phyloseq objects
+}
 \description{
 Pre-filtered data from the intregrated human microbiome project.
 }

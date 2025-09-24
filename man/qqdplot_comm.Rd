@@ -17,6 +17,9 @@ qqdplot_comm(comm, distr, param, plot = TRUE, ...)
 
 \item{...}{pass arguments to qqplot}
 }
+\value{
+QQ plot object or fitted parameters
+}
 \description{
 qq-plot for theoretical vs observed communities
 }

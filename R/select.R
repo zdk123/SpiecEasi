@@ -6,6 +6,7 @@
 #' @param data input data set used to get the network
 #' @param loglik log likeihood of the graphical model
 #' @param gamma the model likeihood/complexity tradeoff parameter
+#' @return Extended BIC score
 #' @export
 #' @examples
 #' # Generate a random adjacency matrix

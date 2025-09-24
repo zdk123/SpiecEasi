@@ -10,6 +10,7 @@
 #' @param verbose display messages
 #' @param plot graph the output
 #' @param ll number of points for the plot
+#' @return ROC curve object
 #' @importFrom grDevices dev.off png
 #' @export
 stars.roc <- function(optmerge, theta, verbose = TRUE, plot = TRUE, ll=15) {
@@ -37,52 +38,52 @@ merge2path <- function(merge, length.out) {
 #' @noRd
 huge.pr <- function (path, theta, verbose = TRUE, plot = TRUE) {
     gcinfo(verbose = FALSE)
-    ROC = list()
-    theta = as.matrix(theta)
-    d = ncol(theta)
-    pos.total = sum(theta != 0)
-    neg.total = d * (d - 1) - pos.total
+    ROC <- list()
+    theta <- as.matrix(theta)
+    d <- ncol(theta)
+    pos.total <- sum(theta != 0)
+    neg.total <- d * (d - 1) - pos.total
     if (verbose)
         message("Computing F1 scores, false positive rates and true positive rates....", appendLF=FALSE)
-    ROC$prec = rep(0, length(path))
-    ROC$rec  = rep(0, length(path))
-    ROC$F1 = rep(0, length(path))
-    for (r in 1:length(path)) {
-        tmp = as.matrix(path[[r]])
-        tp.all = (theta != 0) * (tmp != 0)
-        diag(tp.all) = 0
+    ROC$prec <- rep(0, length(path))
+    ROC$rec  <- rep(0, length(path))
+    ROC$F1 <- rep(0, length(path))
+    for (r in seq_along(path)) {
+        tmp <- as.matrix(path[[r]])
+        tp.all <- (theta != 0) * (tmp != 0)
+        diag(tp.all) <- 0
         ROC$tp[r] <- sum(tp.all != 0)/pos.total
-        fp.all = (theta == 0) * (tmp != 0)
-        diag(fp.all) = 0
+        fp.all <- (theta == 0) * (tmp != 0)
+        diag(fp.all) <- 0
         ROC$fp[r] <- sum(fp.all != 0)/neg.total
-        fn = 1 - ROC$tp[r]
-        precision = ROC$tp[r]/(ROC$tp[r] + ROC$fp[r])
-        recall = ROC$tp[r]/(ROC$tp[r] + fn)
+        fn <- 1 - ROC$tp[r]
+        precision <- ROC$tp[r]/(ROC$tp[r] + ROC$fp[r])
+        recall <- ROC$tp[r]/(ROC$tp[r] + fn)
         ROC$prec[r] <- precision
         ROC$rec[r]  <- recall
-        ROC$F1[r] = 2 * precision * recall/(precision + recall)
+        ROC$F1[r] <- 2 * precision * recall/(precision + recall)
         if (is.na(ROC$F1[r]))
-            ROC$F1[r] = 0
+            ROC$F1[r] <- 0
     }
     if (verbose)
         message("done.")
     rm(precision, recall, tp.all, fp.all, path, theta, fn)
     gc()
-    ord.p = order(ROC$prec, ROC$rec, na.last=NA)
+    ord.p <- order(ROC$prec, ROC$rec, na.last=NA)
     ROC$prec <- ROC$prec[ord.p]
     ROC$rec  <- ROC$rec[ord.p]
-    tmp2 = c(min(c(4/(d-1), ROC$prec)), ROC$prec[ord.p], 1)
-    tmp1 = c(1, ROC$rec[ord.p], 0)
+    tmp2 <- c(min(c(4/(d-1), ROC$prec)), ROC$prec[ord.p], 1)
+    tmp1 <- c(1, ROC$rec[ord.p], 0)
     if (plot) {
         par(mfrow = c(1, 1))
         plot(tmp1, tmp2, type = "b", main = "PR Curve", xlab = "Recall",
             ylab = "Precision", ylim = c(0, 1))
     }
     tmax <- diff(range(tmp2))*diff(range(tmp1))
-    ROC$AUC = sum(diff(tmp2) * (tmp1[-1] + tmp1[-length(tmp1)]))/(2*tmax)
+    ROC$AUC <- sum(diff(tmp2) * (tmp1[-1] + tmp1[-length(tmp1)]))/(2*tmax)
     rm(ord.p, tmp1, tmp2)
     gc()
-    class(ROC) = "roc"
+    class(ROC) <- "roc"
     return(ROC)
 }
 
@@ -99,6 +100,7 @@ huge.pr <- function (path, theta, verbose = TRUE, plot = TRUE) {
 #' @param metric 'jaccard' or 'max'
 #' @param otux taxa names of adjacency x
 #' @param otuy taxa names of adjacency y
+#' @return Dissimilarity score between edge sets
 #' @export
 #' @examples
 #' # Create two sparse adjacency matrices

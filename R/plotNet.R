@@ -7,6 +7,7 @@
 #' @param diag Flag to include self-loops (diagonal of adjacency matrix)
 #' @param edge.attr named list of attributes for graph edges
 #' @param vertex.attr named list of attributes for graph vertices
+#' @return An igraph object
 #' @export
 #' @examples
 #' # Create a symmetric adjacency matrix
@@ -19,14 +20,14 @@ adj2igraph <- function(Adj, rmEmptyNodes=FALSE, diag=FALSE, edge.attr=list(),
     g <- igraph::graph.adjacency(Adj, mode = "undirected", weighted = TRUE, diag=diag)
 
     if (length(vertex.attr) > 0) {
-        for (i in 1:length(vertex.attr)) {
+        for (i in seq_along(vertex.attr)) {
             attr <- names(vertex.attr)[i]
             g <- igraph::set.vertex.attribute(g, attr, index=igraph::V(g), vertex.attr[[i]])
         }
     }
 
     if (length(edge.attr) > 0) {
-        for (i in 1:length(edge.attr)) {
+        for (i in seq_along(edge.attr)) {
             attr <- names(edge.attr)[i]
             g <- igraph::set.edge.attribute(g, attr, index=igraph::E(g), edge.attr[[i]])
         }

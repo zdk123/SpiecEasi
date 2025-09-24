@@ -74,8 +74,8 @@ rmvzipois <- function(n, mu, Sigma=diag(length(mu)), lambdas, ps, ...) {
     if (missing(lambdas) || missing(ps)) {
         if (missing(mu)) stop("Need to supply mu")
         if (length(mu) != length(SDs)) stop("Sigma and mu dimensions don't match")
-        lambdas <- unlist(lapply(1:length(SDs), function(i) .zipois_getLam(mu[i], SDs[i])))
-        ps   <- unlist(lapply(1:length(SDs), function(i) .zipois_getP(mu[i], SDs[i])))
+        lambdas <- unlist(lapply(seq_along(SDs), function(i) .zipois_getLam(mu[i], SDs[i])))
+        ps   <- unlist(lapply(seq_along(SDs), function(i) .zipois_getP(mu[i], SDs[i])))
     }
     if (length(lambdas) != length(SDs)) stop("Sigma and mu/lambdas dimensions don't match")
     if (length(lambdas) == 1) stop("Need more than 1 variable")
@@ -151,7 +151,7 @@ rmvnegbin <- function(n, mu, Sigma, ks, ...) {
     if (missing(mu)) stop('mu is required')
     if (length(mu) != length(SDs)) stop("Sigma and mu dimensions don't match")
     if (missing(ks)) {
-        ks   <- unlist(lapply(1:length(SDs), function(i) .negbin_getK(mu[i], SDs[i])))
+        ks   <- unlist(lapply(seq_along(SDs), function(i) .negbin_getK(mu[i], SDs[i])))
     }
     d   <- length(mu)
     normd  <- rmvnorm(n, rep(0, d), Sigma=Cor)
@@ -214,9 +214,9 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
     SDs <- sqrt(diag(Sigma))
     if (missing(munbs) || missing(ps) || missing(ks)) {
         if (length(mu) != length(SDs)) stop("Sigma and mu dimensions don't match")
-        munbs <- unlist(lapply(1:length(SDs), function(i) .zinegbin_getLam(mu[i], SDs[i])))
-        ps   <- unlist(lapply(1:length(SDs), function(i) .zinegbin_getP(mu[i], munbs[i])))
-        ks   <- unlist(lapply(1:length(SDs), function(i) .zinegbin_getK(mu[i], SDs[i], munbs[i])))
+        munbs <- unlist(lapply(seq_along(SDs), function(i) .zinegbin_getLam(mu[i], SDs[i])))
+        ps   <- unlist(lapply(seq_along(SDs), function(i) .zinegbin_getP(mu[i], munbs[i])))
+        ks   <- unlist(lapply(seq_along(SDs), function(i) .zinegbin_getK(mu[i], SDs[i], munbs[i])))
     }
     if (length(munbs) != length(SDs)) stop("Sigma and mu dimensions don't match")
     d   <- length(munbs)

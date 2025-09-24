@@ -17,6 +17,9 @@ make_graph(method, D, e, enforce = TRUE, ...)
 
 \item{...}{additional options to graph method}
 }
+\value{
+A symmetric adjacency matrix representing the graph topology
+}
 \description{
 Procedure to generate graph topologies for Gaussian Graphical Models
 }

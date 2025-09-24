@@ -16,6 +16,7 @@
 #'  \item{lambda.min.ratio}{lambda.min is lambda.min.ratio*lambda.max is the smallest lambda evaluated. Default: 1e-3}
 #'  \item{nlambda}{Number of values of lambda between lambda.max and lambda.min. Default: 30}
 #' }
+#' @return COAT result object with thresholded covariance matrix
 #' @export
 #' @examples
 #' # simulate data with 1 negative correlation
@@ -179,7 +180,7 @@ adaptive.thresh <- function(S, lam, shrinkDiag=FALSE, eta=1) {
 .getThetaMat <- function(X) {
   n <- ncol(X)
   theta <- matrix(0, n,n)
-  for (i in 1:n) {
+  for (i in seq_len(n)) {
     for (j in i:n) {
       theta[j,i] <- theta[i,j] <- sd(X[,i]*X[,j])
     }

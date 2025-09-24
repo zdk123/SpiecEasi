@@ -12,7 +12,7 @@
 prec2cov <- function(Precision, tol=1e-4) {
     eigval <- eigen(Precision)$values
     if (any(eigval < tol)) {
-        warning("Warning: Precision matrix not invertible, trying generalized inverse instead")
+        warning("Precision matrix not invertible, trying generalized inverse instead")
         ginv(Precision)
     } else {
         solve(Precision)
@@ -32,7 +32,7 @@ prec2cov <- function(Precision, tol=1e-4) {
 #' prec <- cov2prec(cov)
 cov2prec <- function(Cov, tol=1e-4) {
     Precision <- tryCatch(solve(Cov), error = function(e) {
-              warning("Warning: Precision matrix not invertible, trying generalized inverse instead")
+              warning("Precision matrix not invertible, trying generalized inverse instead")
               ginv(Cov) })
     Precision[which(Precision == 0)] <- tol
     Precision
@@ -61,7 +61,7 @@ cov2prec <- function(Cov, tol=1e-4) {
 graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, targetCondition=100, epsBin=1e-2,
                         numBinSearch=100) {
 
-    if (class(Graph) != 'graph') stop('input is not a graph')
+    if (!inherits(Graph, 'graph')) stop('input is not a graph')
     n <- ncol(Graph)
 
     posThetaLims <- sort(posThetaLims)
@@ -123,7 +123,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
         currUB <- stepSize
     } else {
         currLB <- 0
-        stepSize = 0.1
+        stepSize <- 0.1
 
         while (currCondTheta > condTheta) {
             currCondTheta <- kappa(Theta + stepSize*diag(n))
@@ -132,7 +132,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
         currUB <- stepSize
     }
 
-    for (i in 1:numBinSearch) {
+    for (i in seq_len(numBinSearch)) {
         diagConst <- (currUB+currLB)/2
         currCondTheta <- kappa(Theta+diagConst*diag(n))
 
@@ -151,6 +151,7 @@ graph2prec <- function(Graph, posThetaLims=c(2,3), negThetaLims=-posThetaLims, t
 #' @param e Number of edges (preferably sparse, must be at least 1/2 D)
 #' @param enforce add/remove edges to enforce graph has e edges
 #' @param ... additional options to graph method
+#' @return A symmetric adjacency matrix representing the graph topology
 #' @export
 #' @examples
 #' # Generate different types of graphs
@@ -166,7 +167,7 @@ make_graph <- function(method, D, e, enforce=TRUE, ...) {
     method <- switch(method, cluster = "cluster", erdos_renyi = "erdos_renyi",
                        hub = "hub", scale_free = "scale_free",
                        block = "block", band = "band",
-                       stop(paste("Error: graph method", method, "not supported")))
+                       stop("graph method ", method, " not supported"))
 
     if (method != "erdos_renyi")
       if (e < round(D/2)) stop('Number of edges e must be bigger than 1/2 D')
@@ -194,7 +195,7 @@ enforceE <- function(Graph, e) {
     if (diffE > 0) {
         oneInds <- which(Graph == 1)
         tmpInds <- uniqMatInds(oneInds, D)
-        randi   <- sample(1:nrow(tmpInds), abs(diffE))
+        randi   <- sample(seq_len(nrow(tmpInds)), abs(diffE))
         for (i in randi) {
             gind <- tmpInds[i,]
             Graph[gind[1], gind[2]] <- Graph[gind[2], gind[1]] <- 0
@@ -204,7 +205,7 @@ enforceE <- function(Graph, e) {
         diag(Graph) <- 1   # fill diag with dummy 1s
         zeroInds <- which(Graph == 0)
         tmpInds <- uniqMatInds(zeroInds, D)
-        randi   <- sample(1:nrow(tmpInds), abs(diffE))
+        randi   <- sample(seq_len(nrow(tmpInds)), abs(diffE))
         for (i in randi) {
             gind <- tmpInds[i,]
             Graph[gind[1], gind[2]] <- Graph[gind[2], gind[1]] <- 1
@@ -230,7 +231,7 @@ scale_free <- function(D, e, pfun) {
     K_mat <- matrix(0, D)   # keep track of the number of degrees in the graph
 
     # pick first two nodes at random
-    nodes <- sample(1:D, 2)
+    nodes <- sample(seq_len(D), 2)
     #connect nodes
     Graph[nodes[1], nodes[2]] <- 1
     Graph[nodes[2], nodes[1]] <- 1
@@ -349,7 +350,7 @@ band <- function(D, e) {
         off2    <- matrix(0, D, D)
         diag(off2[,-(1:k)]) <- rep(1, D-k)
         tempG <- Graph + off1 + off2
-        if (sum(tempG)>(2*e)) bestFit = TRUE
+        if (sum(tempG)>(2*e)) bestFit <- TRUE
         else Graph <- tempG
         k <- k + 1
     }
@@ -435,6 +436,7 @@ covReport <- function(Cov, Prec) {
 #' s3 method for graph to other data types
 #' @param x graph adjacency matrix
 #' @param ... Arguments to base as.data.frame
+#' @return A data.frame
 #' @export
 #' @examples
 #' # Create a graph and convert to graph adjacency data.frame
@@ -447,6 +449,7 @@ as.data.frame.graph <- function(x, ...) {
 #' s3 method for graph to other data types
 #' @param x graph adjacency matrix
 #' @param ... Arguments to base as.matrix
+#' @return A matrix
 #' @export
 #' @examples
 #' # Create a graph and convert to graph adjacency matrix

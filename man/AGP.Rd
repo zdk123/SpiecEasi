@@ -19,6 +19,9 @@ data(amgut1.filt)
 
 data(amgut2.filt.phy)
 }
+\value{
+List containing amgut1.filt matrix and amgut2.filt.phy phyloseq object
+}
 \description{
 Round 1 and 2 community count datasets from the American Gut Project.
 }

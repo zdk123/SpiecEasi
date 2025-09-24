@@ -78,6 +78,7 @@ get_comm_params <- function(comm, mar=2, distr, ...) {
 #' @param ... further arguments to densfun
 #' @importFrom VGAM dzinegbin dzipois
 #' @importFrom stats dnbinom
+#' @return Fitted distribution parameters
 #' @export
 #' @examples
 #' # Fit Poisson distribution
@@ -95,7 +96,7 @@ get_comm_params <- function(comm, mar=2, distr, ...) {
 #' fit_zip <- fitdistr(x_zip, "zipois")
 #' fit_zip$par['lambda']
 fitdistr <- function (x, densfun, start, control, ...)  {
-    if (!(class(x) %in% c("numeric", "integer"))) stop("Error: input must be numeric vector")
+    if (!(class(x) %in% c("numeric", "integer"))) stop("input must be numeric vector")
     Call <- match.call(expand.dots = TRUE)
     if (missing(start))
         start <- NULL
@@ -242,6 +243,7 @@ logLikzip <- function(param, x, ddistr, ...) {
 #' @param param parameter list for fitting the data. Output from \code{get_comm_params}
 #' @param plot graph the output
 #' @param ... pass arguments to qqplot
+#' @return QQ plot object or fitted parameters
 #' @export
 #' @examples
 #' # Create a simple community matrix
@@ -251,9 +253,9 @@ logLikzip <- function(param, x, ddistr, ...) {
 #' # Create QQ plot
 #' qqdplot_comm(comm, distr="pois", param=params)
 qqdplot_comm <- function(comm, distr, param, plot=TRUE, ...) {
-    if (class(comm)[1] != 'qqdcomm') {
+    if (!inherits(comm, 'qqdcomm')) {
         if (!missing(param)) {
-            fit <- t(sapply(1:nrow(comm), function(i) qqdplot(comm[i,], distr=distr, param=param[[i]], plot=FALSE)))
+            fit <- t(vapply(seq_len(nrow(comm)), function(i) qqdplot(comm[i,], distr=distr, param=param[[i]], plot=FALSE), numeric(2)))
         } else {
             fit <- t(apply(comm, 1, qqdplot, distr=distr, param=NULL, plot=FALSE))
         }
@@ -266,7 +268,7 @@ qqdplot_comm <- function(comm, distr, param, plot=TRUE, ...) {
 
     if (plot) {
         xrange <- range(y)
-        if (!('main' %in% names(list(...)))) main = 'QQ-plot'
+        if (!('main' %in% names(list(...)))) main <- 'QQ-plot'
         else main <- list(...)$main
         plot(y, x, main=main, ylim=xrange, xlab='Observed Quantiles', ylab='Theoretical Quantiles')
         abline(0, 1, lty=2)

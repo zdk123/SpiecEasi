@@ -31,6 +31,7 @@ norm_to_total <- function(x) x/sum(x)
 #'
 #' "Normalize" a count vector by drawing a single sample from a Dirichlet distribution, using the count vector as the prior.
 #' @param x count data vector
+#' @return A single sample from Dirichlet distribution
 #' @export
 #' @examples
 #' x <- c(1, 2, 3, 4)
@@ -69,6 +70,7 @@ neff <- function(x) exp(shannon(x))
 #' Centered log-ratio functions
 #' @param x.f input data
 #' @param ... pass through arguments
+#' @return Centered log-ratio transformed data
 #' @export
 #' @examples
 #' x <- c(1, 2, 3, 4)
@@ -114,6 +116,7 @@ clr.data.frame <- function(x.f, mar=2, ...) {
 #' Additive log-ratio functions
 #' @param x.f input data
 #' @param ... pass through arguments
+#' @return Additive log-ratio transformed data
 #' @export
 #' @examples
 #' x <- c(1, 2, 3, 4)
@@ -169,6 +172,7 @@ alr.data.frame <- function(x.f, mar=2, ...) {
 }
 
 #' @keywords internal
+#' @return Upper triangular elements of matrix
 triu <- function(x) x[upper.tri(x)]
 #' @keywords internal
 tril <- function(x) x[lower.tri(x)]

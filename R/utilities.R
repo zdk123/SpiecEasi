@@ -17,6 +17,10 @@
 #'   \item getOptCov: the optimal covariance matrix associated with the selected network (glasso only)
 #'   \item getOptBeta: the optimal coefficient matrix (mb only)
 #'}
+#' @examples
+#' # Get optimal index from spiec.easi result
+#' # est <- spiec.easi(data, method='glasso')
+#' # opt_idx <- getOptInd(est)
 #' @export
 getOptInd <- function(est) getOptX(est, 'index')
 

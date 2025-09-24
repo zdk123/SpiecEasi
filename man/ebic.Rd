@@ -15,6 +15,9 @@ ebic(refit, data, loglik, gamma = 0.5)
 
 \item{gamma}{the model likeihood/complexity tradeoff parameter}
 }
+\value{
+Extended BIC score
+}
 \description{
 Calculate the extended BIC criterion on a sparse (refit) network and the input data
 }

@@ -1,3 +1,7 @@
+#' @title SpiecEasi: Sparse Inverse Covariance Estimation for Ecological Association Inference
+#' @description SpiecEasi provides methods for inferring ecological associations from compositional microbiome data using sparse inverse covariance estimation.
+#' @details The package implements SPIEC-EASI (SParse InversE Covariance estimation for Ecological Association Inference) methods for microbiome network inference, including glasso and neighborhood selection approaches with stability selection for model selection.
+#' @return This package provides functions for microbiome network inference and analysis
 #' @importFrom graphics abline legend par plot
 #' @importFrom methods as
 #' @importFrom stats cor cov cov2cor lm median na.exclude na.omit optim pnorm ppoints qlnorm rmultinom rnorm rpois sd var
@@ -13,6 +17,7 @@
 #' \item amgut2.filt.phy: A phyloseq object
 #' }
 #' @source http://humanfoodproject.com/americangut/
+#' @return List containing amgut1.filt matrix and amgut2.filt.phy phyloseq object
 NULL
 
 
@@ -37,6 +42,7 @@ NULL
 #'    \item hmp2prot: protein data, A phyloseq object, 43 'taxa' and 47 samples.
 #'  }
 #' @source https://www.hmpdacc.org/ihmp/
+#' @return List containing hmp216S and hmp2prot phyloseq objects
 NULL
 
 #' @name hmp216S

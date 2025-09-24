@@ -23,6 +23,9 @@ adj2igraph(
 
 \item{vertex.attr}{named list of attributes for graph vertices}
 }
+\value{
+An igraph object
+}
 \description{
 Convert an adjacency matrix (ie - from the \code{sparseiCov} function) to an igraph object
 }

@@ -45,6 +45,9 @@ alr(x.f, ...)
 
 \item{mar}{margin to apply the transformation (rows: 1 or cols: 2)}
 }
+\value{
+Additive log-ratio transformed data
+}
 \description{
 Additive log-ratio functions
 }
