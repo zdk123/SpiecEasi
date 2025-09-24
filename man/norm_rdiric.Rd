@@ -12,3 +12,7 @@ norm_rdiric(x)
 \description{
 "Normalize" a count vector by drawing a single sample from a Dirichlet distribution, using the count vector as the prior.
 }
+\examples{
+x <- c(1, 2, 3, 4)
+norm_rdiric(x)  # Returns a single sample from Dirichlet distribution
+}

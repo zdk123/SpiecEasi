@@ -20,3 +20,18 @@ fitdistr(x, densfun, start, control, ...)
 \description{
 Fit parameters of a marginal distribution to some data vector
 }
+\examples{
+# Fit Poisson distribution
+x <- rpois(100, lambda=5)
+fit_pois <- fitdistr(x, "pois")
+fit_pois$par$lambda
+
+# Fit negative binomial distribution
+x_nb <- rnbinom(100, size=1, mu=5)
+fit_nb <- fitdistr(x_nb, "negbin")
+fit_nb$par['mu']
+# Fit zero-inflated Poisson
+x_zip <- c(rpois(80, lambda=5), rep(0, 20))
+fit_zip <- fitdistr(x_zip, "zipois")
+fit_zip$par['lambda']
+}

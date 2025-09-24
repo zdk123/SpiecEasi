@@ -20,3 +20,11 @@ qqdplot_comm(comm, distr, param, plot = TRUE, ...)
 \description{
 qq-plot for theoretical vs observed communities
 }
+\examples{
+# Create a simple community matrix
+comm <- matrix(rpois(100, lambda=5), nrow=10, ncol=10)
+# Get parameters for Poisson distribution
+params <- get_comm_params(comm, distr="pois")
+# Create QQ plot
+qqdplot_comm(comm, distr="pois", param=params)
+}

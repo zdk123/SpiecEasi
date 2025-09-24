@@ -1,4 +1,12 @@
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+---
+title: "SpecEasi"
+author: Zachary D Kurtz
+date: May 13, 2025
+output: github_document
+---
+
+
 
 ```{r setup, echo = FALSE, eval=TRUE}
 knitr::opts_knit$set(
@@ -22,6 +30,12 @@ This package will be useful to anybody who wants to infer graphical models for a
 
 One small point on notation: we refer to the method as "SPIEC-EASI" and reserve "SpiecEasi" for this package.
 
+<!-- badges: start -->
+[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![R-CMD-check-bioc](https://github.com/zdk123/SpiecEasi/actions/workflows/R-CMD-check-bioc.yaml/badge.svg)](https://github.com/zdk123/SpiecEasi/actions/workflows/R-CMD-check-bioc.yaml)
+[![Codecov test coverage](https://codecov.io/gh/zdk123/SpiecEasi/graph/badge.svg)](https://app.codecov.io/gh/zdk123/SpiecEasi)
+<!-- badges: end -->
+
 ## TOC ##
 0. [Installation](#installation)
 1. [News](#news)
@@ -32,6 +46,7 @@ One small point on notation: we refer to the method as "SPIEC-EASI" and reserve 
 5. [Cross Domain SPIEC-EASI](#cross-domain-interactions)
 6. [pulsar & batch options](#pulsar-parallel-utilities-for-model-selection)
 7. [Troubleshooting](#troubleshooting)
+8. [Code of Conduct](#code-of-conduct)
 
 ## Installation ##
 
@@ -41,10 +56,21 @@ I assume that all auxiliary packages are already installed - for example pulsar,
 If you get an unexpected error, you may need to download and install a missing dependency.
 
 From an interactive R session:
-
 ```{r, eval=FALSE}
-library(devtools)
-install_github("zdk123/SpiecEasi")
+if (!require("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+
+BiocManager::install("SpiecEasi")
+```
+ 
+Or for a development version:
+```{r eval=FALSE}
+if (!require("remotes", quietly = TRUE)) install.packages("remotes")
+
+remotes::install_github("zdk123/SpiecEasi")
+```
+
+And load the installed package:
+```r
 library(SpiecEasi)
 ```
 
@@ -108,7 +134,7 @@ e <- d
 Synthesize the data
 ```{r, eval=runchunks}
 set.seed(10010)
-graph <- make_graph('cluster', d, e)
+graph <- SpiecEasi::make_graph('cluster', d, e)
 Prec  <- graph2prec(graph)
 Cor   <- cov2cor(prec2cov(Prec))
 
@@ -198,7 +224,7 @@ legend("topright", c("MB", "glasso", "sparcc"),
 
 ## Working with phyloseq ##
 
-SpiecEasi includes some convience wrappers to work directly with `phyloseq` objects.
+SpiecEasi includes some convenience wrappers to work directly with `phyloseq` objects.
 ```{r, eval=runchunks, warning=FALSE, message=FALSE}
 library(phyloseq)
 ## Load round 2 of American gut project
@@ -390,3 +416,7 @@ sum(getRefit(se))/2
 if (saveout)
  save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".README.RData")
 ```
+
+
+## Code of Conduct ##
+Please note that the SpiecEasi project is released with a [Contributor Code of Conduct](http://bioconductor.org/about/code-of-conduct/). By contributing to this project, you agree to abide by its terms.

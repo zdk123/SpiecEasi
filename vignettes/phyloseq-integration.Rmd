@@ -1,0 +1,60 @@
+---
+title: "Working with phyloseq"
+author: 
+  - name: Zachary Kurtz
+    email: zdkurtz@gmail.com
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+package: "`r pkg_ver('SpiecEasi')`"
+vignette: >
+  %\VignetteIndexEntry{Working with phyloseq}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+```{r setup, echo = FALSE, eval=TRUE}
+knitr::opts_knit$set(
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = TRUE
+saveout   = runchunks
+
+if (!runchunks) load('.VIGNETTE.RData')
+```
+
+# Working with phyloseq
+
+SpiecEasi includes some convenience wrappers to work directly with `phyloseq` objects.
+
+```{r, eval=runchunks, warning=FALSE, message=FALSE}
+library(SpiecEasi)
+library(phyloseq)
+## Load round 2 of American gut project
+data('amgut2.filt.phy')
+se.mb.amgut2 <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
+                           nlambda=20, pulsar.params=list(rep.num=50))
+ig2.mb <- adj2igraph(getRefit(se.mb.amgut2),  vertex.attr=list(name=taxa_names(amgut2.filt.phy)))
+plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
+```
+
+The `plot_network` function provides an easy way to visualize networks with taxonomic information from phyloseq objects. You can specify different taxonomic ranks for coloring nodes and customize the visualization further.
+
+Session info:
+```{r}
+sessionInfo()
+```
+
+```{r, echo = FALSE, eval=runchunks}
+if (saveout)
+ save(se.mb.amgut2, ig2.mb, file=".VIGNETTE.RData")
+``` 

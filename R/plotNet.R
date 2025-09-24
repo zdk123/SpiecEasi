@@ -8,6 +8,12 @@
 #' @param edge.attr named list of attributes for graph edges
 #' @param vertex.attr named list of attributes for graph vertices
 #' @export
+#' @examples
+#' # Create a symmetric adjacency matrix
+#' adj <- matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), nrow=3, byrow=TRUE)
+#' 
+#' # Convert to igraph
+#' g <- adj2igraph(adj, vertex.attr=list(name=c('A', 'B', 'C')))
 adj2igraph <- function(Adj, rmEmptyNodes=FALSE, diag=FALSE, edge.attr=list(),
                        vertex.attr=list(name=1:ncol(Adj))) {
     g <- igraph::graph.adjacency(Adj, mode = "undirected", weighted = TRUE, diag=diag)

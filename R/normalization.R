@@ -11,6 +11,9 @@
 #'
 #' @param x count data vector
 #' @export
+#' @examples
+#' x <- c(1, 2, 0, 4)
+#' norm_pseudo(x)  # Adds 1 to each value before normalizing
 norm_pseudo  <- function(x) norm_to_total(x+1)
 
 #' Total Sum Normalize
@@ -18,6 +21,9 @@ norm_pseudo  <- function(x) norm_to_total(x+1)
 #' Normalize a count vector by the total sum of that vector
 #' @param x count data vector
 #' @export
+#' @examples
+#' x <- c(1, 2, 3, 4)
+#' norm_to_total(x)  # Divides each value by sum(x) = 10
 norm_to_total <- function(x) x/sum(x)
 
 
@@ -26,6 +32,9 @@ norm_to_total <- function(x) x/sum(x)
 #' "Normalize" a count vector by drawing a single sample from a Dirichlet distribution, using the count vector as the prior.
 #' @param x count data vector
 #' @export
+#' @examples
+#' x <- c(1, 2, 3, 4)
+#' norm_rdiric(x)  # Returns a single sample from Dirichlet distribution
 norm_rdiric <- function(x) {
   VGAM::rdiric(n=1, shape=x)[1,]
 }
@@ -33,11 +42,14 @@ norm_rdiric <- function(x) {
 #' compute the shannon entropy from a vector (normalized internally)
 #'
 #' Shannon entropy is:
-#'     sum [ x_i log(x_i) ]
+#'     sum \[ x_i log(x_i) \]
 #'
 #' @param x data vector
 #' @return shannon entropy in base e
 #' @export
+#' @examples
+#' x <- c(1, 2, 3, 4)
+#' shannon(x)  # Returns Shannon entropy of normalized vector
 shannon <- function(x) {
     x.f <- norm_to_total(x)
     -sum(x.f*log(x.f), na.rm=TRUE)
@@ -48,6 +60,9 @@ shannon <- function(x) {
 #' @param x data vector
 #' @return N_eff in base e
 #' @export
+#' @examples
+#' x <- c(1, 2, 3, 4)
+#' neff(x)  # Returns effective number of species
 neff <- function(x) exp(shannon(x))
 
 
@@ -55,6 +70,17 @@ neff <- function(x) exp(shannon(x))
 #' @param x.f input data
 #' @param ... pass through arguments
 #' @export
+#' @examples
+#' x <- c(1, 2, 3, 4)
+#' clr(x)  # Returns centered log-ratio transformation
+#' 
+#' # Matrix example
+#' mat <- matrix(1:12, nrow=3)
+#' clr(mat)  # CLR transformation by columns
+#' 
+#' # Data frame example
+#' df <- as.data.frame(mat)
+#' clr(df)  # CLR transformation by columns
 clr <- function(x.f, ...) {
     UseMethod('clr')
 }
@@ -89,6 +115,17 @@ clr.data.frame <- function(x.f, mar=2, ...) {
 #' @param x.f input data
 #' @param ... pass through arguments
 #' @export
+#' @examples
+#' x <- c(1, 2, 3, 4)
+#' alr(x)  # Returns additive log-ratio transformation using first component as reference
+#' 
+#' # Matrix example
+#' mat <- matrix(1:12, nrow=3)
+#' alr(mat)  # ALR transformation by columns
+#' 
+#' # Data frame example
+#' df <- as.data.frame(mat)
+#' alr(df)  # ALR transformation by columns
 alr <- function(x.f, ...) {
     UseMethod("alr")
 }

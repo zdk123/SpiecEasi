@@ -77,6 +77,18 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @param sym symmetrize the neighborhood using the 'or' (default)/'and' rule
 #' @param ... further arguments to glmnet
 #' @importFrom Matrix t
+#' @export
+#' @examples
+#' # Generate binary data for Ising model
+#' set.seed(123)
+#' data <- matrix(rbinom(100, 1, 0.5), nrow=20, ncol=5)
+#' lambda <- c(0.1, 0.2, 0.3)
+#' 
+#' # Fit neighborhood selection model
+#' result <- neighborhood.net(data, lambda, method="ising")
+#' 
+#' # Check adjacency matrices
+#' length(result$path)  # Number of lambda values
 neighborhood.net <- function(data, lambda, method="ising", ncores=1, sym='or', ...) {
     p <- ncol(data)
     l <- length(lambda)
@@ -170,3 +182,5 @@ glm.neighborhood <- function(X, Y, lambda, link='binomial', ...) {
 
 dclr <- function(x) t(clr(apply(x, 1, norm_diric),2))
 dclrNPN <- function(x) huge::huge.npn(t(clr(apply(x, 1, norm_diric),2)), verbose=FALSE)
+
+

@@ -8,6 +8,14 @@
 \description{
 Estimate networks from the precision matrix of compositional microbial abundance data.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/zdk123/SpiecEasi}
+  \item Report bugs at \url{https://github.com/zdk123/SpiecEasi//issues/}
+}
+
+}
 \author{
 \strong{Maintainer}: Zachary Kurtz \email{zdkurtz@gmail.com}
 

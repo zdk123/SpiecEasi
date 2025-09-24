@@ -36,9 +36,23 @@ Compositional-adjusted thresholding by  doi.org/10.1080/01621459.2018.1442340 by
 If \code{adaptive=TRUE}, and \code{data} is a covariance matrix, the adaptive penalty is calculated by assuming the underlying data is jointly Gaussian in the infinite sample setting. The results may differ from the 'empirical' adaptive setting.
 
 There are a few undocumented arguments useful for computing a lambda path on the fly:
-\itemize{
- \item{lambda.max: }{Maximum lambda. Default: max absolute covariance}
- \item{lambda.min.ratio: }{lambda.min is lambda.min.ratio*lambda.max is the smallest lambda evaluated. Defailt: 1e-3}
- \item{nlambda: }{Number of values of lambda between lambda.max and lambda.min. Default: 30}
+\describe{
+\item{lambda.max}{Maximum lambda. Default: max absolute covariance}
+\item{lambda.min.ratio}{lambda.min is lambda.min.ratio*lambda.max is the smallest lambda evaluated. Default: 1e-3}
+\item{nlambda}{Number of values of lambda between lambda.max and lambda.min. Default: 30}
 }
+}
+\examples{
+# simulate data with 1 negative correlation
+ set.seed(10010)
+ Sigma <- diag(10)*2
+ Sigma[1,2] <- Sigma[2,1] <- -.9
+ data  <- exp(rmvnorm(50, runif(10, 0, 2), Sigma))
+
+# normalize
+ data.clr <- t(clr(data, 1))
+
+# apply COAT
+ est.coat <- coat(data.clr, lambda=0.15, thresh="soft")
+ image(as.matrix(est.coat$cov))
 }

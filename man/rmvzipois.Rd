@@ -27,3 +27,14 @@ rmvzipois(n, mu, Sigma = diag(length(mu)), lambdas, ps, ...)
 Generate multivariate, Zero-inflated poisson data,
 with counts approximately correlated according to Sigma
 }
+\examples{
+# Generate 50 samples from 3 correlated ZIP variables
+mu <- c(2, 5, 8)
+Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+data <- rmvzipois(50, mu=mu, Sigma=Sigma)
+
+# Generate using explicit lambda and zero-inflation parameters
+lambdas <- c(2, 5, 8)
+ps <- c(0.1, 0.2, 0.3)
+data2 <- rmvzipois(50, Sigma=Sigma, lambdas=lambdas, ps=ps)
+}

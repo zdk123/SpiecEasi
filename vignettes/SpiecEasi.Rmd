@@ -1,0 +1,190 @@
+---
+title: "Introduction to SpiecEasi"
+author: 
+  - name: Zachary Kurtz
+    email: zdkurtz@gmail.com
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+package: "`r pkg_ver('SpiecEasi')`"
+vignette: >
+  %\VignetteIndexEntry{Introduction to SpiecEasi}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+```{r setup, echo = FALSE, eval=TRUE}
+knitr::opts_knit$set(
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = TRUE
+saveout   = runchunks
+
+if (!runchunks) load('.VIGNETTE.RData')
+```
+
+# Introduction to SpiecEasi
+
+Sparse InversE Covariance estimation for Ecological Association and Statistical Inference
+
+This package will be useful to anybody who wants to infer graphical models for all sorts of compositional data, though primarily intended for microbiome relative abundance data (generated from 16S amplicon sequence data). It also includes a generator for [overdispersed, zero inflated] multivariate, correlated count data. Please see the paper published in [PLoS Comp Bio](http://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1004226).
+
+One small point on notation: we refer to the method as "SPIEC-EASI" and reserve "SpiecEasi" for this package.
+
+## Available vignettes
+
+This package includes several vignettes covering different aspects of SpiecEasi:
+
+- **[Introduction to SpiecEasi](SpiecEasi.html)** (this vignette): Basic usage and introduction
+- **[Working with phyloseq](phyloseq-integration.html)**: Integration with phyloseq objects
+- **[Learning latent variable graphical models](latent-variable-models.html)**: Advanced methods for handling latent variables
+- **[Cross Domain SPIEC-EASI](cross-domain-interactions.html)**: Analyzing multiple data types together
+- **[pulsar: parallel utilities for model selection](pulsar-parallel.html)**: Parallel processing and performance optimization
+- **[Troubleshooting](troubleshooting.html)**: Common issues and solutions
+
+## Basic Usage
+
+Lets simulate some multivariate data under zero-inflated negative binomial model, based on (high depth/count) round 1 of the American gut project, with a sparse network. The basic steps are:
+
+1. load the data and normalize counts to to common scale (min depth)
+2. fit count margins to the model
+3. generate a synthetic network
+4. generate some synthetic data
+5. clr transformation
+6. inverse covariance estimation along a lambda (sparsity) path
+7. stability selection using the StARS criterion
+8. evaluate performance
+
+Obviously, for real data, skip 1-4.
+
+Session info:
+```{r}
+sessionInfo()
+```
+
+Setup:
+```{r, eval=runchunks}
+library(SpiecEasi)
+data(amgut1.filt)
+depths <- rowSums(amgut1.filt)
+amgut1.filt.n  <- t(apply(amgut1.filt, 1, norm_to_total))
+amgut1.filt.cs <- round(amgut1.filt.n * min(depths))
+
+d <- ncol(amgut1.filt.cs)
+n <- nrow(amgut1.filt.cs)
+e <- d
+```
+
+Synthesize the data:
+```{r, eval=runchunks}
+set.seed(10010)
+graph <- SpiecEasi::make_graph('cluster', d, e)
+Prec  <- graph2prec(graph)
+Cor   <- cov2cor(prec2cov(Prec))
+
+X <- synth_comm_from_counts(amgut1.filt.cs, mar=2, distr='zinegbin', Sigma=Cor, n=n)
+```
+
+The main SPIEC-EASI pipeline: Data transformation, sparse inverse covariance estimation and model selection:
+```{r, eval=runchunks}
+se <- spiec.easi(X, method='mb', lambda.min.ratio=1e-2, nlambda=15)
+```
+
+Examine ROC over lambda path and PR over the stars index for the selected graph:
+```{r, eval=FALSE, fig.width=5, fig.height=5}
+huge::huge.roc(se$est$path, graph, verbose=FALSE)
+stars.pr(getOptMerge(se), graph, verbose=FALSE)
+# stars selected final network under: getRefit(se)
+```
+
+The above example does not cover all possible options and parameters. For example, other generative network models are available, the lambda.min.ratio (the scaling factor that determines the minimum sparsity/lambda parameter) shown here might not be right for your dataset, and its possible that you'll want more repetitions (number of subsamples) for StARS.
+
+## Analysis of American Gut data
+
+Now let's apply SpiecEasi directly to the American Gut data. Don't forget that the normalization is performed internally in the `spiec.easi` function. Also, we should use a larger number of stars repetitions for real data. We can pass in arguments to the inner stars selection function as a list via the parameter `pulsar.params`. If you have more than one processor available, you can also supply a number to `ncores`. Also, let's compare results from the MB and glasso methods as well as SparCC (correlation).
+
+**Note**: On Windows systems, `mc.cores > 1` is not supported by default. For Windows users, we recommend using `ncores=1` for serial processing or the `snow` cluster type for parallel processing. See the [pulsar-parallel vignette](pulsar-parallel.html) for detailed Windows-specific guidance.
+
+```{r, eval=runchunks, message=FALSE, warning=FALSE}
+se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=50))
+se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=50))
+sparcc.amgut <- sparcc(amgut1.filt)
+## Define arbitrary threshold for SparCC correlation matrix for the graph
+sparcc.graph <- abs(sparcc.amgut$Cor) >= 0.3
+diag(sparcc.graph) <- 0
+library(Matrix)
+sparcc.graph <- Matrix(sparcc.graph, sparse=TRUE)
+## Create igraph objects
+ig.mb     <- adj2igraph(getRefit(se.mb.amgut))
+ig.gl     <- adj2igraph(getRefit(se.gl.amgut))
+ig.sparcc <- adj2igraph(sparcc.graph)
+```
+
+Visualize using igraph plotting:
+```{r, eval=runchunks, fig.width=15, fig.height=7, message=FALSE}
+library(igraph)
+## set size of vertex proportional to clr-mean
+vsize    <- rowMeans(clr(amgut1.filt, 1))+6
+am.coord <- layout.fruchterman.reingold(ig.mb)
+
+par(mfrow=c(1,3))
+plot(ig.mb, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="MB")
+plot(ig.gl, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="glasso")
+plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparcc")
+```
+
+We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI is based on penalized estimators, the edge weights are not directly comparable to SparCC (or Pearson/Spearman correlation coefficients):
+
+```{r, eval=runchunks, fig.width=8, fig.height=5}
+library(Matrix)
+secor  <- cov2cor(getOptCov(se.gl.amgut))
+sebeta <- symBeta(getOptBeta(se.mb.amgut), mode='maxabs')
+elist.gl     <- summary(triu(secor*getRefit(se.gl.amgut), k=1))
+elist.mb     <- summary(sebeta)
+elist.sparcc <- summary(sparcc.graph*sparcc.amgut$Cor)
+
+hist(elist.sparcc[,3], main='', xlab='edge weights')
+hist(elist.mb[,3], add=TRUE, col='forestgreen')
+hist(elist.gl[,3], add=TRUE, col='red')
+```
+
+Lets look at the degree statistics from the networks inferred by each method:
+
+```{r, eval=runchunks, fig.width=9, fig.height=6}
+dd.gl     <- degree.distribution(ig.gl)
+dd.mb     <- degree.distribution(ig.mb)
+dd.sparcc <- degree.distribution(ig.sparcc)
+
+plot(0:(length(dd.sparcc)-1), dd.sparcc, ylim=c(0,.35), type='b',
+      ylab="Frequency", xlab="Degree", main="Degree Distributions")
+points(0:(length(dd.gl)-1), dd.gl, col="red" , type='b')
+points(0:(length(dd.mb)-1), dd.mb, col="forestgreen", type='b')
+legend("topright", c("MB", "glasso", "sparcc"),
+        col=c("forestgreen", "red", "black"), pch=1, lty=1)
+```
+
+## Next steps
+
+For more advanced usage, please refer to the other vignettes:
+
+- **[Working with phyloseq](phyloseq-integration.html)**: Learn how to integrate SpiecEasi with phyloseq objects for easier data management and visualization
+- **[Learning latent variable graphical models](latent-variable-models.html)**: Advanced methods for handling unobserved variables that can affect network inference
+- **[Cross Domain SPIEC-EASI](cross-domain-interactions.html)**: Analyze multiple data types (e.g., 16S and ITS) together
+- **[pulsar: parallel utilities for model selection](pulsar-parallel.html)**: Optimize performance with parallel processing
+- **[Troubleshooting](troubleshooting.html)**: Solutions for common issues and parameter tuning guidelines
+
+```{r, echo = FALSE, eval=runchunks}
+if (saveout)
+ save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".VIGNETTE.RData")
+```

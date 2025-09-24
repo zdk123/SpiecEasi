@@ -21,3 +21,11 @@ list of parameters
 \description{
 Get the parameters for the OTUs (along mar) of each community
 }
+\examples{
+# Create a simple community matrix
+comm <- matrix(rpois(20, lambda=5), nrow=4, ncol=5)
+# Get parameters for Poisson distribution
+params <- get_comm_params(comm, distr="pois")
+# Get parameters for negative binomial distribution
+params_nb <- get_comm_params(comm, distr="negbin")
+}

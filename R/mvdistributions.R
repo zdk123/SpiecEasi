@@ -6,6 +6,12 @@
 #' @return Poisson counts of length \eqn{n}
 #' @importFrom stats qpois dpois runif
 #' @export
+#' @examples
+#' # Draw 10 samples from ZIP with lambda=5 and 20% zero inflation
+#' rzipois(10, lambda=5, pstr0=0.2)
+#' 
+#' # Draw 100 samples with different parameters
+#' rzipois(100, lambda=c(2,5,8), pstr0=c(0.1,0.2,0.3))
 rzipois <- function(n, lambda, pstr0 = 0) {
     ans <- rpois(n, lambda)
     ans <- ifelse(runif(n) < pstr0, 0, ans)
@@ -50,6 +56,16 @@ rzipois <- function(n, lambda, pstr0 = 0) {
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom VGAM qzipois
 #' @export
+#' @examples
+#' # Generate 50 samples from 3 correlated ZIP variables
+#' mu <- c(2, 5, 8)
+#' Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+#' data <- rmvzipois(50, mu=mu, Sigma=Sigma)
+#' 
+#' # Generate using explicit lambda and zero-inflation parameters
+#' lambdas <- c(2, 5, 8)
+#' ps <- c(0.1, 0.2, 0.3)
+#' data2 <- rmvzipois(50, Sigma=Sigma, lambdas=lambdas, ps=ps)
 rmvzipois <- function(n, mu, Sigma=diag(length(mu)), lambdas, ps, ...) {
     d   <- ncol(Sigma)
     Cor <- cov2cor(Sigma)
@@ -82,6 +98,11 @@ rmvzipois <- function(n, mu, Sigma=diag(length(mu)), lambdas, ps, ...) {
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom stats qpois
 #' @export
+#' @examples
+#' # Generate 50 samples from 3 correlated Poisson variables
+#' mu <- c(2, 5, 8)
+#' Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+#' data <- rmvpois(50, mu=mu, Sigma=Sigma)
 rmvpois <- function(n, mu, Sigma, ...) {
     Cor <- cov2cor(Sigma)
     SDs <- sqrt(diag(Sigma))
@@ -113,6 +134,15 @@ rmvpois <- function(n, mu, Sigma, ...) {
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom stats qnbinom
 #' @export
+#' @examples
+#' # Generate 50 samples from 3 correlated negative binomial variables
+#' mu <- c(2, 5, 8)
+#' Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+#' data <- rmvnegbin(50, mu=mu, Sigma=Sigma)
+#' 
+#' # Generate with explicit shape parameters
+#' ks <- c(2, 3, 4)
+#' data2 <- rmvnegbin(50, mu=mu, Sigma=Sigma, ks=ks)
 rmvnegbin <- function(n, mu, Sigma, ks, ...) {
 # Generate an NxD matrix of Zero-inflated poisson data,
 # with counts approximately correlated according to Sigma
@@ -166,6 +196,17 @@ rmvnegbin <- function(n, mu, Sigma, ks, ...) {
 #' @return \eqn{Dxn} matrix with zi-poisson data
 #' @importFrom VGAM qzinegbin
 #' @export
+#' @examples
+#' # Generate 50 samples from 3 correlated ZINB variables
+#' mu <- c(2, 5, 8)
+#' Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+#' data <- rmvzinegbin(50, mu=mu, Sigma=Sigma)
+#' 
+#' # Generate with explicit parameters
+#' munbs <- c(2, 5, 8)
+#' ks <- c(2, 3, 4)
+#' ps <- c(0.1, 0.2, 0.3)
+#' data2 <- rmvzinegbin(50, Sigma=Sigma, munbs=munbs, ks=ks, ps=ps)
 rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
 # Generate an NxD matrix of Zero-inflated poisson data,
 # with counts approximately correlated according to Sigma
@@ -214,6 +255,15 @@ rmvzinegbin <- function(n, mu, Sigma, munbs, ks, ps, ...) {
 #' @param empirical is Sigma the empirical correlation?
 #' @return \eqn{Dxn} matrix with Gaussian data
 #' @export
+#' @examples
+#' # Generate 50 samples from 3 correlated normal variables
+#' mu <- c(0, 0, 0)
+#' Sigma <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+#' data <- rmvnorm(50, mu=mu, Sigma=Sigma)
+#' 
+#' # Generate with different mean vector
+#' mu2 <- c(1, 2, 3)
+#' data2 <- rmvnorm(50, mu=mu2, Sigma=Sigma)
 rmvnorm <- function(n=100, mu=rep(0,10), Sigma=diag(10), tol=1e-6, empirical=TRUE) {
     p <- length(mu)
     if (!all(dim(Sigma) == c(p, p)))
@@ -239,6 +289,12 @@ rmvnorm <- function(n=100, mu=rep(0,10), Sigma=diag(10), tol=1e-6, empirical=TRU
 #' @param sds standard deviations of the resulting covariance.
 #' @return Covariance matrix of sample dimension as cor
 #' @export
+#' @examples
+#' # Create a correlation matrix and standard deviations
+#' cor <- matrix(c(1, 0.5, 0.2, 0.5, 1, 0.3, 0.2, 0.3, 1), nrow=3)
+#' sds <- c(2, 3, 4)
+#' # Convert to covariance matrix
+#' cov <- cor2cov(cor, sds)
 cor2cov <- function(cor, sds) {
     if (length(sds) != length(diag(cor))) stop("inputs are of mismatched dimension")
     cor * sds * rep(sds, each=nrow(cor))

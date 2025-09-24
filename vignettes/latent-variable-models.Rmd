@@ -1,0 +1,108 @@
+---
+title: "Learning latent variable graphical models"
+author: 
+  - name: Zachary Kurtz
+    email: zdkurtz@gmail.com
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+package: "`r pkg_ver('SpiecEasi')`"
+vignette: >
+  %\VignetteIndexEntry{Learning latent variable graphical models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+```{r setup, echo = FALSE, eval=TRUE}
+knitr::opts_knit$set(
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = TRUE
+saveout   = runchunks
+
+if (!runchunks) load('.VIGNETTE.RData')
+```
+
+# Learning latent variable graphical models
+
+It can be shown that unobserved, latent variables introduce artifacts into empirical estimates of OTU-OTU associations. These effects can be removed from the network by treating the inverse covariance selection problem as a sparse + low-rank decomposition (SPIEC-EASI slr), where the sparse component are the associations encoded as a conditional independence graph, and the low-rank components are the isolated latent effects.
+
+Please see the [preprint](https://www.biorxiv.org/content/10.1101/2019.12.21.885889v1.full) and the manuscript [Synapse project](https://www.synapse.org/#!Synapse:syn20843558) or [github repository](https://github.com/zdk123/SpiecEasiSLR_manuscript) for more details.
+
+To demonstrate this in action we can show that removing latent effects improves a consistency measure between round 1 and round 2 of the American Gut project data.
+
+First we fit the networks, assuming that there are 10 latent components in the dataset:
+
+```{r, eval=FALSE}
+se1.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+se2.mb.amgut <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+
+se1.slr.amgut <- spiec.easi(amgut1.filt, method='slr', r=10, lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+se2.slr.amgut <- spiec.easi(amgut2.filt.phy, method='slr', r=10, lambda.min.ratio=1e-2,
+                          nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
+```
+
+Then we compare the consistency between the edge sets within each method using the Jaccard index:
+
+```{r, eval=FALSE}
+otu1 <- colnames(amgut1.filt)
+otu2 <- taxa_names(amgut2.filt.phy)
+edge.diss(getRefit(se1.mb.amgut), getRefit(se2.mb.amgut), 'jaccard', otu1, otu2)
+edge.diss(getRefit(se1.slr.amgut), getRefit(se2.slr.amgut), 'jaccard', otu1, otu2)
+```
+
+Consistency should be a bit better for the slr networks.
+
+Construct the robust PCA from amgut2 data:
+
+```{r, eval=FALSE}
+X <- se2.slr.amgut$est$data
+L <- se2.slr.amgut$est$resid[[getOptInd(se2.slr.amgut)]]
+pca <- robustPCA(X, L)
+```
+
+We can also check the correlation between AGP meta-data and the latent factors (scores of the robust PCA):
+
+```{r, eval=FALSE}
+age <- as.numeric(as.character(sample_data(amgut2.filt.phy)$AGE))
+bmi <- as.numeric(as.character(sample_data(amgut2.filt.phy)$BMI))
+depth <- colSums(otu_table(amgut2.filt.phy))
+
+cor(age, pca$scores, use='pairwise')
+cor(bmi, pca$scores, use='pairwise')
+cor(depth, pca$scores, use='pairwise')
+```
+
+## Key differences from standard SPIEC-EASI
+
+The `slr` method in SpiecEasi implements the sparse + low-rank decomposition approach, which:
+
+1. **Removes latent effects**: By decomposing the inverse covariance into sparse and low-rank components, we can isolate and remove the effects of unobserved variables.
+
+2. **Improves consistency**: Networks inferred with latent variable correction tend to be more consistent across different datasets or time points.
+
+3. **Parameter `r`**: Specifies the number of latent components to model. This should be chosen based on domain knowledge or cross-validation.
+
+4. **Computational considerations**: The slr method is more computationally intensive than standard methods, so consider using parallel processing options.
+
+Session info:
+```{r}
+sessionInfo()
+```
+
+```{r, echo = FALSE, eval=runchunks}
+if (saveout)
+ save(file=".VIGNETTE.RData")
+``` 

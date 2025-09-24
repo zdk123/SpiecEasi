@@ -1,0 +1,12 @@
+inst/doc
+vignettes/*.html
+vignettes/*.R
+src/*.so
+src/*.o
+.README.RData
+README_files/*
+.Rhistory
+/doc/
+/Meta/
+SpiecEasi.BiocCheck/*
+check/*

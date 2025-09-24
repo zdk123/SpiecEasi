@@ -30,3 +30,9 @@ graph2prec(
 Has internal rules for converting various graph topologies into the associated
 adjancency and, therefore, precision matrix
 }
+\examples{
+# Create a simple graph
+g <- make_graph("erdos_renyi", D=10, e=15)
+# Convert to precision matrix
+prec <- graph2prec(g)
+}

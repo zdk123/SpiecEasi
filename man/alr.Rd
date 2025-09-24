@@ -48,3 +48,15 @@ alr(x.f, ...)
 \description{
 Additive log-ratio functions
 }
+\examples{
+x <- c(1, 2, 3, 4)
+alr(x)  # Returns additive log-ratio transformation using first component as reference
+
+# Matrix example
+mat <- matrix(1:12, nrow=3)
+alr(mat)  # ALR transformation by columns
+
+# Data frame example
+df <- as.data.frame(mat)
+alr(df)  # ALR transformation by columns
+}

@@ -29,3 +29,15 @@ clr(x.f, ...)
 \description{
 Centered log-ratio functions
 }
+\examples{
+x <- c(1, 2, 3, 4)
+clr(x)  # Returns centered log-ratio transformation
+
+# Matrix example
+mat <- matrix(1:12, nrow=3)
+clr(mat)  # CLR transformation by columns
+
+# Data frame example
+df <- as.data.frame(mat)
+clr(df)  # CLR transformation by columns
+}

@@ -43,13 +43,13 @@ Get the optimal network, and related structures, when StARS is run.
 Use the getter functions to parse \code{\link{spiec.easi}} output:
 
 \itemize{
-  \item getOptLambda: penalty parameter from provided lambda path
-  \item getOptInd: index of the selected lambda from provided lambda path
-  \item getOptNet / getRefit: the optimal (StARS-refit) network
-  \item getStability: average stability at the selected sparsity
-  \item getOptMerge: symmetric matrix with edge-wise stability
-  \item getOptiCov: the optimal inverse covariance matrix (glasso only)
-  \item getOptCov: the optimal covariance matrix associated with the selected network (glasso only)
-  \item getOptBeta: the optimal coefficient matrix (mb only)
+\item getOptLambda: penalty parameter from provided lambda path
+\item getOptInd: index of the selected lambda from provided lambda path
+\item getOptNet / getRefit: the optimal (StARS-refit) network
+\item getStability: average stability at the selected sparsity
+\item getOptMerge: symmetric matrix with edge-wise stability
+\item getOptiCov: the optimal inverse covariance matrix (glasso only)
+\item getOptCov: the optimal covariance matrix associated with the selected network (glasso only)
+\item getOptBeta: the optimal coefficient matrix (mb only)
 }
 }

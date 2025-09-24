@@ -1,7 +1,7 @@
 #' stars.roc, stars.pr
 #'
 #' Plot a ROC (reciever operator characteristic) or a Precision-Recall curve
-#' along the stars 'confidence path'. Each edge is a number in [0,1],
+#' along the stars 'confidence path'. Each edge is a number in \[0,1\],
 #' which is on the fraction of inferred graphs over subsamples in which that edge
 #' appeared in stars.
 #'
@@ -100,6 +100,17 @@ huge.pr <- function (path, theta, verbose = TRUE, plot = TRUE) {
 #' @param otux taxa names of adjacency x
 #' @param otuy taxa names of adjacency y
 #' @export
+#' @examples
+#' # Create two sparse adjacency matrices
+#' library(Matrix)
+#' x <- Matrix(c(0,1,0,1,0,1,0,1,0), nrow=3, sparse=TRUE)
+#' y <- Matrix(c(0,1,1,1,0,0,1,0,0), nrow=3, sparse=TRUE)
+#' 
+#' # Calculate Jaccard dissimilarity
+#' jaccard_sim <- edge.diss(x, y, metric='jaccard')
+#' 
+#' # Calculate max overlap
+#' max_sim <- edge.diss(x, y, metric='max')
 edge.diss <- function(x, y, metric='jaccard', otux=NULL, otuy=NULL) {
   stopifnot(inherits(x, 'sparseMatrix'), TRUE)
   stopifnot(inherits(y, 'sparseMatrix'), TRUE)

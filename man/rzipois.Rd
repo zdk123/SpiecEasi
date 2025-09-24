@@ -19,3 +19,10 @@ Poisson counts of length \eqn{n}
 \description{
 Draw samples from a zero-inflated poisson distribution
 }
+\examples{
+# Draw 10 samples from ZIP with lambda=5 and 20\% zero inflation
+rzipois(10, lambda=5, pstr0=0.2)
+
+# Draw 100 samples with different parameters
+rzipois(100, lambda=c(2,5,8), pstr0=c(0.1,0.2,0.3))
+}

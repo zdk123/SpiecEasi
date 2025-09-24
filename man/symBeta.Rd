@@ -19,10 +19,19 @@ Symmetrize a beta (coefficient) matrix, ie. selected from MB neighborhood select
 }
 \details{
 Mode can be:
-\itemize{
- \item ave:  Arithmetic average between the two possible values of beta
- \item maxabs: The maximum [absolute] value between the two values
- \item upper:  Take the values from the upper triangle
- \item lower:  Take the values from the lower triangle
+\describe{
+\item{ave}{Arithmetic average between the two possible values of beta}
+\item{maxabs}{The maximum [absolute] value between the two values}
+\item{upper}{Take the values from the upper triangle}
+\item{lower}{Take the values from the lower triangle}
 }
+}
+\examples{
+# Create an asymmetric coefficient matrix
+beta <- matrix(c(0, 0.5, 0.2, 0.3, 0, 0.1, 0, 0.4, 0), nrow=3)
+
+# Symmetrize using different methods
+sym_ave <- symBeta(beta, mode='ave')      # Average
+sym_max <- symBeta(beta, mode='maxabs')   # Maximum absolute
+sym_upper <- symBeta(beta, mode='upper')  # Upper triangle
 }

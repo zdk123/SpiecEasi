@@ -1,0 +1,99 @@
+---
+title: "Cross Domain SPIEC-EASI"
+author: 
+  - name: Zachary Kurtz
+    email: zdkurtz@gmail.com
+output: 
+  BiocStyle::html_document:
+    self_contained: yes
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    code_folding: show
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+package: "`r pkg_ver('SpiecEasi')`"
+vignette: >
+  %\VignetteIndexEntry{Cross Domain SPIEC-EASI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}  
+---
+
+```{r setup, echo = FALSE, eval=TRUE}
+knitr::opts_knit$set(
+  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
+  base.url = NULL) # upload all images to imgur.com
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#"
+)
+runchunks = TRUE
+saveout   = runchunks
+
+if (!runchunks) load('.VIGNETTE.RData')
+```
+
+# Cross Domain SPIEC-EASI
+
+SpiecEasi now includes a convenience wrapper for dealing with multiple taxa sequenced on the same samples, such as 16S and ITS, as seen in [Tipton, Müller, et. al. (2018)](https://microbiomejournal.biomedcentral.com/articles/10.1186/s40168-017-0393-0). It assumes that each taxa is in its own data matrix and that all samples are in all data matrices in the same order.
+
+Here's an example run from the [HMP2 project](https://ibdmdb.org/tunnel/public/summary.html) with 16S and Proteomics data:
+
+```{r, eval=runchunks, echo=TRUE, message=FALSE}
+library(SpiecEasi)
+library(phyloseq)
+data(hmp2)
+se.hmp2 <- spiec.easi(list(hmp216S, hmp2prot), method='mb', nlambda=40,
+              lambda.min.ratio=1e-2, pulsar.params = list(thresh = 0.05))
+
+dtype <- c(rep(1,ntaxa(hmp216S)), rep(2,ntaxa(hmp2prot)))
+plot(adj2igraph(getRefit(se.hmp2)), vertex.color=dtype+1, vertex.size=9)
+```
+
+## Key features of cross-domain analysis
+
+1. **Multiple data types**: You can analyze different types of microbiome data (e.g., 16S rRNA, ITS, metagenomics) or even different omics data types together.
+
+2. **Same samples**: All data matrices must have the same samples in the same order.
+
+3. **Unified network**: The result is a single network where nodes represent features from all data types, and edges represent associations between features across domains.
+
+4. **Visualization**: Different node colors can be used to distinguish between different data types or domains.
+
+## Example with custom data
+
+```{r, eval=FALSE}
+# Example with custom data
+# Assuming you have two data matrices with the same samples
+data1 <- matrix(rpois(100*50, 10), 100, 50)  # First data type
+data2 <- matrix(rpois(100*30, 5), 100, 30)   # Second data type
+
+# Run cross-domain SPIEC-EASI
+se.cross <- spiec.easi(list(data1, data2), method='mb', 
+                       lambda.min.ratio=1e-2, nlambda=20,
+                       pulsar.params=list(rep.num=50))
+
+# Create visualization with different colors for each domain
+dtype <- c(rep(1, ncol(data1)), rep(2, ncol(data2)))
+ig.cross <- adj2igraph(getRefit(se.cross))
+plot(ig.cross, vertex.color=dtype+1, vertex.size=6)
+```
+
+## Interpretation
+
+In cross-domain networks:
+
+- **Within-domain edges**: Represent associations between features of the same type
+- **Cross-domain edges**: Represent associations between features from different data types
+- **Network structure**: Can reveal how different biological systems interact
+
+This approach is particularly useful for understanding how different components of the microbiome (e.g., bacteria vs. fungi) or different biological systems (e.g., microbiome vs. metabolome) interact.
+
+Session info:
+```{r}
+sessionInfo()
+```
+
+```{r, echo = FALSE, eval=runchunks}
+if (saveout)
+ save(se.hmp2, dtype, file=".VIGNETTE.RData")
+``` 

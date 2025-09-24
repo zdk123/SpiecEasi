@@ -12,3 +12,7 @@ norm_to_total(x)
 \description{
 Normalize a count vector by the total sum of that vector
 }
+\examples{
+x <- c(1, 2, 3, 4)
+norm_to_total(x)  # Divides each value by sum(x) = 10
+}

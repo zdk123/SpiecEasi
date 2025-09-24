@@ -7,3 +7,8 @@
 ^inst/extdata\.*
 ^inst/TUTORIAL*
 ^LICENSE\.md$
+^\.github$
+^codecov\.yml$
+^doc$
+^Meta$
+..Rcheck
