@@ -20,6 +20,9 @@ stars.pr(optmerge, theta, verbose = TRUE, plot = TRUE, ll = 15)
 
 \item{ll}{number of points for the plot}
 }
+\value{
+ROC curve object
+}
 \description{
 Plot a ROC (reciever operator characteristic) or a Precision-Recall curve
 along the stars 'confidence path'. Each edge is a number in [0,1],

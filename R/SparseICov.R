@@ -20,6 +20,7 @@
 #'
 #' The argument \code{nlambda} determines the number of penalties - somewhere between 10-100 is usually good, depending on how the values of empirical correlation are distributed.
 #' @importFrom huge huge huge.npn
+#' @return Sparse inverse covariance estimation result object
 #' @export
 #' @examples
 #' # simulate data with 1 negative correlation
@@ -127,11 +128,11 @@ neighborhood.net <- function(data, lambda, method="ising", ncores=1, sym='or', .
       betamat
     }
 
-    est <- parallel::mcmapply(estFun, 1:p,
+    est <- parallel::mcmapply(estFun, seq_len(p),
                 mc.cores=ncores, SIMPLIFY='array')
     beta <- vector('list', length(lambda))
     path <- vector('list', length(lambda))
-    for (i in 1:dim(est)[2]) {
+    for (i in seq_len(dim(est)[2])) {
         tmp       <- as(est[,i,], 'dgCMatrix')
         beta[[i]] <- tmp
         tmp       <- as(tmp, 'lgCMatrix')

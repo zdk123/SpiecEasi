@@ -53,3 +53,8 @@ Use the getter functions to parse \code{\link{spiec.easi}} output:
 \item getOptBeta: the optimal coefficient matrix (mb only)
 }
 }
+\examples{
+# Get optimal index from spiec.easi result
+# est <- spiec.easi(data, method='glasso')
+# opt_idx <- getOptInd(est)
+}

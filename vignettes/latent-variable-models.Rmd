@@ -11,7 +11,8 @@ output:
     toc_depth: 2
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
-package: "`r pkg_ver('SpiecEasi')`"
+package: "SpiecEasi"
+version: "1.99.0"
 vignette: >
   %\VignetteIndexEntry{Learning latent variable graphical models}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,13 +20,18 @@ vignette: >
 ---
 
 ```{r setup, echo = FALSE, eval=TRUE}
+library(BiocStyle)
 knitr::opts_knit$set(
-  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
-  base.url = NULL) # upload all images to imgur.com
+  upload.fun = NULL,
+  base.url = NULL) # use local files for images
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#"
 )
+# Override BiocStyle plot hook to avoid css_align issues
+knitr::knit_hooks$set(plot = function(x, options) {
+  paste0('![', basename(x), '](', x, ')')
+})
 runchunks = TRUE
 saveout   = runchunks
 

@@ -17,6 +17,9 @@ edge.diss(x, y, metric = "jaccard", otux = NULL, otuy = NULL)
 
 \item{otuy}{taxa names of adjacency y}
 }
+\value{
+Dissimilarity score between edge sets
+}
 \description{
 Compute the dissimilarity between the edge sets of two networks via:
 \enumerate{

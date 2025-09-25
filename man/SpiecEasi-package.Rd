@@ -4,9 +4,15 @@
 \name{SpiecEasi-package}
 \alias{SpiecEasi}
 \alias{SpiecEasi-package}
-\title{SpiecEasi: Sparse Inverse Covariance for Ecological Statistical Inference}
+\title{SpiecEasi: Sparse Inverse Covariance Estimation for Ecological Association Inference}
+\value{
+This package provides functions for microbiome network inference and analysis
+}
 \description{
-Estimate networks from the precision matrix of compositional microbial abundance data.
+SpiecEasi provides methods for inferring ecological associations from compositional microbiome data using sparse inverse covariance estimation.
+}
+\details{
+The package implements SPIEC-EASI (SParse InversE Covariance estimation for Ecological Association Inference) methods for microbiome network inference, including glasso and neighborhood selection approaches with stability selection for model selection.
 }
 \seealso{
 Useful links:

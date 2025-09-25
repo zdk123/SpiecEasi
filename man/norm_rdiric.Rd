@@ -9,6 +9,9 @@ norm_rdiric(x)
 \arguments{
 \item{x}{count data vector}
 }
+\value{
+A single sample from Dirichlet distribution
+}
 \description{
 "Normalize" a count vector by drawing a single sample from a Dirichlet distribution, using the count vector as the prior.
 }

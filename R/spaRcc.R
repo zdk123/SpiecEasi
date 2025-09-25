@@ -103,13 +103,13 @@ pval.sparccboot <- function(x, sided='both') {
     ind95    <- max(1,round(.025*niters)):round(.975*niters)
     boot_ord <- apply(x$t, 2, sort)
     boot_ord95 <- boot_ord[ind95,]
-    outofrange <- unlist(lapply(1:length(x$t0), function(i) {
+    outofrange <- unlist(lapply(seq_along(x$t0), function(i) {
             aitvar <- x$t0[i]
             range  <- range(boot_ord95[,i])
             range[1] > aitvar || range[2] < aitvar
         }))
     # calc whether center of mass is above or below the mean
-    bs_above <- unlist(lapply(1:nparams, function(i)
+    bs_above <- unlist(lapply(seq_len(nparams), function(i)
                     length(which(x$t[, i] > tmeans[i]))))
     is_above <- bs_above > x$R/2
     cors <- x$t0
@@ -123,28 +123,28 @@ pval.sparccboot <- function(x, sided='both') {
 
 
 #' @noRd
-sparccinner <- function(data.f, T=NULL, iter=10, th=0.1) {
-    if (is.null(T))   T  <- av(data.f)
-    res.bv <- basis_var(T)
+sparccinner <- function(data.f, T_mat=NULL, iter=10, th=0.1) {
+    if (is.null(T_mat))   T_mat  <- av(data.f)
+    res.bv <- basis_var(T_mat)
     Vbase  <- res.bv$Vbase
     M      <- res.bv$M
-    cbase  <- C_from_V(T, Vbase)
+    cbase  <- C_from_V(T_mat, Vbase)
     Cov    <- cbase$Cov
     Cor    <- cbase$Cor
 
     ## do iterations here
     excluded <- NULL
-    for (i in 1:iter) {
+    for (i in seq_len(iter)) {
         res.excl <- exclude_pairs(Cor, M, th, excluded)
         M <- res.excl$M
         excluded <- res.excl$excluded
         if (res.excl$break_flag) break
-        res.bv <- basis_var(T, M=M, excluded=excluded)
+        res.bv <- basis_var(T_mat, M=M, excluded=excluded)
         Vbase  <- res.bv$Vbase
         M      <- res.bv$M
         K <- M
         diag(K) <- 1
-        cbase  <- C_from_V(T, Vbase)
+        cbase  <- C_from_V(T_mat, Vbase)
         Cov    <- cbase$Cov
         Cor    <- cbase$Cor
     }
@@ -157,7 +157,7 @@ exclude_pairs <- function(Cor, M, th=0.1, excluded=NULL) {
     break_flag <- FALSE
     C_temp <- abs(Cor - diag(diag(Cor)) )  # abs value / remove diagonal
     if (!is.null(excluded)) C_temp[excluded] <- 0 # set previously excluded correlations to 0
-    exclude <- which(abs(C_temp - max(C_temp)) < .Machine$double.eps*100)[1:2]
+    exclude <- which(abs(C_temp - max(C_temp)) < .Machine$double.eps*100)[seq_len(2)]
     if (max(C_temp) > th)  {
         i <- na.exclude(arrayInd(exclude, c(nrow(M), ncol(M)))[,1])
         M[i,i] <- M[i,i] - 1
@@ -174,26 +174,26 @@ basis_cov <- function(data.f) {
 # data.f -> relative abundance data
 # OTUs in columns, samples in rows (yes, I know this is transpose of normal)
     # first compute aitchison variation
-    T <- av(data.f)
-    res.bv <- basis_var(T)
+    T_mat <- av(data.f)
+    res.bv <- basis_var(T_mat)
     Vbase  <- res.bv$Vbase
     M      <- res.bv$M
-    cbase  <- C_from_V(T, Vbase)
+    cbase  <- C_from_V(T_mat, Vbase)
     Cov    <- cbase$Cov
     Cor    <- cbase$Cor
     list(Cov=Cov, M=M)
 }
 
 #' @noRd
-basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
-                      M = matrix(1, nrow(T), ncol(T)) + (diag(ncol(T))*(ncol(T)-2)),
+basis_var <- function(T_mat, CovMat = matrix(0, nrow(T_mat), ncol(T_mat)),
+                      M = matrix(1, nrow(T_mat), ncol(T_mat)) + (diag(ncol(T_mat))*(ncol(T_mat)-2)),
                       excluded = NULL, Vmin=1e-4) {
 
     if (!is.null(excluded)) {
-        T[excluded] <- 0
+        T_mat[excluded] <- 0
      #   CovMat[excluded] <- 0
     }
-    Ti     <- matrix(rowSums(T))
+    Ti     <- matrix(rowSums(T_mat))
     CovVec <- matrix(rowSums(CovMat - diag(diag(CovMat)))) # row sum of off diagonals
     M.I <- tryCatch(solve(M), error=function(e) MASS::ginv(M))
     Vbase <- M.I %*% (Ti + 2*CovVec)
@@ -201,10 +201,10 @@ basis_var <- function(T, CovMat = matrix(0, nrow(T), ncol(T)),
     list(Vbase=Vbase, M=M)
 }
 
-C_from_V <- function(T, Vbase) {
-    J      <- matrix(1, nrow(T), ncol(T))
+C_from_V <- function(T_mat, Vbase) {
+    J      <- matrix(1, nrow(T_mat), ncol(T_mat))
     Vdiag  <- diag(c(Vbase))
-    CovMat <- .5*((J %*% Vdiag) + (Vdiag %*% J) - T)
+    CovMat <- .5*((J %*% Vdiag) + (Vdiag %*% J) - T_mat)
     CovMat <- (CovMat + t(CovMat))/2  # enforce symmetry
     # check that correlations are within -1,1
     CorMat <- cov2cor(CovMat)

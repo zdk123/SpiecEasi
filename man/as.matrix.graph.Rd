@@ -11,6 +11,9 @@
 
 \item{...}{Arguments to base as.matrix}
 }
+\value{
+A matrix
+}
 \description{
 s3 method for graph to other data types
 }

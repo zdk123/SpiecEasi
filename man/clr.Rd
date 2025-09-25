@@ -26,6 +26,9 @@ clr(x.f, ...)
 
 \item{mar}{margin to apply the transformation (rows: 1 or cols: 2)}
 }
+\value{
+Centered log-ratio transformed data
+}
 \description{
 Centered log-ratio functions
 }

@@ -144,6 +144,7 @@ NULL
 #' @method spiec.easi default
 #' @rdname spiec.easi
 #' @seealso \code{\link{multi.spiec.easi}}
+#' @return SPIEC-EASI result object
 #' @export
 spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
                         verbose=TRUE, pulsar.select=TRUE, pulsar.params=list(),
@@ -320,6 +321,7 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
 #' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
 #' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
 #' @seealso \code{\link{spiec.easi}}
+#' @return SPIEC-EASI result object
 #' @export
 #' @examples
 #' # Generate random data
@@ -343,7 +345,7 @@ multi.spiec.easi <- function(datalist, method='glasso', sel.criterion='stars',
 #' @rdname multi.spiec.easi
 #' @export
 spiec.easi.list <- function(data, ...) {
-  classes <- sapply(data, class)
+  classes <- vapply(data, function(x) class(x)[1], character(1))
   if (length(unique(classes)) != 1)
     warning('input list contains data of mixed classes.')
 

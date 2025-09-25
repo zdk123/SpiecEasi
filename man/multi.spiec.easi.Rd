@@ -34,6 +34,9 @@ multi.spiec.easi(
 
 \item{data}{non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also be list of phyloseq objects.}
 }
+\value{
+SPIEC-EASI result object
+}
 \description{
 A SPIEC-EASI pipeline for inferring a sparse inverse covariance matrix within and between multiple compositional datasets, under joint sparsity penalty.
 }

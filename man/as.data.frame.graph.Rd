@@ -11,6 +11,9 @@
 
 \item{...}{Arguments to base as.data.frame}
 }
+\value{
+A data.frame
+}
 \description{
 s3 method for graph to other data types
 }

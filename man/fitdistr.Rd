@@ -17,6 +17,9 @@ fitdistr(x, densfun, start, control, ...)
 
 \item{...}{further arguments to densfun}
 }
+\value{
+Fitted distribution parameters
+}
 \description{
 Fit parameters of a marginal distribution to some data vector
 }

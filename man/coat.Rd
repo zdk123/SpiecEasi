@@ -29,6 +29,9 @@ coat(
 
 \item{...}{Arguments to automatically calculating the lambda path. See details.}
 }
+\value{
+COAT result object with thresholded covariance matrix
+}
 \description{
 Compositional-adjusted thresholding by  doi.org/10.1080/01621459.2018.1442340 by Cao, Lin & Li (2018)
 }
