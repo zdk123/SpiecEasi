@@ -40,7 +40,7 @@ describe("Graph to precision matrix conversion", {
   test_that("condition number of precision matrix is within eps of target condition", {
       lapply(1:length(prec_list), function(i) {
           lapply(1:length(prec_list[[i]]), function(j) {
-              expect_equal(kappa(prec_list[[i]][[j]]), conds[j], tolerance=tol, scale=1)
+              expect_equal(kappa(prec_list[[i]][[j]]), conds[j], tolerance=tol)
           })
       })
   })
