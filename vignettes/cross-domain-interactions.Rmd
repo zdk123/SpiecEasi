@@ -20,8 +20,8 @@ vignette: >
 
 ```{r setup, echo = FALSE, eval=TRUE}
 knitr::opts_knit$set(
-  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
-  base.url = NULL) # upload all images to imgur.com
+  upload.fun = NULL,
+  base.url = NULL) # use local files for images
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#"
@@ -89,7 +89,7 @@ In cross-domain networks:
 This approach is particularly useful for understanding how different components of the microbiome (e.g., bacteria vs. fungi) or different biological systems (e.g., microbiome vs. metabolome) interact.
 
 Session info:
-```{r}
+```{r, eval=runchunks}
 sessionInfo()
 ```
 

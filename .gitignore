@@ -1,6 +1,7 @@
 inst/doc
 vignettes/*.html
 vignettes/*.R
+vignettes/*_files/*
 src/*.so
 src/*.o
 .README.RData

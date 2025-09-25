@@ -20,8 +20,8 @@ vignette: >
 
 ```{r setup, echo = FALSE, eval=TRUE}
 knitr::opts_knit$set(
-  upload.fun = function(file) knitr::imgur_upload(file, "ce3138fd1186b7d"),
-  base.url = NULL) # upload all images to imgur.com
+  upload.fun = NULL,
+  base.url = NULL) # use local files for images # upload all images to imgur.com
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#"
