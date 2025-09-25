@@ -11,7 +11,8 @@ output:
     toc_depth: 2
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
-package: "`r pkg_ver('SpiecEasi')`"
+package: "SpiecEasi"
+version: "1.99.0"
 vignette: >
   %\VignetteIndexEntry{Working with phyloseq}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,13 +20,18 @@ vignette: >
 ---
 
 ```{r setup, echo = FALSE, eval=TRUE}
+library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
-  base.url = NULL) # use local files for images # upload all images to imgur.com
+  base.url = NULL) # use local files for images
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#"
 )
+# Override BiocStyle plot hook to avoid css_align issues
+knitr::knit_hooks$set(plot = function(x, options) {
+  paste0('![', basename(x), '](', x, ')')
+})
 runchunks = TRUE
 saveout   = runchunks
 
