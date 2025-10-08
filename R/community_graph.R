@@ -2,6 +2,7 @@
 #'
 #' @param Precision symmetric precision matrix
 #' @param tol tolerance to define a zero eigenvalue (ie - is Prec positive definite)
+#' @return A covariance matrix (inverse of the precision matrix)
 #' @importFrom MASS ginv
 #' @export
 #' @examples
@@ -23,6 +24,7 @@ prec2cov <- function(Precision, tol=1e-4) {
 #'
 #' @param Cov symmetric covariance matrix (can be correlation also)
 #' @param tol tolerance to define a zero eigenvalue (ie - is Prec positive definite)
+#' @return A precision matrix (inverse of the covariance matrix)
 #' @importFrom MASS ginv
 #' @export
 #' @examples
@@ -53,6 +55,7 @@ cov2prec <- function(Cov, tol=1e-4) {
 #' @param targetCondition sets the condition of the precision matrix by modulating the magnitude of the diagonal
 #' @param epsBin the convergence tolerance of the condition number binary search
 #' @param numBinSearch maximum number of iterations
+#' @return A precision matrix with the specified condition number
 #' @examples
 #' # Create a simple graph
 #' g <- make_graph("erdos_renyi", D=10, e=15)

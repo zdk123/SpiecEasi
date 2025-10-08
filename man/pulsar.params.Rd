@@ -3,6 +3,9 @@
 \name{pulsar.params}
 \alias{pulsar.params}
 \title{pulsar params}
+\value{
+A list of parameters for pulsar model selection
+}
 \description{
 The values to the \code{pulsar.params}/\code{icov.select.params} argument in the \code{\link{spiec.easi}} function must be a list with values from pulsar and/or batch.pulsar. See the pulsar docs for detailed instructions.
 

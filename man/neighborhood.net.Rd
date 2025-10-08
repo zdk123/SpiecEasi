@@ -19,6 +19,9 @@ neighborhood.net(data, lambda, method = "ising", ncores = 1, sym = "or", ...)
 
 \item{...}{further arguments to glmnet}
 }
+\value{
+A sparse inverse covariance matrix estimated using neighborhood selection
+}
 \description{
 Select a sparse inverse covariance matrix using neighborhood selection and glmnet from various exponential models.
 }

@@ -99,6 +99,7 @@ spiec.easi.otu_table <- function(data, ...) {
 #'    \item job.res, list, empty list. Named list to specify job resources for an hpc.
 #'    \item cleanup, boolean, FALSE. Remove registry files.
 #'}
+#' @return A list of parameters for pulsar model selection
 #' @seealso \code{\link[pulsar]{pulsar}} \code{\link[pulsar]{batch.pulsar}} \code{\link{spiec.easi}}
 NULL
 

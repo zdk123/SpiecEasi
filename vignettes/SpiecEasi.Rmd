@@ -228,7 +228,7 @@ if (runchunks && exists("se.mb.amgut") && exists("se.gl.amgut")) {
   cache_file <- '../vignette_cache/SpiecEasi.RData'
   tryCatch({
     # Load trimming function and trim objects to reduce size
-    source('../trim_spiec_easi.R')
+    source('../vignette_cache/trim_spiec_easi.R')
     se.mb.trimmed <- trim_spiec_easi(se.mb.amgut)
     se.gl.trimmed <- trim_spiec_easi(se.gl.amgut)
     se.trimmed <- trim_spiec_easi(se)

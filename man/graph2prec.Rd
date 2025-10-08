@@ -26,6 +26,9 @@ graph2prec(
 
 \item{numBinSearch}{maximum number of iterations}
 }
+\value{
+A precision matrix with the specified condition number
+}
 \description{
 Has internal rules for converting various graph topologies into the associated
 adjancency and, therefore, precision matrix

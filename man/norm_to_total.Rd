@@ -9,6 +9,9 @@ norm_to_total(x)
 \arguments{
 \item{x}{count data vector}
 }
+\value{
+A normalized vector (values sum to 1)
+}
 \description{
 Normalize a count vector by the total sum of that vector
 }
