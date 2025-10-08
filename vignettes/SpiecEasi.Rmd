@@ -32,10 +32,33 @@ knitr::opts_chunk$set(
 knitr::knit_hooks$set(plot = function(x, options) {
   paste0('![', basename(x), '](', x, ')')
 })
-runchunks = TRUE
+runchunks = if (Sys.getenv("FORCE_VIGNETTE_REBUILD", "FALSE") == "TRUE") TRUE else FALSE
+
+cache_file <- '../vignette_cache/SpiecEasi.RData'
+if (!runchunks && file.exists(cache_file)) {
+  load(cache_file)
+  # If we loaded trimmed objects, reassign them to original names
+  if (exists("se.mb.trimmed")) {
+    se.mb.amgut <- se.mb.trimmed
+    rm(se.mb.trimmed)
+  }
+  if (exists("se.gl.trimmed")) {
+    se.gl.amgut <- se.gl.trimmed
+    rm(se.gl.trimmed)
+  }
+  if (exists("se.trimmed")) {
+    se <- se.trimmed
+    rm(se.trimmed)
+  }
+  message("Loaded cached data from SpiecEasi.RData")
+} else {
+  if (!runchunks) {
+    message("Cache file SpiecEasi.RData not found - building from scratch")
+  }
+  runchunks <- TRUE
+}
 saveout   = runchunks
 
-if (!runchunks) load('.VIGNETTE.RData')
 ```
 
 # Introduction to SpiecEasi
@@ -73,14 +96,18 @@ Lets simulate some multivariate data under zero-inflated negative binomial model
 Obviously, for real data, skip 1-4.
 
 Session info:
-```{r, eval=runchunks}
+```{r, eval=TRUE}
 sessionInfo()
 ```
 
 Setup:
-```{r, eval=runchunks}
+
+```{r, eval=TRUE}
 library(SpiecEasi)
 data(amgut1.filt)
+```
+
+```{r, eval=runchunks}
 depths <- rowSums(amgut1.filt)
 amgut1.filt.n  <- t(apply(amgut1.filt, 1, norm_to_total))
 amgut1.filt.cs <- round(amgut1.filt.n * min(depths))
@@ -106,7 +133,7 @@ se <- spiec.easi(X, method='mb', lambda.min.ratio=1e-2, nlambda=15)
 ```
 
 Examine ROC over lambda path and PR over the stars index for the selected graph:
-```{r, eval=FALSE, fig.width=5, fig.height=5}
+```{r, eval=TRUE, fig.width=5, fig.height=5}
 huge::huge.roc(se$est$path, graph, verbose=FALSE)
 stars.pr(getOptMerge(se), graph, verbose=FALSE)
 # stars selected final network under: getRefit(se)
@@ -122,10 +149,14 @@ Now let's apply SpiecEasi directly to the American Gut data. Don't forget that t
 
 ```{r, eval=runchunks, message=FALSE, warning=FALSE}
 se.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
-                          nlambda=20, pulsar.params=list(rep.num=50))
+                          nlambda=10, pulsar.params=list(rep.num=20))
 se.gl.amgut <- spiec.easi(amgut1.filt, method='glasso', lambda.min.ratio=1e-2,
-                          nlambda=20, pulsar.params=list(rep.num=50))
+                          nlambda=10, pulsar.params=list(rep.num=20))
 sparcc.amgut <- sparcc(amgut1.filt)
+```
+
+Create igraph objects for visualization:
+```{r, eval=TRUE}
 ## Define arbitrary threshold for SparCC correlation matrix for the graph
 sparcc.graph <- abs(sparcc.amgut$Cor) >= 0.3
 diag(sparcc.graph) <- 0
@@ -138,8 +169,9 @@ ig.sparcc <- adj2igraph(sparcc.graph)
 ```
 
 Visualize using igraph plotting:
-```{r, eval=runchunks, fig.width=15, fig.height=7, message=FALSE}
+```{r, eval=TRUE, fig.width=15, fig.height=7, message=FALSE}
 library(igraph)
+library(Matrix)
 ## set size of vertex proportional to clr-mean
 vsize    <- rowMeans(clr(amgut1.filt, 1))+6
 am.coord <- layout.fruchterman.reingold(ig.mb)
@@ -152,22 +184,22 @@ plot(ig.sparcc, layout=am.coord, vertex.size=vsize, vertex.label=NA, main="sparc
 
 We can evaluate the weights on edges networks using the terms from the underlying model. SparCC correlations can be used directly, while SpiecEasi networks need to be massaged a bit. Note that since SPIEC-EASI is based on penalized estimators, the edge weights are not directly comparable to SparCC (or Pearson/Spearman correlation coefficients):
 
-```{r, eval=runchunks, fig.width=8, fig.height=5}
-library(Matrix)
+```{r, eval=TRUE, fig.width=8, fig.height=5}
+# Create edge lists for weight comparison
 secor  <- cov2cor(getOptCov(se.gl.amgut))
 sebeta <- symBeta(getOptBeta(se.mb.amgut), mode='maxabs')
 elist.gl     <- summary(triu(secor*getRefit(se.gl.amgut), k=1))
 elist.mb     <- summary(sebeta)
 elist.sparcc <- summary(sparcc.graph*sparcc.amgut$Cor)
 
+# Plot edge weight distributions
 hist(elist.sparcc[,3], main='', xlab='edge weights')
 hist(elist.mb[,3], add=TRUE, col='forestgreen')
 hist(elist.gl[,3], add=TRUE, col='red')
 ```
 
 Lets look at the degree statistics from the networks inferred by each method:
-
-```{r, eval=runchunks, fig.width=9, fig.height=6}
+```{r, eval=TRUE, fig.width=9, fig.height=6}
 dd.gl     <- degree.distribution(ig.gl)
 dd.mb     <- degree.distribution(ig.mb)
 dd.sparcc <- degree.distribution(ig.sparcc)
@@ -190,7 +222,23 @@ For more advanced usage, please refer to the other vignettes:
 - **[pulsar: parallel utilities for model selection](pulsar-parallel.html)**: Optimize performance with parallel processing
 - **[Troubleshooting](troubleshooting.html)**: Solutions for common issues and parameter tuning guidelines
 
-```{r, echo = FALSE, eval=runchunks}
-if (saveout)
- save(amgut1.filt, depths, amgut1.filt.n, amgut1.filt.cs, d, n, e, graph, Prec, Cor, se, se.mb.amgut, se.gl.amgut, sparcc.amgut, sparcc.graph, ig.mb, ig.gl, ig.sparcc, file=".VIGNETTE.RData")
+```{r, echo = FALSE, eval=TRUE}
+# Save only the expensive computations if they exist and we're rebuilding
+if (runchunks && exists("se.mb.amgut") && exists("se.gl.amgut")) {
+  cache_file <- '../vignette_cache/SpiecEasi.RData'
+  tryCatch({
+    # Load trimming function and trim objects to reduce size
+    source('../trim_spiec_easi.R')
+    se.mb.trimmed <- trim_spiec_easi(se.mb.amgut)
+    se.gl.trimmed <- trim_spiec_easi(se.gl.amgut)
+    se.trimmed <- trim_spiec_easi(se)
+    
+    # Save the trimmed expensive spiec.easi results plus other needed variables
+    save(se.mb.trimmed, se.gl.trimmed, se.trimmed, sparcc.amgut, graph, X, Prec, Cor, 
+         depths, amgut1.filt.cs, d, n, e, file=cache_file)
+    message("Saved trimmed cache file: ", cache_file, " in directory: ", getwd())
+  }, error = function(e) {
+    message("Failed to save cache file: ", e$message)
+  })
+}
 ```

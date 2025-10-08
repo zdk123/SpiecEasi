@@ -32,10 +32,48 @@ knitr::opts_chunk$set(
 knitr::knit_hooks$set(plot = function(x, options) {
   paste0('![', basename(x), '](', x, ')')
 })
-runchunks = TRUE
+runchunks = if (Sys.getenv("FORCE_VIGNETTE_REBUILD", "FALSE") == "TRUE") TRUE else FALSE
+
+cache_file <- '../vignette_cache/pulsar-parallel.RData'
+if (!runchunks && file.exists(cache_file)) {
+  load(cache_file)
+  # If we loaded trimmed objects, reassign them to original names
+  if (exists("se1.trimmed")) {
+    se1 <- se1.trimmed
+    rm(se1.trimmed)
+  }
+  if (exists("se2.trimmed")) {
+    se2 <- se2.trimmed
+    rm(se2.trimmed)
+  }
+  if (exists("se3.trimmed")) {
+    se3 <- se3.trimmed
+    rm(se3.trimmed)
+  }
+  if (exists("se4.trimmed")) {
+    se4 <- se4.trimmed
+    rm(se4.trimmed)
+  }
+  if (exists("se.serial.trimmed")) {
+    se.serial <- se.serial.trimmed
+    rm(se.serial.trimmed)
+  }
+  if (exists("se.batch.trimmed")) {
+    se.batch <- se.batch.trimmed
+    rm(se.batch.trimmed)
+  }
+  if (exists("se.windows.trimmed")) {
+    se.windows <- se.windows.trimmed
+    rm(se.windows.trimmed)
+  }
+} else {
+  if (!runchunks) {
+    message("Cache file pulsar-parallel.RData not found - building from scratch")
+  }
+  runchunks <- TRUE
+}
 saveout   = runchunks
 
-if (!runchunks) load('.VIGNETTE.RData')
 ```
 
 # pulsar: parallel utilities for model selection
@@ -48,9 +86,12 @@ As in the previous version of SpiecEasi, we can supply the `ncores` argument to 
 
 In this example, we set the random seed to make consistent comparison across experiments:
 
-```{r, message=FALSE, warning=FALSE}
+```{r, eval=TRUE}
 library(SpiecEasi)
 data(amgut1.filt)
+```
+
+```{r, eval=runchunks, message=FALSE, warning=FALSE}
 
 ## Default settings ##
 pargs1 <- list(rep.num=50, seed=10010)
@@ -79,7 +120,7 @@ se2 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
 
 We can further speed up StARS using the [bounded-StARS](https://arxiv.org/abs/1605.07072) ('bstars') method. The B-StARS approach computes network stability across the whole lambda path, but only for the first 2 subsamples. This is used to build an initial estimate of the summary statistic, which in turn gives us a lower/upper bound on the optimal lambda. The remaining subsamples are used to compute the stability over the restricted path. Since denser networks are more computational expensive to compute, this can significantly reduce computational time for datasets with many variables.
 
-```{r, message=FALSE, warning=FALSE}
+```{r, message=FALSE, warning=FALSE, eval=runchunks}
 t3 <- system.time(
 se3 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
                sel.criterion='bstars', pulsar.select=TRUE, pulsar.params=pargs1)
@@ -92,7 +133,7 @@ se4 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
 
 We can see that in addition to the computational savings, the refit networks are identical:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 ## serial vs parallel
 identical(getRefit(se1), getRefit(se2))
 t1[3] > t2[3]
@@ -108,18 +149,18 @@ t2[3] > t4[3]
 For Windows users, there are several options for parallel processing:
 
 ### Option 1: Use snow cluster
-```{r, eval=FALSE}
+```{r, eval=runchunks}
 # For Windows users who want parallel processing
 library(parallel)
 cl <- makeCluster(4, type = "SOCK")
-pargs.windows <- list(rep.num=50, seed=10010, cluster=cl)
+pargs.windows <- list(rep.num=50, seed=10010)
 se.windows <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
                          sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs.windows)
 stopCluster(cl)
 ```
 
 ### Option 2: Use serial processing
-```{r, eval=FALSE}
+```{r, eval=runchunks}
 # Simple serial processing for Windows
 pargs.serial <- list(rep.num=50, seed=10010, ncores=1)
 se.serial <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
@@ -127,7 +168,7 @@ se.serial <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda
 ```
 
 ### Option 3: Use batch mode
-```{r, eval=FALSE}
+```{r, eval=runchunks}
 # Batch mode works on all platforms
 bargs <- list(rep.num=50, seed=10010, conffile="parallel")
 se.batch <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
@@ -140,7 +181,7 @@ Pulsar gives us the option of running stability selection in batch mode, using t
 
 This requires an external config file which will instruct the batchtools registry how to construct the cluster function which will execute the individual jobs. `batch.pulsar` has some built in config files that are useful for testing purposes (serial mode, "parallel", "snow", etc), but it is advisable to create your own config file and pass in the absolute path. See the [batchtools docs](https://mllg.github.io/batchtools/articles/batchtools.html#configuration-file) for instructions on how to construct config file and template files (i.e. to interact with a queueing system such as TORQUE or SGE).
 
-```{r, eval=FALSE}
+```{r, eval=runchunks}
 ## bargs <- list(rep.num=50, seed=10010, conffile="path/to/conf.txt")
 bargs <- list(rep.num=50, seed=10010, conffile="parallel")
 ## See the config file stores:
@@ -156,7 +197,7 @@ se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
 
 Let's compare the performance of different approaches:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 # Compare timing
 cat("Serial StARS:", t1[3], "seconds\n")
 cat("Platform-specific StARS:", t2[3], "seconds\n")
@@ -198,7 +239,26 @@ Session info:
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=runchunks}
-if (saveout)
- save(se1, se2, se3, se4, t1, t2, t3, t4, pargs1, pargs2, file=".VIGNETTE.RData")
+```{r, echo = FALSE, eval=TRUE}
+# Save objects if they exist
+if (exists("se1") && exists("se2")) {
+  cache_file <- '../vignette_cache/pulsar-parallel.RData'
+  tryCatch({
+    # Load trimming function and trim objects to reduce size
+    source('../trim_spiec_easi.R')
+    se1.trimmed <- trim_spiec_easi(se1)
+    se2.trimmed <- trim_spiec_easi(se2)
+    se3.trimmed <- trim_spiec_easi(se3)
+    se4.trimmed <- trim_spiec_easi(se4)
+    se.serial.trimmed <- trim_spiec_easi(se.serial)
+    se.batch.trimmed <- trim_spiec_easi(se.batch)
+    se.windows.trimmed <- trim_spiec_easi(se.windows)
+    
+    # Save trimmed objects and timing data
+    save(se1.trimmed, se2.trimmed, se3.trimmed, se4.trimmed, se.serial.trimmed, se.batch.trimmed, se.windows.trimmed, t1, t2, t3, t4, pargs1, pargs2, file=cache_file)
+    message("Saved trimmed cache file: ", cache_file, " in directory: ", getwd())
+  }, error = function(e) {
+    message("Failed to save cache file: ", e$message)
+  })
+}
 ``` 

@@ -12,3 +12,4 @@
 ^doc$
 ^Meta$
 ..Rcheck
+^vignette_cache$

@@ -13,3 +13,4 @@ README_files/*
 /Meta/
 SpiecEasi.BiocCheck/*
 check/*
+#vignette_cache/
