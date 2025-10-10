@@ -13,3 +13,4 @@
 ^Meta$
 ..Rcheck
 ^vignette_cache$
+^\.bumpversion\.cfg$

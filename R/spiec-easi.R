@@ -80,7 +80,7 @@ spiec.easi.otu_table <- function(data, ...) {
 
 #' @name pulsar.params
 #' @title pulsar params
-#' @description The values to the \code{pulsar.params}/\code{icov.select.params} argument in the \code{\link{spiec.easi}} function must be a list with values from pulsar and/or batch.pulsar. See the pulsar docs for detailed instructions.
+#' @description The values to the \code{pulsar.params}/\code{icov.select.params} argument in the \code{\link{spiec.easi}} function must be a list with values for pulsar model selection parameters.
 #'
 #' List of arguments, data type, default. Description
 #' \itemize{
@@ -100,7 +100,7 @@ spiec.easi.otu_table <- function(data, ...) {
 #'    \item cleanup, boolean, FALSE. Remove registry files.
 #'}
 #' @return A list of parameters for pulsar model selection
-#' @seealso \code{\link[pulsar]{pulsar}} \code{\link[pulsar]{batch.pulsar}} \code{\link{spiec.easi}}
+#' @seealso \code{\link{spiec.easi}}
 NULL
 
 #' @noRd
@@ -137,11 +137,11 @@ NULL
 #' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' \[default\], 'bstars' (Bounded StARS)
 #' @param verbose flag to show progress messages
 #' @param pulsar.select flag to perform model selection. Choices are TRUE/FALSE/'batch'
-#' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
+#' @param pulsar.params list of further arguments to pulsar model selection. See the documentation for \code{\link{pulsar.params}}.
 #' @param icov.select deprecated.
 #' @param icov.select.params deprecated.
 #' @param lambda.log should values of lambda be distributed logarithmically (\code{TRUE}) or linearly ()\code{FALSE}) between \code{lamba.min} and \code{lambda.max}?
-#' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
+#' @param ... further arguments to sparse inverse covariance estimation
 #' @method spiec.easi default
 #' @rdname spiec.easi
 #' @seealso \code{\link{multi.spiec.easi}}
@@ -319,8 +319,8 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
 #' @param sel.criterion character string specifying criterion/method for model selection. Accepts 'stars' and 'bstars' \[default\]
 #' @param verbose flag to show progress messages
 #' @param pulsar.select flag to perform model selection. Choices are TRUE/FALSE/'batch'
-#' @param pulsar.params list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.
-#' @param ... further arguments to \code{\link{sparseiCov}} / \code{huge}
+#' @param pulsar.params list of further arguments to pulsar model selection. See the documentation for \code{\link{pulsar.params}}.
+#' @param ... further arguments to sparse inverse covariance estimation
 #' @seealso \code{\link{spiec.easi}}
 #' @return SPIEC-EASI result object
 #' @export
