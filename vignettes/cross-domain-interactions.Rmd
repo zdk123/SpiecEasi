@@ -19,7 +19,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -128,13 +128,13 @@ Session info:
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=TRUE}
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
 # Save objects if they exist
 if (exists("se.hmp2") && exists("dtype")) {
   cache_file <- '../vignette_cache/cross-domain-interactions.RData'
   tryCatch({
     # Load trimming function and trim objects to reduce size
-    source('../trim_spiec_easi.R')
+    source('../vignette_cache/trim_spiec_easi.R')
     se.hmp2.trimmed <- trim_spiec_easi(se.hmp2)
     se.cross.trimmed <- trim_spiec_easi(se.cross)
     

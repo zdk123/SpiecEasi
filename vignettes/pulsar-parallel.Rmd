@@ -19,7 +19,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -239,13 +239,13 @@ Session info:
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=TRUE}
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
 # Save objects if they exist
 if (exists("se1") && exists("se2")) {
   cache_file <- '../vignette_cache/pulsar-parallel.RData'
   tryCatch({
     # Load trimming function and trim objects to reduce size
-    source('../trim_spiec_easi.R')
+    source('../vignette_cache/trim_spiec_easi.R')
     se1.trimmed <- trim_spiec_easi(se1)
     se2.trimmed <- trim_spiec_easi(se2)
     se3.trimmed <- trim_spiec_easi(se3)

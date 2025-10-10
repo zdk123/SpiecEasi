@@ -19,7 +19,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -222,7 +222,7 @@ For more advanced usage, please refer to the other vignettes:
 - **[pulsar: parallel utilities for model selection](pulsar-parallel.html)**: Optimize performance with parallel processing
 - **[Troubleshooting](troubleshooting.html)**: Solutions for common issues and parameter tuning guidelines
 
-```{r, echo = FALSE, eval=TRUE}
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
 # Save only the expensive computations if they exist and we're rebuilding
 if (runchunks && exists("se.mb.amgut") && exists("se.gl.amgut")) {
   cache_file <- '../vignette_cache/SpiecEasi.RData'

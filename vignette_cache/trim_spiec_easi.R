@@ -18,7 +18,7 @@ trim_spiec_easi <- function(se) {
     trimmed$select <- list(
       stars = list(
         summary = se$select$stars$summary,  # For plotting
-        opt.index = se$select$stars$opt.index,  # For getOptInd()
+        opt.index = 1,  # Always set to 1 since we only keep the optimal element
         merge = se$select$stars$merge  # For getOptMerge()
       )
     )
@@ -26,16 +26,22 @@ trim_spiec_easi <- function(se) {
   
   # Keep minimal est info - but preserve what's needed for getOptCov/getOptBeta
   if (!is.null(se$est)) {
+    # Get the optimal index safely
+    opt_idx <- if (!is.null(se$select$stars$opt.index)) se$select$stars$opt.index else 1
+    
     trimmed$est <- list(
       method = se$est$method,
       lambda = se$est$lambda,
       sparsity = se$est$sparsity,
       df = se$est$df,
       sym = se$est$sym,
-      # Keep the optimal path elements for getOptCov/getOptBeta
-      path = se$est$path[se$select$stars$opt.index],  # Only optimal path
-      beta = se$est$beta[se$select$stars$opt.index],  # Only optimal beta
-      cov = list(se$est$cov[[se$select$stars$opt.index]])  # Only optimal cov as list
+      # Keep the optimal path elements as the first (and only) element in lists
+      path = if (!is.null(se$est$path) && length(se$est$path) >= opt_idx) list(se$est$path[[opt_idx]]) else NULL,
+      beta = if (!is.null(se$est$beta) && length(se$est$beta) >= opt_idx) list(se$est$beta[[opt_idx]]) else NULL,
+      cov = if (!is.null(se$est$cov) && length(se$est$cov) >= opt_idx) list(se$est$cov[[opt_idx]]) else NULL,
+      # Keep data and resid for latent variable models
+      data = se$est$data,
+      resid = if (!is.null(se$est$resid) && length(se$est$resid) >= opt_idx) list(se$est$resid[[opt_idx]]) else NULL
     )
   }
   

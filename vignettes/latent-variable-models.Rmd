@@ -19,7 +19,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -107,8 +107,11 @@ Consistency should be a bit better for the slr networks.
 Construct the robust PCA from amgut2 data:
 
 ```{r, eval=TRUE}
-X <- se2.slr.amgut$est$data
-L <- se2.slr.amgut$est$resid[[getOptInd(se2.slr.amgut)]]
+# Use cached X and L if available, otherwise extract from objects
+if (!exists("X") || !exists("L")) {
+  X <- se2.slr.amgut$est$data
+  L <- se2.slr.amgut$est$resid[[getOptInd(se2.slr.amgut)]]
+}
 pca <- robustPCA(X, L)
 ```
 
@@ -141,13 +144,13 @@ Session info:
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=TRUE}
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
 # Save objects if they exist
 if (exists("se1.mb.amgut") && exists("se2.mb.amgut")) {
   cache_file <- '../vignette_cache/latent-variable-models.RData'
   tryCatch({
     # Load trimming function and trim objects to reduce size
-    source('../trim_spiec_easi.R')
+    source('../vignette_cache/trim_spiec_easi.R')
     se1.mb.trimmed <- trim_spiec_easi(se1.mb.amgut)
     se2.mb.trimmed <- trim_spiec_easi(se2.mb.amgut)
     se1.slr.trimmed <- trim_spiec_easi(se1.slr.amgut)
