@@ -134,10 +134,12 @@ fitdistr <- function (x, densfun, start, control, ...)  {
         which1  <- which(x == 1.0)
         max <- abs(length(whichz) - length(which1))
         max <- max - max*.1
-        zind    <- na.omit(whichz[seq_len(max)])
+        zind    <- na.omit(whichz[seq_len(max(max, 0))])
         tempx   <- x[-zind]
         pstr0  <- length(which(x == 0)) / length(x)
-        pstr0  <- abs(pstr0 - exp(-mean(tempx)))   # correct for approx expected zeros in a poisson (important for small rates)
+        if (length(tempx) > 0 && !is.na(mean(tempx))) {
+            pstr0  <- abs(pstr0 - exp(-mean(tempx)))   # correct for approx expected zeros in a poisson (important for small rates)
+        }
         estimate <- mean(x) / (1 - pstr0)
         vars <- ((1 - pstr0) * (estimate^2 + estimate)) - ((1-pstr0) * estimate)^2
         sds  <- sqrt(vars)
@@ -161,10 +163,10 @@ fitdistr <- function (x, densfun, start, control, ...)  {
         which1  <- which(x == 1.0)
         max   <- abs(length(whichz) - length(which1))
         max   <- max - max*.1
-        zind  <- na.omit(whichz[seq_len(max)])
+        zind  <- na.omit(whichz[seq_len(max(max, 0))])
         tempx <- x[-zind]
         pstr0 <- length(which(x == 0)) / length(x)
-        if (pstr0 != 0)
+        if (pstr0 != 0 && length(tempx) > 0 && !is.na(mean(tempx)))
             pstr0 <- abs(pstr0 - exp(-mean(tempx)))   # correct for approx expected zeros, if there are any
         m  <- mean(x)
         v  <- var(x)
@@ -173,10 +175,15 @@ fitdistr <- function (x, densfun, start, control, ...)  {
             else size <- 100
             estimate <- m
         } else {
-            v <- var(tempx)
-            m <- mean(tempx)
+            if (length(tempx) > 1) {
+                v <- var(tempx)
+                m <- mean(tempx)
+            } else {
+                v <- var(x)
+                m <- mean(x)
+            }
             estimate <- m / (1 - pstr0)
-            if (v < m) size <- 1e2
+            if (is.na(v) || is.na(m) || v < m) size <- 1e2
             else size <- (m^2/(v-m)) * ((1-pstr0) * estimate)
         }
         lower <- c(1e-2, 1e-2, 0)
