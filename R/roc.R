@@ -126,8 +126,8 @@ edge.diss <- function(x, y, metric='jaccard', otux=NULL, otuy=NULL) {
     yli[,1] <- otuy[yli[,1]]
     yli[,2] <- otuy[yli[,2]]
   }
-  xedges <- apply(xli[,1:2], 1, paste, collapse="-")
-  yedges <- apply(yli[,1:2], 1, paste, collapse="-")
+  xedges <- apply(xli[,seq_len(2)], 1, paste, collapse="-")
+  yedges <- apply(yli[,seq_len(2)], 1, paste, collapse="-")
   if (metric=="jaccard") {
     return(length(intersect(xedges, yedges)) / length(unique(c(xedges, yedges))))
   } else {

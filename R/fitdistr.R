@@ -134,7 +134,7 @@ fitdistr <- function (x, densfun, start, control, ...)  {
         which1  <- which(x == 1.0)
         max <- abs(length(whichz) - length(which1))
         max <- max - max*.1
-        zind    <- na.omit(whichz[1:max])
+        zind    <- na.omit(whichz[seq_len(max)])
         tempx   <- x[-zind]
         pstr0  <- length(which(x == 0)) / length(x)
         pstr0  <- abs(pstr0 - exp(-mean(tempx)))   # correct for approx expected zeros in a poisson (important for small rates)
@@ -161,7 +161,7 @@ fitdistr <- function (x, densfun, start, control, ...)  {
         which1  <- which(x == 1.0)
         max   <- abs(length(whichz) - length(which1))
         max   <- max - max*.1
-        zind  <- na.omit(whichz[1:max])
+        zind  <- na.omit(whichz[seq_len(max)])
         tempx <- x[-zind]
         pstr0 <- length(which(x == 0)) / length(x)
         if (pstr0 != 0)
