@@ -1,6 +1,6 @@
 # SpiecEasi NEWS
 
-## Changes in version 1.99.0
+## Changes in version 1.99.1
 
 ### NEW FEATURES
 
