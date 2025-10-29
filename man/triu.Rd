@@ -23,8 +23,17 @@ triu2diag(x, diagval = 0)
 }
 \value{
 Upper triangular elements of matrix
+
+Upper triangular elements of matrix
 }
 \description{
 Get or symmeterize the upper/lower triangle of a symmetric matrix with the other side zeroed out
+}
+\examples{
+# Create a symmetric matrix
+mat <- matrix(1:16, 4, 4)
+mat <- mat + t(mat)  # Make symmetric
+# Get upper triangular elements
+upper_elements <- triu(mat)
 }
 \keyword{internal}

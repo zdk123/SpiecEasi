@@ -4,11 +4,10 @@
 
 ### NEW FEATURES
 
-* Added comprehensive Bioconductor package infrastructure and compliance
+* Added comprehensive Bioconductor package infrastructure
 * Added automated GitHub Actions workflow for Bioconductor continuous integration
 * Added test coverage reporting and automated testing
 * Added Bioconductor-style vignettes and documentation
-    - Package now fully compliant with Bioconductor standards and guidelines
     - Added biocViews categorization: Software, Microbiome, Metagenomics, GraphAndNetwork, NetworkInference
     - Added comprehensive support documentation and issue templates
     - Implemented proper code of conduct and contribution guidelines
@@ -23,8 +22,7 @@
 
 ### BUG FIXES
 
-* Package now passes all Bioconductor validation checks
-* Resolved any compliance issues identified during BiocCheck
+* Resolved compliance issues identified during BiocCheck
 * Enhanced error handling and package robustness
 
 ## Changes in version 1.1.3

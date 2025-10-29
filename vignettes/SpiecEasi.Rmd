@@ -69,6 +69,24 @@ This package will be useful to anybody who wants to infer graphical models for a
 
 One small point on notation: we refer to the method as "SPIEC-EASI" and reserve "SpiecEasi" for this package.
 
+## Installation
+
+To install SpiecEasi from Bioconductor:
+
+```{r, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+  install.packages("BiocManager")
+BiocManager::install("SpiecEasi")
+```
+
+For development versions, you can install from GitHub:
+
+```{r, eval=FALSE}
+if (!require("remotes", quietly = TRUE))
+  install.packages("remotes")
+remotes::install_github("zdk123/SpiecEasi")
+```
+
 ## Available vignettes
 
 This package includes several vignettes covering different aspects of SpiecEasi:

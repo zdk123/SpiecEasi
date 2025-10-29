@@ -262,7 +262,7 @@ logLikzip <- function(param, x, ddistr, ...) {
 qqdplot_comm <- function(comm, distr, param, plot=TRUE, ...) {
     if (!inherits(comm, 'qqdcomm')) {
         if (!missing(param)) {
-            fit <- t(sapply(seq_len(nrow(comm)), function(i) qqdplot(comm[i,], distr=distr, param=param[[i]], plot=FALSE)))
+            fit <- t(vapply(seq_len(nrow(comm)), function(i) qqdplot(comm[i,], distr=distr, param=param[[i]], plot=FALSE), FUN.VALUE=numeric(ncol(comm))))
         } else {
             fit <- t(apply(comm, 1, qqdplot, distr=distr, param=NULL, plot=FALSE))
         }

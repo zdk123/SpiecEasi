@@ -11,6 +11,15 @@
 #' @param plot graph the output
 #' @param ll number of points for the plot
 #' @return ROC curve object
+#' @examples
+#' # Create sample data and run spiec.easi
+#' data(amgut1.filt)
+#' est <- spiec.easi(amgut1.filt, method='glasso', nlambda=10)
+#' # Create a simple true graph for demonstration
+#' true_graph <- matrix(0, ncol(amgut1.filt), ncol(amgut1.filt))
+#' true_graph[1,2] <- true_graph[2,1] <- 1
+#' # Plot ROC curve
+#' roc_result <- stars.roc(getOptMerge(est), true_graph)
 #' @importFrom grDevices dev.off png
 #' @export
 stars.roc <- function(optmerge, theta, verbose = TRUE, plot = TRUE, ll=15) {

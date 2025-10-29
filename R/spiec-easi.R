@@ -322,7 +322,7 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
 #' @param pulsar.params list of further arguments to pulsar model selection. See the documentation for \code{\link{pulsar.params}}.
 #' @param ... further arguments to sparse inverse covariance estimation
 #' @seealso \code{\link{spiec.easi}}
-#' @return SPIEC-EASI result object
+#' @return a list of pulsar parameters.
 #' @export
 #' @examples
 #' # Generate random data

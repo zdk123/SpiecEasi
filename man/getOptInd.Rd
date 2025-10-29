@@ -55,6 +55,7 @@ Use the getter functions to parse \code{\link{spiec.easi}} output:
 }
 \examples{
 # Get optimal index from spiec.easi result
-# est <- spiec.easi(data, method='glasso')
-# opt_idx <- getOptInd(est)
+data(amgut1.filt)
+est <- spiec.easi(amgut1.filt, method='glasso', nlambda=10)
+opt_idx <- getOptInd(est)
 }
