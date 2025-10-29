@@ -1,5 +1,4 @@
 ## Ignore build and temp file
-^\.travis\.yml$
 ^figure*
 ^.README\.*
 ^README\.Rmd$
