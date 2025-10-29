@@ -1,5 +1,26 @@
 # SpiecEasi NEWS
 
+## Unreleased changes
+
+### BUG FIXES
+
+* Fixed BugReports URL in DESCRIPTION (removed double slash)
+* Replaced sapply with vapply in R/fitdistr.R for improved type stability
+* Fixed incomplete final line in .Rbuildignore file
+
+### IMPROVEMENTS
+
+* Added BiocManager installation instructions to main vignette
+* Added runnable examples to man pages for getOptInd, robustPCA, stars.roc, and triu functions
+* Cleaned up promotional language in NEWS entries
+* Removed unused inst/extdata files to reduce package size
+
+### INFRASTRUCTURE
+
+* Added .registration = TRUE to useDynLib in NAMESPACE
+* Updated package version to 0.99.2 for Bioconductor submission
+* Verified vignette runtime compliance with Bioconductor guidelines
+
 ## Changes in version 1.99.2
 
 ### NEW FEATURES
