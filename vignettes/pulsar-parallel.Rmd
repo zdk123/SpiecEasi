@@ -12,7 +12,7 @@ output:
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 package: "SpiecEasi"
-version: "1.99.2"
+version: "1.99.3"
 vignette: >
   %\VignetteIndexEntry{pulsar: parallel utilities for model selection}
   %\VignetteEngine{knitr::rmarkdown}
