@@ -58,14 +58,7 @@ if (!runchunks && file.exists(cache_file)) {
     se.serial <- se.serial.trimmed
     rm(se.serial.trimmed)
   }
-  if (exists("se.batch.trimmed")) {
-    se.batch <- se.batch.trimmed
-    rm(se.batch.trimmed)
-  }
-  if (exists("se.windows.trimmed")) {
-    se.windows <- se.windows.trimmed
-    rm(se.windows.trimmed)
-  }
+
 } else {
   if (!runchunks) {
     message("Cache file pulsar-parallel.RData not found - building from scratch")
@@ -82,7 +75,7 @@ SpiecEasi is now using the [pulsar package](https://cran.r-project.org/package=p
 
 As in the previous version of SpiecEasi, we can supply the `ncores` argument to the pulsar.params list to break up the subsampled computations into parallel tasks.
 
-**Note**: On Windows systems, `mc.cores > 1` is not supported by default. For Windows users, we recommend using the `snow` cluster type or running in serial mode.
+**Note**: On Windows systems, `mc.cores > 1` is not supported by default. For Windows users, we recommend running in serial mode or using batch mode with `conffile='snow'`.
 
 In this example, we set the random seed to make consistent comparison across experiments:
 
@@ -148,16 +141,11 @@ t2[3] > t4[3]
 
 For Windows users, there are several options for parallel processing:
 
-### Option 1: Use snow cluster
-```{r, eval=runchunks}
-# For Windows users who want parallel processing
-library(parallel)
-cl <- makeCluster(4, type = "SOCK")
-pargs.windows <- list(rep.num=50, seed=10010)
-se.windows <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
-                         sel.criterion='stars', pulsar.select=TRUE, pulsar.params=pargs.windows)
-stopCluster(cl)
-```
+### Option 1: Use batch mode with snow
+
+For Windows users who want parallel processing, use batch mode with the
+`snow` configuration. See the [Batch Mode](#batch-mode) section below for
+a full example, and use `conffile='snow'` instead of `conffile='parallel'`.
 
 ### Option 2: Use serial processing
 ```{r, eval=runchunks}
@@ -168,7 +156,7 @@ se.serial <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda
 ```
 
 ### Option 3: Use batch mode
-```{r, eval=runchunks}
+```{r, eval=FALSE}
 # Batch mode works on all platforms
 bargs <- list(rep.num=50, seed=10010, conffile="parallel")
 se.batch <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-3, nlambda=30,
@@ -181,7 +169,7 @@ Pulsar gives us the option of running stability selection in batch mode, using t
 
 This requires an external config file which will instruct the batchtools registry how to construct the cluster function which will execute the individual jobs. `batch.pulsar` has some built in config files that are useful for testing purposes (serial mode, "parallel", "snow", etc), but it is advisable to create your own config file and pass in the absolute path. See the [batchtools docs](https://mllg.github.io/batchtools/articles/batchtools.html#configuration-file) for instructions on how to construct config file and template files (i.e. to interact with a queueing system such as TORQUE or SGE).
 
-```{r, eval=runchunks}
+```{r, eval=FALSE}
 ## bargs <- list(rep.num=50, seed=10010, conffile="path/to/conf.txt")
 bargs <- list(rep.num=50, seed=10010, conffile="parallel")
 ## See the config file stores:
@@ -231,7 +219,7 @@ if (.Platform$OS.type != "windows") {
 ### Windows systems:
 1. **For small datasets**: Use default StARS with serial processing
 2. **For medium datasets**: Use B-StARS with serial processing
-3. **For large datasets**: Use batch mode or snow cluster
+3. **For large datasets**: Use batch mode with `conffile='snow'`
 4. **For HPC clusters**: Use batch mode with appropriate config files
 
 Session info:
@@ -251,11 +239,9 @@ if (exists("se1") && exists("se2")) {
     se3.trimmed <- trim_spiec_easi(se3)
     se4.trimmed <- trim_spiec_easi(se4)
     se.serial.trimmed <- trim_spiec_easi(se.serial)
-    se.batch.trimmed <- trim_spiec_easi(se.batch)
-    se.windows.trimmed <- trim_spiec_easi(se.windows)
     
     # Save trimmed objects and timing data
-    save(se1.trimmed, se2.trimmed, se3.trimmed, se4.trimmed, se.serial.trimmed, se.batch.trimmed, se.windows.trimmed, t1, t2, t3, t4, pargs1, pargs2, file=cache_file)
+    save(se1.trimmed, se2.trimmed, se3.trimmed, se4.trimmed, se.serial.trimmed, t1, t2, t3, t4, pargs1, pargs2, file=cache_file)
     message("Saved trimmed cache file: ", cache_file, " in directory: ", getwd())
   }, error = function(e) {
     message("Failed to save cache file: ", e$message)
