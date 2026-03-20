@@ -1,5 +1,13 @@
 # SpiecEasi NEWS
 
+## Changes in version 1.99.4
+
+### BUG FIXES
+
+* Fixed vignette build failure caused by `makeCluster(4, type = "SOCK")` requiring unavailable `snow` package
+* Replaced broken snow cluster example with reference to `batch.pulsar` with `conffile='snow'`
+* Set batch mode vignette chunks to `eval=FALSE` to avoid build failures on systems without `batchtools` infrastructure
+
 ## Changes in version 1.99.3
 
 ### BUG FIXES
