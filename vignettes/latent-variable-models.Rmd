@@ -12,7 +12,7 @@ output:
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 package: "SpiecEasi"
-version: "1.99.4"
+version: "1.99.5"
 vignette: >
   %\VignetteIndexEntry{Learning latent variable graphical models}
   %\VignetteEngine{knitr::rmarkdown}

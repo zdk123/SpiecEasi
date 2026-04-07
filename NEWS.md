@@ -1,6 +1,6 @@
 # SpiecEasi NEWS
 
-## Unreleased changes
+## Changes in version 1.99.5
 
 ### BUG FIXES
 
