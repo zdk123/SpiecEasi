@@ -254,13 +254,14 @@ spiec.easi.default <- function(data, method='glasso', sel.criterion='stars',
     stop("supply sel.criterion directly to spiec.easi, not pulsar.params")
 
 
+  estFunResolved <- match.fun(estFun)
   if (pulsar.select=="batch") {
     fun <- "batch.pulsar"
-    call <- quote(batch.pulsar(data=X, fun=match.fun(estFun), fargs=args))
+    call <- quote(batch.pulsar(data=X, fun=estFunResolved, fargs=args))
     pulsar.select <- TRUE
   } else {
     fun <- "pulsar"
-    call <- quote(pulsar(data=X, fun=match.fun(estFun), fargs=args))
+    call <- quote(pulsar(data=X, fun=estFunResolved, fargs=args))
   }
 
   if (pulsar.select) {

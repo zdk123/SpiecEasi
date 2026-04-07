@@ -1,5 +1,16 @@
 # SpiecEasi NEWS
 
+## Unreleased changes
+
+### BUG FIXES
+
+* Fixed vignette rebuild error with pulsar >= 0.3.13: resolve the estimation function before passing to `pulsar()` - this avoids lazy `match.fun` evaluation that fails on PSOCK cluster workers.
+
+### INFRASTRUCTURE
+
+* Removed obsolete `CXX_STD = CXX11` from `src/Makevars` (R >= 4.6 defaults to C++20)
+* Fixed `.Rbuildignore` to exclude leftover `vignettes/figure` directory from knitr
+
 ## Changes in version 1.99.4
 
 ### BUG FIXES

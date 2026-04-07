@@ -1,5 +1,6 @@
 ## Ignore build and temp file
-^figure*
+^figure$
+^vignettes/figure$
 ^.README\.*
 ^README\.Rmd$
 ^LICENSE\.md$
