@@ -1,7 +1,7 @@
 Package: SpiecEasi
 Title: Sparse Inverse Covariance for Ecological Statistical Inference
-Version: 2.1.0
-Date: 2026-03-19
+Version: 2.1.1
+Date: 2026-04-29
 Authors@R: c(
     person("Zachary", "Kurtz", role = c("aut", "cre"), email="zdkurtz@gmail.com"),
     person("Christian", "Mueller", role = "aut"),

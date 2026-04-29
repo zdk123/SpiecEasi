@@ -1,4 +1,5 @@
 ## Ignore build and temp file
+^venv$
 ^figure$
 ^vignettes/figure$
 ^.README\.*

@@ -1,5 +1,15 @@
 # SpiecEasi NEWS
 
+## Changes in version 2.1.1
+
+### DOCUMENTATION
+
+* Set vignette YAML `version` fields to match the package version.
+
+### INFRASTRUCTURE
+
+* Added `venv` to `.Rbuildignore` so local Python virtualenvs are not included in package tarballs.
+
 ## Changes in version 1.99.5
 
 ### BUG FIXES
