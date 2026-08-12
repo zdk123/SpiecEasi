@@ -12,14 +12,14 @@ output:
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 package: "SpiecEasi"
-version: "1.99.0"
+version: "1.99.5"
 vignette: >
   %\VignetteIndexEntry{Troubleshooting}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -32,10 +32,32 @@ knitr::opts_chunk$set(
 knitr::knit_hooks$set(plot = function(x, options) {
   paste0('![', basename(x), '](', x, ')')
 })
-runchunks = TRUE
+runchunks = if (Sys.getenv("FORCE_VIGNETTE_REBUILD", "FALSE") == "TRUE") TRUE else FALSE
+
+cache_file <- '../vignette_cache/troubleshooting.RData'
+if (!runchunks && file.exists(cache_file)) {
+  load(cache_file)
+  # If we loaded trimmed objects, reassign them to original names
+  if (exists("se.trimmed")) {
+    se <- se.trimmed
+    rm(se.trimmed)
+  }
+  if (exists("se4.trimmed")) {
+    se4 <- se4.trimmed
+    rm(se4.trimmed)
+  }
+  if (exists("se5.trimmed")) {
+    se5 <- se5.trimmed
+    rm(se5.trimmed)
+  }
+} else {
+  if (!runchunks) {
+    message("Cache file troubleshooting.RData not found - building from scratch")
+  }
+  runchunks <- TRUE
+}
 saveout   = runchunks
 
-if (!runchunks) load('.VIGNETTE.RData')
 ```
 
 # Troubleshooting
@@ -44,37 +66,41 @@ A common issue that comes up when running `spiec.easi` is coming up with an empt
 
 For example:
 
-```{r, echo=TRUE, message=FALSE, warning=TRUE}
+```{r, echo=TRUE, message=FALSE, warning=TRUE, eval=runchunks}
 library(SpiecEasi)
 data(amgut1.filt)
 
 pargs <- list(seed=10010)
-se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=5e-1, nlambda=10, pulsar.params=pargs)
-getOptInd(se)
-sum(getRefit(se))/2
+se3 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=5e-1, nlambda=10, pulsar.params=pargs)
 ```
-
+```{r, eval=TRUE}
+getOptInd(se3)
+sum(getRefit(se3))/2
+```
 As the warning indicates, the network stability could not be determined from the lambda path. Looking at the stability along the lambda path, `se$select$stars$summary`, we can see that the maximum value of the StARS summary statistic never crosses the default threshold (0.05).
 
 This problem we can fix by lowering `lambda.min.ratio` to explore denser networks:
 
-```{r, message=FALSE, warning=FALSE}
-se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=10, pulsar.params=pargs)
+```{r, message=FALSE, warning=FALSE, eval=runchunks}
+se4 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=10, pulsar.params=pargs)
 ```
 
 We have now fit a network, but since we have only a rough, discrete sampling of networks along the lambda path, we should check how far we are from the target stability threshold (0.05):
 
 ```{r}
-getStability(se)
-sum(getRefit(se))/2
+getStability(se4)
+sum(getRefit(se4))/2
 ```
 
 To get closer to the mark, we should bump up `nlambda` to more finely sample of the lambda path, which gives a denser network:
 
-```{r, message=FALSE, warning=FALSE}
-se <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=100, pulsar.params=pargs)
-getStability(se)
-sum(getRefit(se))/2
+```{r, message=FALSE, warning=FALSE, eval=runchunks}
+se5 <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-1, nlambda=100, pulsar.params=pargs)
+```
+
+```{r,  message=FALSE, warning=FALSE}
+getStability(se5)
+sum(getRefit(se5))/2
 ```
 
 ## Common issues and solutions
@@ -213,7 +239,22 @@ Session info:
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=runchunks}
-if (saveout)
- save(se, pargs, file=".VIGNETTE.RData")
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
+# Save objects if they exist
+if (exists("se") && exists("pargs")) {
+  cache_file <- '../vignette_cache/troubleshooting.RData'
+  tryCatch({
+    # Load trimming function and trim objects to reduce size
+    source('../vignette_cache/trim_spiec_easi.R')
+    se.trimmed <- trim_spiec_easi(se)
+    se4.trimmed <- trim_spiec_easi(se4)
+    se5.trimmed <- trim_spiec_easi(se5)
+    
+    # Save trimmed objects
+    save(se.trimmed, se4.trimmed, se5.trimmed, pargs, file=cache_file)
+    message("Saved trimmed cache file: ", cache_file, " in directory: ", getwd())
+  }, error = function(e) {
+    message("Failed to save cache file: ", e$message)
+  })
+}
 ``` 

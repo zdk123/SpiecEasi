@@ -12,14 +12,14 @@ output:
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 package: "SpiecEasi"
-version: "1.99.0"
+version: "1.99.5"
 vignette: >
   %\VignetteIndexEntry{Cross Domain SPIEC-EASI}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -32,10 +32,28 @@ knitr::opts_chunk$set(
 knitr::knit_hooks$set(plot = function(x, options) {
   paste0('![', basename(x), '](', x, ')')
 })
-runchunks = TRUE
+runchunks = if (Sys.getenv("FORCE_VIGNETTE_REBUILD", "FALSE") == "TRUE") TRUE else FALSE
+
+cache_file <- '../vignette_cache/cross-domain-interactions.RData'
+if (!runchunks && file.exists(cache_file)) {
+  load(cache_file)
+  # If we loaded trimmed objects, reassign them to original names
+  if (exists("se.hmp2.trimmed")) {
+    se.hmp2 <- se.hmp2.trimmed
+    rm(se.hmp2.trimmed)
+  }
+  if (exists("se.cross.trimmed")) {
+    se.cross <- se.cross.trimmed
+    rm(se.cross.trimmed)
+  }
+} else {
+  if (!runchunks) {
+    message("Cache file cross-domain-interactions.RData not found - building from scratch")
+  }
+  runchunks <- TRUE
+}
 saveout   = runchunks
 
-if (!runchunks) load('.VIGNETTE.RData')
 ```
 
 # Cross Domain SPIEC-EASI
@@ -44,13 +62,21 @@ SpiecEasi now includes a convenience wrapper for dealing with multiple taxa sequ
 
 Here's an example run from the [HMP2 project](https://ibdmdb.org/tunnel/public/summary.html) with 16S and Proteomics data:
 
-```{r, eval=runchunks, echo=TRUE, message=FALSE}
+First we load the data:
+```{r, eval=TRUE}
 library(SpiecEasi)
 library(phyloseq)
 data(hmp2)
+```
+
+Run the cross-domain SPIEC-EASI pipeline:
+```{r, eval=runchunks, echo=TRUE, message=FALSE}
 se.hmp2 <- spiec.easi(list(hmp216S, hmp2prot), method='mb', nlambda=40,
               lambda.min.ratio=1e-2, pulsar.params = list(thresh = 0.05))
+```
 
+Plot the network:
+```{r, eval=TRUE}
 dtype <- c(rep(1,ntaxa(hmp216S)), rep(2,ntaxa(hmp2prot)))
 plot(adj2igraph(getRefit(se.hmp2)), vertex.color=dtype+1, vertex.size=9)
 ```
@@ -67,7 +93,7 @@ plot(adj2igraph(getRefit(se.hmp2)), vertex.color=dtype+1, vertex.size=9)
 
 ## Example with custom data
 
-```{r, eval=FALSE}
+```{r, eval=runchunks}
 # Example with custom data
 # Assuming you have two data matrices with the same samples
 data1 <- matrix(rpois(100*50, 10), 100, 50)  # First data type
@@ -78,6 +104,9 @@ se.cross <- spiec.easi(list(data1, data2), method='mb',
                        lambda.min.ratio=1e-2, nlambda=20,
                        pulsar.params=list(rep.num=50))
 
+```
+
+```{r, eval=TRUE}
 # Create visualization with different colors for each domain
 dtype <- c(rep(1, ncol(data1)), rep(2, ncol(data2)))
 ig.cross <- adj2igraph(getRefit(se.cross))
@@ -95,11 +124,25 @@ In cross-domain networks:
 This approach is particularly useful for understanding how different components of the microbiome (e.g., bacteria vs. fungi) or different biological systems (e.g., microbiome vs. metabolome) interact.
 
 Session info:
-```{r, eval=runchunks}
+```{r, eval=TRUE}
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=runchunks}
-if (saveout)
- save(se.hmp2, dtype, file=".VIGNETTE.RData")
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
+# Save objects if they exist
+if (exists("se.hmp2") && exists("dtype")) {
+  cache_file <- '../vignette_cache/cross-domain-interactions.RData'
+  tryCatch({
+    # Load trimming function and trim objects to reduce size
+    source('../vignette_cache/trim_spiec_easi.R')
+    se.hmp2.trimmed <- trim_spiec_easi(se.hmp2)
+    se.cross.trimmed <- trim_spiec_easi(se.cross)
+    
+    # Save trimmed objects and other essential data
+    save(se.hmp2.trimmed, se.cross.trimmed, dtype, data1, data2, ig.cross, file=cache_file)
+    message("Saved trimmed cache file: ", cache_file, " in directory: ", getwd())
+  }, error = function(e) {
+    message("Failed to save cache file: ", e$message)
+  })
+}
 ``` 

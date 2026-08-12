@@ -163,6 +163,20 @@ jobs:
           key: ${{ matrix.config.os }}-${{ matrix.config.r }}-biocmanager-${{ env.cache-version }}
           restore-keys: ${{ matrix.config.os }}-${{ matrix.config.r }}-biocmanager-
 
+      ## Cache individual vignette builds to speed up builds
+      - name: Cache vignette builds
+        uses: actions/cache@v4
+        with:
+          path: |
+            vignettes/SpiecEasi.RData
+            vignettes/phyloseq-integration.RData
+            vignettes/cross-domain-interactions.RData
+            vignettes/latent-variable-models.RData
+            vignettes/pulsar-parallel.RData
+            vignettes/troubleshooting.RData
+          key: ${{ matrix.config.os }}-${{ matrix.config.r }}-vignettes-${{ env.cache-version }}-${{ hashFiles('vignettes/*.Rmd') }}
+          restore-keys: ${{ matrix.config.os }}-${{ matrix.config.r }}-vignettes-${{ env.cache-version }}-
+
       ## remotes is needed for isntalling the Linux system dependencies
       ## as well as other R packages later on.
       - name: Install remotes
@@ -244,7 +258,34 @@ jobs:
         run: |
           ## Pass #2 at installing dependencies
           message(paste('****', Sys.time(), 'pass number 2 at installing dependencies: any remaining dependencies ****'))
-          remotes::install_local(dependencies = TRUE, repos = BiocManager::repositories(), build_vignettes = TRUE, upgrade = TRUE, force = TRUE)
+          remotes::install_local(dependencies = TRUE, repos = BiocManager::repositories(), build_vignettes = FALSE, upgrade = TRUE, force = TRUE)
+        shell: Rscript {0}
+
+      - name: Build vignettes with caching
+        env:
+          FORCE_VIGNETTE_REBUILD: ${{ github.event.head_commit.message && contains(github.event.head_commit.message, '/rebuild-vignettes') || 'FALSE' }}
+        run: |
+          ## Build vignettes separately to enable caching
+          message(paste('****', Sys.time(), 'building vignettes with caching ****'))
+          message(paste('FORCE_VIGNETTE_REBUILD:', Sys.getenv("FORCE_VIGNETTE_REBUILD")))
+          
+          ## Load individual vignette cache files if they exist
+          vignette_caches <- c("SpiecEasi.RData", "phyloseq-integration.RData", 
+                           "cross-domain-interactions.RData", "latent-variable-models.RData",
+                           "pulsar-parallel.RData", "troubleshooting.RData")
+          
+          for (cache_file in vignette_caches) {
+            cache_path <- file.path("vignettes", cache_file)
+            if (file.exists(cache_path)) {
+              message(paste("Loading cached data from", cache_file))
+              # Load into global environment so vignettes can access the data
+              load(cache_path, envir = .GlobalEnv)
+            } else {
+              message(paste("No cache found for", cache_file, "- will build from scratch"))
+            }
+          }
+          
+          tools::buildVignettes(dir = ".", tangle = TRUE)
         shell: Rscript {0}
 
       - name: Install BiocGenerics

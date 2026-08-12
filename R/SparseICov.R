@@ -77,6 +77,7 @@ sparseiCov <- function(data, method, npn=FALSE, verbose=FALSE, cov.output = TRUE
 #' @param ncores number of cores for distributing the model fitting
 #' @param sym symmetrize the neighborhood using the 'or' (default)/'and' rule
 #' @param ... further arguments to glmnet
+#' @return A sparse inverse covariance matrix estimated using neighborhood selection
 #' @importFrom Matrix t
 #' @export
 #' @examples

@@ -16,7 +16,7 @@
 #' # Convert to igraph
 #' g <- adj2igraph(adj, vertex.attr=list(name=c('A', 'B', 'C')))
 adj2igraph <- function(Adj, rmEmptyNodes=FALSE, diag=FALSE, edge.attr=list(),
-                       vertex.attr=list(name=1:ncol(Adj))) {
+                       vertex.attr=list(name=seq_len(ncol(Adj)))) {
     g <- igraph::graph_from_adjacency_matrix(Adj, mode = "undirected", weighted = TRUE, diag=diag)
 
     if (length(vertex.attr) > 0) {

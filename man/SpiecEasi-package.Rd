@@ -18,7 +18,7 @@ The package implements SPIEC-EASI (SParse InversE Covariance estimation for Ecol
 Useful links:
 \itemize{
   \item \url{https://github.com/zdk123/SpiecEasi}
-  \item Report bugs at \url{https://github.com/zdk123/SpiecEasi//issues/}
+  \item Report bugs at \url{https://github.com/zdk123/SpiecEasi/issues/}
 }
 
 }

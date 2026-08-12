@@ -20,16 +20,16 @@
 sparcc <- function(data, iter=20, inner_iter=10, th=.1) {
 
 #  without all the 'frills'
-    sparccs <- lapply(1:iter, function(i)
+    sparccs <- lapply(seq_len(iter), function(i)
                       sparccinner(t(apply(data, 1, norm_diric)),
                                   iter=inner_iter, th=th))
     # collect
     cors <- array(unlist(lapply(sparccs, function(x) x$Cor)),
                  c(ncol(data),ncol(data),iter))
-    corMed <- apply(cors, 1:2, median)
+    corMed <- apply(cors, seq_len(2), median)
     covs <- array(unlist(lapply(sparccs, function(x) x$Cov)),
                  c(ncol(data),ncol(data),iter))
-    covMed <- apply(covs, 1:2, median)
+    covMed <- apply(covs, seq_len(2), median)
     covMed <- cor2cov(corMed, sqrt(diag(covMed)))
     list(Cov=covMed, Cor=corMed)
 }

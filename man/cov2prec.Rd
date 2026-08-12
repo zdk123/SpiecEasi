@@ -11,6 +11,9 @@ cov2prec(Cov, tol = 1e-04)
 
 \item{tol}{tolerance to define a zero eigenvalue (ie - is Prec positive definite)}
 }
+\value{
+A precision matrix (inverse of the covariance matrix)
+}
 \description{
 Covariance matrix to its matrix inverse (Precision matrix)
 }

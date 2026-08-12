@@ -3,8 +3,11 @@
 \name{pulsar.params}
 \alias{pulsar.params}
 \title{pulsar params}
+\value{
+A list of parameters for pulsar model selection
+}
 \description{
-The values to the \code{pulsar.params}/\code{icov.select.params} argument in the \code{\link{spiec.easi}} function must be a list with values from pulsar and/or batch.pulsar. See the pulsar docs for detailed instructions.
+The values to the \code{pulsar.params}/\code{icov.select.params} argument in the \code{\link{spiec.easi}} function must be a list with values for pulsar model selection parameters.
 
 List of arguments, data type, default. Description
 \itemize{
@@ -25,5 +28,5 @@ With \code{pulsar.select='batch'}, additional arguments:
 }
 }
 \seealso{
-\code{\link[pulsar]{pulsar}} \code{\link[pulsar]{batch.pulsar}} \code{\link{spiec.easi}}
+\code{\link{spiec.easi}}
 }

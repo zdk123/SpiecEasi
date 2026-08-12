@@ -29,7 +29,7 @@ spiec.easi(data, ...)
 \arguments{
 \item{data}{For a matrix, non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also by phyloseq or otu_table object.}
 
-\item{...}{further arguments to \code{\link{sparseiCov}} / \code{huge}}
+\item{...}{further arguments to sparse inverse covariance estimation}
 
 \item{method}{estimation method to use as a character string. Currently either 'glasso' or 'mb' (meinshausen-buhlmann's neighborhood selection)}
 
@@ -39,7 +39,7 @@ spiec.easi(data, ...)
 
 \item{pulsar.select}{flag to perform model selection. Choices are TRUE/FALSE/'batch'}
 
-\item{pulsar.params}{list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.}
+\item{pulsar.params}{list of further arguments to pulsar model selection. See the documentation for \code{\link{pulsar.params}}.}
 
 \item{icov.select}{deprecated.}
 

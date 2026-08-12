@@ -28,14 +28,14 @@ multi.spiec.easi(
 
 \item{pulsar.select}{flag to perform model selection. Choices are TRUE/FALSE/'batch'}
 
-\item{pulsar.params}{list of further arguments to \code{\link{pulsar}} or \code{\link{batch.pulsar}}. See the documentation for \code{\link{pulsar.params}}.}
+\item{pulsar.params}{list of further arguments to pulsar model selection. See the documentation for \code{\link{pulsar.params}}.}
 
-\item{...}{further arguments to \code{\link{sparseiCov}} / \code{huge}}
+\item{...}{further arguments to sparse inverse covariance estimation}
 
 \item{data}{non-normalized count OTU/data table with samples on rows and features/OTUs in columns. Can also be list of phyloseq objects.}
 }
 \value{
-SPIEC-EASI result object
+a list of pulsar parameters.
 }
 \description{
 A SPIEC-EASI pipeline for inferring a sparse inverse covariance matrix within and between multiple compositional datasets, under joint sparsity penalty.

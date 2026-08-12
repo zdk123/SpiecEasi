@@ -10,6 +10,7 @@
 #' add pseudocount before normalizing a count vector
 #'
 #' @param x count data vector
+#' @return A normalized vector with pseudo-count added
 #' @export
 #' @examples
 #' x <- c(1, 2, 0, 4)
@@ -20,6 +21,7 @@ norm_pseudo  <- function(x) norm_to_total(x+1)
 #'
 #' Normalize a count vector by the total sum of that vector
 #' @param x count data vector
+#' @return A normalized vector (values sum to 1)
 #' @export
 #' @examples
 #' x <- c(1, 2, 3, 4)

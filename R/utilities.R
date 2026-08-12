@@ -19,8 +19,9 @@
 #'}
 #' @examples
 #' # Get optimal index from spiec.easi result
-#' # est <- spiec.easi(data, method='glasso')
-#' # opt_idx <- getOptInd(est)
+#' data(amgut1.filt)
+#' est <- spiec.easi(amgut1.filt, method='glasso', nlambda=10)
+#' opt_idx <- getOptInd(est)
 #' @export
 getOptInd <- function(est) getOptX(est, 'index')
 
@@ -166,6 +167,13 @@ symBeta <- function(beta, mode='ave') {
 #' @param x the data matrix or vector
 #' @param k (0/1 flag indicate diagonal should be selected)
 #' @param diagval value to be added to the diagonal if converting from upper triangular matrix.
+#' @return Upper triangular elements of matrix
+#' @examples
+#' # Create a symmetric matrix
+#' mat <- matrix(1:16, 4, 4)
+#' mat <- mat + t(mat)  # Make symmetric
+#' # Get upper triangular elements
+#' upper_elements <- triu(mat)
 #' @export
 triu <- function(x, k=1) x[upper.tri(x, !k)]
 #' @export

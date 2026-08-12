@@ -12,14 +12,14 @@ output:
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 package: "SpiecEasi"
-version: "1.99.0"
+version: "1.99.5"
 vignette: >
   %\VignetteIndexEntry{Learning latent variable graphical models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -32,10 +32,35 @@ knitr::opts_chunk$set(
 knitr::knit_hooks$set(plot = function(x, options) {
   paste0('![', basename(x), '](', x, ')')
 })
-runchunks = TRUE
-saveout   = runchunks
+runchunks = if (Sys.getenv("FORCE_VIGNETTE_REBUILD", "FALSE") == "TRUE") TRUE else FALSE
 
-if (!runchunks) load('.VIGNETTE.RData')
+cache_file <- '../vignette_cache/latent-variable-models.RData'
+if (!runchunks && file.exists(cache_file)) {
+  load(cache_file)
+  # If we loaded trimmed objects, reassign them to original names
+  if (exists("se1.mb.trimmed")) {
+    se1.mb.amgut <- se1.mb.trimmed
+    rm(se1.mb.trimmed)
+  }
+  if (exists("se2.mb.trimmed")) {
+    se2.mb.amgut <- se2.mb.trimmed
+    rm(se2.mb.trimmed)
+  }
+  if (exists("se1.slr.trimmed")) {
+    se1.slr.amgut <- se1.slr.trimmed
+    rm(se1.slr.trimmed)
+  }
+  if (exists("se2.slr.trimmed")) {
+    se2.slr.amgut <- se2.slr.trimmed
+    rm(se2.slr.trimmed)
+  }
+} else {
+  if (!runchunks) {
+    message("Cache file latent-variable-models.RData not found - building from scratch")
+  }
+  runchunks <- TRUE
+}
+saveout   = runchunks
 ```
 
 # Learning latent variable graphical models
@@ -46,9 +71,17 @@ Please see the [preprint](https://www.biorxiv.org/content/10.1101/2019.12.21.885
 
 To demonstrate this in action we can show that removing latent effects improves a consistency measure between round 1 and round 2 of the American Gut project data.
 
+```{r, eval=TRUE}
+library(SpiecEasi)
+library(phyloseq)
+data(hmp2)
+data(amgut1.filt)
+data(amgut2.filt.phy)
+```
+
 First we fit the networks, assuming that there are 10 latent components in the dataset:
 
-```{r, eval=FALSE}
+```{r, eval=runchunks}
 se1.mb.amgut <- spiec.easi(amgut1.filt, method='mb', lambda.min.ratio=1e-2,
                           nlambda=20, pulsar.params=list(rep.num=20, ncores=4))
 se2.mb.amgut <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
@@ -62,7 +95,7 @@ se2.slr.amgut <- spiec.easi(amgut2.filt.phy, method='slr', r=10, lambda.min.rati
 
 Then we compare the consistency between the edge sets within each method using the Jaccard index:
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 otu1 <- colnames(amgut1.filt)
 otu2 <- taxa_names(amgut2.filt.phy)
 edge.diss(getRefit(se1.mb.amgut), getRefit(se2.mb.amgut), 'jaccard', otu1, otu2)
@@ -73,15 +106,18 @@ Consistency should be a bit better for the slr networks.
 
 Construct the robust PCA from amgut2 data:
 
-```{r, eval=FALSE}
-X <- se2.slr.amgut$est$data
-L <- se2.slr.amgut$est$resid[[getOptInd(se2.slr.amgut)]]
+```{r, eval=TRUE}
+# Use cached X and L if available, otherwise extract from objects
+if (!exists("X") || !exists("L")) {
+  X <- se2.slr.amgut$est$data
+  L <- se2.slr.amgut$est$resid[[getOptInd(se2.slr.amgut)]]
+}
 pca <- robustPCA(X, L)
 ```
 
 We can also check the correlation between AGP meta-data and the latent factors (scores of the robust PCA):
 
-```{r, eval=FALSE}
+```{r, eval=TRUE}
 age <- as.numeric(as.character(sample_data(amgut2.filt.phy)$AGE))
 bmi <- as.numeric(as.character(sample_data(amgut2.filt.phy)$BMI))
 depth <- colSums(otu_table(amgut2.filt.phy))
@@ -108,7 +144,23 @@ Session info:
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=runchunks}
-if (saveout)
- save(file=".VIGNETTE.RData")
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
+# Save objects if they exist
+if (exists("se1.mb.amgut") && exists("se2.mb.amgut")) {
+  cache_file <- '../vignette_cache/latent-variable-models.RData'
+  tryCatch({
+    # Load trimming function and trim objects to reduce size
+    source('../vignette_cache/trim_spiec_easi.R')
+    se1.mb.trimmed <- trim_spiec_easi(se1.mb.amgut)
+    se2.mb.trimmed <- trim_spiec_easi(se2.mb.amgut)
+    se1.slr.trimmed <- trim_spiec_easi(se1.slr.amgut)
+    se2.slr.trimmed <- trim_spiec_easi(se2.slr.amgut)
+    
+    # Save trimmed objects and other essential data
+    save(se1.mb.trimmed, se2.mb.trimmed, se1.slr.trimmed, se2.slr.trimmed, otu1, otu2, X, L, pca, age, bmi, depth, file=cache_file)
+    message("Saved trimmed cache file: ", cache_file, " in directory: ", getwd())
+  }, error = function(e) {
+    message("Failed to save cache file: ", e$message)
+  })
+}
 ``` 

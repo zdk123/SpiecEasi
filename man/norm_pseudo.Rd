@@ -9,6 +9,9 @@ norm_pseudo(x)
 \arguments{
 \item{x}{count data vector}
 }
+\value{
+A normalized vector with pseudo-count added
+}
 \description{
 add pseudocount before normalizing a count vector
 }

@@ -12,14 +12,14 @@ output:
     code_folding: show
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 package: "SpiecEasi"
-version: "1.99.0"
+version: "1.99.5"
 vignette: >
   %\VignetteIndexEntry{Working with phyloseq}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r setup, echo = FALSE, eval=TRUE}
+```{r setup, echo = FALSE, eval=TRUE, message=FALSE}
 library(BiocStyle)
 knitr::opts_knit$set(
   upload.fun = NULL,
@@ -32,35 +32,68 @@ knitr::opts_chunk$set(
 knitr::knit_hooks$set(plot = function(x, options) {
   paste0('![', basename(x), '](', x, ')')
 })
-runchunks = TRUE
-saveout   = runchunks
+runchunks = if (Sys.getenv("FORCE_VIGNETTE_REBUILD", "FALSE") == "TRUE") TRUE else FALSE
 
-if (!runchunks) load('.VIGNETTE.RData')
+cache_file <- '../vignette_cache/phyloseq-integration.RData'
+if (!runchunks && file.exists(cache_file)) {
+  load(cache_file)
+  # If we loaded trimmed objects, reassign them to original names
+  if (exists("se.mb.amgut2.trimmed")) {
+    se.mb.amgut2 <- se.mb.amgut2.trimmed
+    rm(se.mb.amgut2.trimmed)
+  }
+} else {
+  if (!runchunks) {
+    message("Cache file phyloseq-integration.RData not found - building from scratch")
+  }
+  runchunks <- TRUE
+}
+saveout   = runchunks
 ```
 
 # Working with phyloseq
 
 SpiecEasi includes some convenience wrappers to work directly with `phyloseq` objects.
 
-```{r, eval=runchunks, warning=FALSE, message=FALSE}
+```{r, eval=TRUE}
 library(SpiecEasi)
 library(phyloseq)
 ## Load round 2 of American gut project
 data('amgut2.filt.phy')
+```
+
+
+```{r, eval=runchunks, warning=FALSE, message=FALSE}
 se.mb.amgut2 <- spiec.easi(amgut2.filt.phy, method='mb', lambda.min.ratio=1e-2,
                            nlambda=20, pulsar.params=list(rep.num=50))
 ig2.mb <- adj2igraph(getRefit(se.mb.amgut2),  vertex.attr=list(name=taxa_names(amgut2.filt.phy)))
-plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
 ```
 
+
 The `plot_network` function provides an easy way to visualize networks with taxonomic information from phyloseq objects. You can specify different taxonomic ranks for coloring nodes and customize the visualization further.
+```{r, eval=TRUE}
+plot_network(ig2.mb, amgut2.filt.phy, type='taxa', color="Rank3")
+```
 
 Session info:
 ```{r}
 sessionInfo()
 ```
 
-```{r, echo = FALSE, eval=runchunks}
-if (saveout)
- save(se.mb.amgut2, ig2.mb, file=".VIGNETTE.RData")
+```{r, echo = FALSE, eval=TRUE, message=FALSE}
+# Save objects if they exist
+if (exists("se.mb.amgut2") && exists("ig2.mb")) {
+  cache_file <- '../vignette_cache/phyloseq-integration.RData'
+  tryCatch({
+    # Load trimming function and trim objects to reduce size
+    source('../vignette_cache/trim_spiec_easi.R')
+    se.mb.amgut2.trimmed <- trim_spiec_easi(se.mb.amgut2)
+    
+    # Save trimmed objects
+    save(se.mb.amgut2.trimmed, ig2.mb, file=cache_file)
+    message("Saved trimmed cache file: ", cache_file, " in directory: ", getwd())
+  }, error = function(e) {
+    message("Failed to save cache file: ", e$message)
+  })
+}
 ``` 

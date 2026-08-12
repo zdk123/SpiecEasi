@@ -2,6 +2,7 @@
 #'
 #' @param Precision symmetric precision matrix
 #' @param tol tolerance to define a zero eigenvalue (ie - is Prec positive definite)
+#' @return A covariance matrix (inverse of the precision matrix)
 #' @importFrom MASS ginv
 #' @export
 #' @examples
@@ -23,6 +24,7 @@ prec2cov <- function(Precision, tol=1e-4) {
 #'
 #' @param Cov symmetric covariance matrix (can be correlation also)
 #' @param tol tolerance to define a zero eigenvalue (ie - is Prec positive definite)
+#' @return A precision matrix (inverse of the covariance matrix)
 #' @importFrom MASS ginv
 #' @export
 #' @examples
@@ -53,6 +55,7 @@ cov2prec <- function(Cov, tol=1e-4) {
 #' @param targetCondition sets the condition of the precision matrix by modulating the magnitude of the diagonal
 #' @param epsBin the convergence tolerance of the condition number binary search
 #' @param numBinSearch maximum number of iterations
+#' @return A precision matrix with the specified condition number
 #' @examples
 #' # Create a simple graph
 #' g <- make_graph("erdos_renyi", D=10, e=15)
@@ -245,7 +248,7 @@ scale_free <- function(D, e, pfun) {
         }
     }
 
-    newnodes <- setdiff(1:D, nodes)
+    newnodes <- setdiff(seq_len(D), nodes)
     existnodes <- nodes
     while (length(newnodes) != 0) {  # For each node
         n1 <- na.exclude(newnodes)[1]
@@ -297,8 +300,8 @@ hub <- function(D, e, numHubs=ceiling(D/20)) {
 
     Graph   <- matrix(0, D, D)
     # partiion nodes into groups
-    groupid  <- factor(sample(1:numHubs, D, replace=TRUE))
-    groupind <- split(1:D, groupid)
+    groupid  <- factor(sample(seq_len(numHubs), D, replace=TRUE))
+    groupind <- split(seq_len(D), groupid)
 
     for (ind in groupind) {
         hub <- sample(ind, 1)   # pick 1 hub
@@ -320,8 +323,8 @@ cluster <- function(D, e, numHubs=floor((D/15)+(e/D))-1) {
     Graph   <- matrix(0, D, D)
     # partiion nodes into groups
 #    groupid  <- factor(sample(1:numHubs, D, replace=TRUE))
-    groupid <- factor(sample(rep(1:numHubs, length.out=D)))
-    groupind <- split(1:D, groupid)
+    groupid <- factor(sample(rep(seq_len(numHubs), length.out=D)))
+    groupind <- split(seq_len(D), groupid)
     eHub     <- ceiling(e/numHubs)
     for (ind in groupind) {
         nHub <- length(ind)
@@ -346,9 +349,9 @@ band <- function(D, e) {
     # add off diagonals until e is exhausted
     while (!bestFit) {
         off1    <- matrix(0, D, D)
-        diag(off1[-(1:k),]) <- rep(1, D-k)
+        diag(off1[-(seq_len(k)),]) <- rep(1, D-k)
         off2    <- matrix(0, D, D)
-        diag(off2[,-(1:k)]) <- rep(1, D-k)
+        diag(off2[,-(seq_len(k))]) <- rep(1, D-k)
         tempG <- Graph + off1 + off2
         if (sum(tempG)>(2*e)) bestFit <- TRUE
         else Graph <- tempG
@@ -381,8 +384,8 @@ block <- function(D, e, numHubs) {  #blocksize=20, p=D/((D/blocksize)*(blocksize
 
     Graph <- matrix(0, D, D)
    # partition nodes into blocks
-    blockid  <- factor(sample(1:numHubs, D, replace=TRUE))
-    blockind <- split(1:D, blockid)
+    blockid  <- factor(sample(seq_len(numHubs), D, replace=TRUE))
+    blockind <- split(seq_len(D), blockid)
   #  hubs <- round(seq.int(1,D+1, length.out=numHubs+1))
     for (ind in blockind) {
         nHubs <- length(ind)

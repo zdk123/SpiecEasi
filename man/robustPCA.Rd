@@ -19,3 +19,10 @@ a named list with n x r matrix of scores and r x r matrix of loadings
 \description{
 Form a robust PCA from clr-transformed data and [the low rank component of] an inverse covariance matrix
 }
+\examples{
+# Create sample data
+data(amgut1.filt)
+data.clr <- t(clr(t(amgut1.filt), 1))
+# Perform robust PCA
+pca_result <- robustPCA(data.clr, diag(ncol(data.clr)))
+}

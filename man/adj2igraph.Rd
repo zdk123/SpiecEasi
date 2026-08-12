@@ -9,7 +9,7 @@ adj2igraph(
   rmEmptyNodes = FALSE,
   diag = FALSE,
   edge.attr = list(),
-  vertex.attr = list(name = 1:ncol(Adj))
+  vertex.attr = list(name = seq_len(ncol(Adj)))
 )
 }
 \arguments{

@@ -11,6 +11,15 @@
 #' @param plot graph the output
 #' @param ll number of points for the plot
 #' @return ROC curve object
+#' @examples
+#' # Create sample data and run spiec.easi
+#' data(amgut1.filt)
+#' est <- spiec.easi(amgut1.filt, method='glasso', nlambda=10)
+#' # Create a simple true graph for demonstration
+#' true_graph <- matrix(0, ncol(amgut1.filt), ncol(amgut1.filt))
+#' true_graph[1,2] <- true_graph[2,1] <- 1
+#' # Plot ROC curve
+#' roc_result <- stars.roc(getOptMerge(est), true_graph)
 #' @importFrom grDevices dev.off png
 #' @export
 stars.roc <- function(optmerge, theta, verbose = TRUE, plot = TRUE, ll=15) {
@@ -126,8 +135,8 @@ edge.diss <- function(x, y, metric='jaccard', otux=NULL, otuy=NULL) {
     yli[,1] <- otuy[yli[,1]]
     yli[,2] <- otuy[yli[,2]]
   }
-  xedges <- apply(xli[,1:2], 1, paste, collapse="-")
-  yedges <- apply(yli[,1:2], 1, paste, collapse="-")
+  xedges <- apply(xli[,seq_len(2)], 1, paste, collapse="-")
+  yedges <- apply(yli[,seq_len(2)], 1, paste, collapse="-")
   if (metric=="jaccard") {
     return(length(intersect(xedges, yedges)) / length(unique(c(xedges, yedges))))
   } else {
