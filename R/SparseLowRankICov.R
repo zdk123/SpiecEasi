@@ -78,12 +78,14 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
   if (is.null(args$opts$tol)) args$opts$tol <- 1e-3
 ##  lest <- vector('list', n)
   loglik <- vector('numeric', n)
+  iter   <- vector('integer', n)
   path <- vector('list', n) ; icov <- vector('list', n) ; resid <- vector('list', n)
   for (i in n:1) {
     est <- do.call('admm2', c(list(lambda=lambda[i]), args))
     tmp <- est$S
     icov [[i]] <- tmp
     resid[[i]] <- est$L
+    iter[[i]]  <- est$iter
     tmp <- Matrix::forceSymmetric(Matrix::triu(tmp,k=1))
     path [[i]] <- as(tmp, 'lsCMatrix')
     args$opts$Lambda <- est$Lambda
@@ -96,7 +98,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
     loglik[[i]] <- log(Matrix::det(R[z,z])) - sum(Matrix::diag(R[z,z] %*% SigmaO[z,z])) - (p-q)
 #    args$opts$eta <- max(.5, (p-(n-i))/p)
   }
-  list(icov=icov, path=path, resid=resid, lambda=lambda, loglik=loglik, data=data)
+  list(icov=icov, path=path, resid=resid, lambda=lambda, loglik=loglik, iter=iter, data=data)
 }
 
 #' @useDynLib SpiecEasi
