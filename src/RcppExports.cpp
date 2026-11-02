@@ -11,9 +11,35 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// eigPSDThresh2R
+arma::mat eigPSDThresh2R(arma::mat M, int k, double beta);
+RcppExport SEXP _SpiecEasi_eigPSDThresh2R(SEXP MSEXP, SEXP kSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(eigPSDThresh2R(M, k, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
+// eigPSDThreshPartialR
+arma::mat eigPSDThreshPartialR(arma::mat M, int k, double beta);
+RcppExport SEXP _SpiecEasi_eigPSDThreshPartialR(SEXP MSEXP, SEXP kSEXP, SEXP betaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type M(MSEXP);
+    Rcpp::traits::input_parameter< int >::type k(kSEXP);
+    Rcpp::traits::input_parameter< double >::type beta(betaSEXP);
+    rcpp_result_gen = Rcpp::wrap(eigPSDThreshPartialR(M, k, beta));
+    return rcpp_result_gen;
+END_RCPP
+}
 // ADMM
-List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda, arma::mat& Y, double beta, int r, double mu, const double& eta, const double& muf, const int& maxiter, const double& newtol, const double& tol, const double& over_relax_par, bool shrinkDiag);
-RcppExport SEXP _SpiecEasi_ADMM(SEXP SigmaOSEXP, SEXP lambdaSEXP, SEXP ISEXP, SEXP LambdaSEXP, SEXP YSEXP, SEXP betaSEXP, SEXP rSEXP, SEXP muSEXP, SEXP etaSEXP, SEXP mufSEXP, SEXP maxiterSEXP, SEXP newtolSEXP, SEXP tolSEXP, SEXP over_relax_parSEXP, SEXP shrinkDiagSEXP) {
+List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda, arma::mat& Y, double beta, int r, double mu, const double& eta, const double& muf, const int& maxiter, const double& newtol, const double& tol, const double& over_relax_par, bool shrinkDiag, bool partial_eig);
+RcppExport SEXP _SpiecEasi_ADMM(SEXP SigmaOSEXP, SEXP lambdaSEXP, SEXP ISEXP, SEXP LambdaSEXP, SEXP YSEXP, SEXP betaSEXP, SEXP rSEXP, SEXP muSEXP, SEXP etaSEXP, SEXP mufSEXP, SEXP maxiterSEXP, SEXP newtolSEXP, SEXP tolSEXP, SEXP over_relax_parSEXP, SEXP shrinkDiagSEXP, SEXP partial_eigSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -32,13 +58,16 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type tol(tolSEXP);
     Rcpp::traits::input_parameter< const double& >::type over_relax_par(over_relax_parSEXP);
     Rcpp::traits::input_parameter< bool >::type shrinkDiag(shrinkDiagSEXP);
-    rcpp_result_gen = Rcpp::wrap(ADMM(SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag));
+    Rcpp::traits::input_parameter< bool >::type partial_eig(partial_eigSEXP);
+    rcpp_result_gen = Rcpp::wrap(ADMM(SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag, partial_eig));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_SpiecEasi_ADMM", (DL_FUNC) &_SpiecEasi_ADMM, 15},
+    {"_SpiecEasi_eigPSDThresh2R", (DL_FUNC) &_SpiecEasi_eigPSDThresh2R, 3},
+    {"_SpiecEasi_eigPSDThreshPartialR", (DL_FUNC) &_SpiecEasi_eigPSDThreshPartialR, 3},
+    {"_SpiecEasi_ADMM", (DL_FUNC) &_SpiecEasi_ADMM, 16},
     {NULL, NULL, 0}
 };
 

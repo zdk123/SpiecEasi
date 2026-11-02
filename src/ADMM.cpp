@@ -4,6 +4,17 @@
 using namespace Rcpp;
 using namespace arma;
 
+// LAPACK symbols declared directly (with hidden Fortran string lengths) to avoid
+// clashing with Armadillo's own LAPACK prototypes.
+extern "C" void dsyevr_(const char* jobz, const char* range, const char* uplo,
+                        const int* n, double* a, const int* lda,
+                        const double* vl, const double* vu,
+                        const int* il, const int* iu, const double* abstol,
+                        int* m, double* w, double* z, const int* ldz, int* isuppz,
+                        double* work, const int* lwork, int* iwork, const int* liwork,
+                        int* info, size_t, size_t, size_t);
+extern "C" double dlamch_(const char* cmach, size_t);
+
 
 arma::mat sqrtmNewt2(arma::mat& C, arma::mat& sqrt0, const double& errTol) {
     arma::mat X(sqrt0);
@@ -103,6 +114,60 @@ arma::mat eigPSDThresh2(arma::mat& M, int k, double beta=0) {
     return 0.5 * (L + L.t());
 }
 
+// Same result as eigPSDThresh2, but asks LAPACK (dsyevr) only for the eigenpairs
+// that survive the threshold: the top k+1 when beta == 0, else those above beta.
+arma::mat eigPSDThreshPartial(arma::mat& M, int k, double beta=0) {
+    int n = M.n_rows;
+    if (beta == 0 && k <= 0)
+      return arma::zeros<arma::mat>(n, n);
+    if (beta == 0 && k >= n)
+      return eigPSDThresh2(M, k, beta);
+
+    arma::mat A = symmatu(M);
+    A = 0.5 * (A + A.t());
+
+    const char* range = (beta == 0) ? "I" : "V";
+    int il = n - k, iu = n, ncol = (beta == 0) ? k + 1 : n;
+    double vl = beta, vu = std::numeric_limits<double>::max();
+    double abstol = 2 * dlamch_("S", 1);
+    int m = 0, info = 0, lwork = -1, liwork = -1, iwq = 0;
+    double wq = 0;
+    arma::vec w(n);
+    arma::mat Z(n, ncol);
+    std::vector<int> isuppz(2 * ncol);
+
+    dsyevr_("V", range, "U", &n, A.memptr(), &n, &vl, &vu, &il, &iu, &abstol, &m,
+            w.memptr(), Z.memptr(), &n, isuppz.data(), &wq, &lwork, &iwq, &liwork, &info, 1, 1, 1);
+    lwork = static_cast<int>(wq); liwork = iwq;
+    std::vector<double> work(lwork);
+    std::vector<int> iwork(liwork);
+    dsyevr_("V", range, "U", &n, A.memptr(), &n, &vl, &vu, &il, &iu, &abstol, &m,
+            w.memptr(), Z.memptr(), &n, isuppz.data(), work.data(), &lwork, iwork.data(), &liwork, &info, 1, 1, 1);
+    if (info != 0)
+      return eigPSDThresh2(M, k, beta);
+    if (m == 0)
+      return arma::zeros<arma::mat>(n, n);
+
+    arma::vec d = w.head(m);
+    arma::mat Q = Z.cols(0, m - 1);
+    if (beta == 0)
+      beta = std::max(d(0), 0.0);  // d(0) is the (k+1)-th largest eigenvalue
+    arma::vec tmpd = d - beta;
+    tmpd.elem(find(tmpd < 0)).zeros();
+    arma::mat L = Q * diagmat(tmpd) * Q.t();
+    return 0.5 * (L + L.t());
+}
+
+// [[Rcpp::export(.eigPSDThresh2)]]
+arma::mat eigPSDThresh2R(arma::mat M, int k, double beta=0) {
+    return eigPSDThresh2(M, k, beta);
+}
+
+// [[Rcpp::export(.eigPSDThreshPartial)]]
+arma::mat eigPSDThreshPartialR(arma::mat M, int k, double beta=0) {
+    return eigPSDThreshPartial(M, k, beta);
+}
+
 
 List SVD2(arma::mat& M) {
     arma::mat U, V;
@@ -173,7 +238,8 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
           arma::mat& Lambda, arma::mat& Y, double beta=0, int r=0, double mu=0,
           const double& eta=4/5, const double& muf=1e-6, const int&
           maxiter=500, const double& newtol=1e-5, const double& tol=1e-5,
-          const double& over_relax_par=1.6, bool shrinkDiag=true) {
+          const double& over_relax_par=1.6, bool shrinkDiag=true,
+          bool partial_eig=false) {
 
     int n = SigmaO.n_rows;
     if (mu == 0) mu = n;
@@ -209,7 +275,8 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       if (iter == 0) {
         L = LA;
       } else {
-        L = eigPSDThresh2(LA, r, mu*beta);
+        L = partial_eig ? eigPSDThreshPartial(LA, r, mu*beta)
+                        : eigPSDThresh2(LA, r, mu*beta);
 //        L = softSVT4(LA, r+1, mu*beta);
       }
 

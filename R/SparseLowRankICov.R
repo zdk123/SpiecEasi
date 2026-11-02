@@ -103,7 +103,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 #' @noRd
 admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
-  defopts <- list(mu=1, eta=1, muf=1e-4, maxiter=1000, newtol=1e-4)
+  defopts <- list(mu=1, eta=1, muf=1e-4, maxiter=1000, newtol=1e-4, partial.eig=FALSE)
   if (!missing(opts)) for (o in names(opts)) defopts[[ o ]] <- opts [[ o ]]
   if (missing(beta)) beta <- 0
   if (missing(r))       r <- 0
@@ -124,7 +124,7 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   else Y <- opts$Y
   ADMM(SigmaO=SigmaO, lambda=lambda, I=I, Lambda=Lambda, Y=Y, beta=beta, r=r, shrinkDiag=shrinkDiag,
        maxiter=opts$maxiter, mu=opts$mu, eta=opts$eta, newtol=opts$newtol, muf=opts$muf,
-       tol=tol, over_relax_par=over_relax_par)
+       tol=tol, over_relax_par=over_relax_par, partial_eig=opts$partial.eig)
 }
 
 #' robust PCA
