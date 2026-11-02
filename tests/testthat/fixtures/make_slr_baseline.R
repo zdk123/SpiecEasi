@@ -1,5 +1,6 @@
 ## Regenerate the SLR baseline fixture used by test_slr.R.
-## The stored fixture was produced by the PR #292 solver (commit 1dc723d on perf/slr-admm).
+## The stored fixture was produced by the PR #292 solver with all perf flags off,
+## after the double-precision lambda fix in SOFTTHRESH2 (which moved results by ~5e-8).
 ## Bit-compatible solver changes must reproduce it; run from the package root:
 ##   Rscript tests/testthat/fixtures/make_slr_baseline.R
 

@@ -31,7 +31,7 @@ arma::mat sqrtmNewt2(arma::mat& C, arma::mat& sqrt0, const double& errTol) {
 
 
 
-arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrinkDiag = true) {
+arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const double& lambda, const bool& shrinkDiag = true) {
     arma::mat A = symmatu(Sig);
 //    int n = A.n_cols;
     arma::sp_mat S(sign(A));
@@ -43,7 +43,7 @@ arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrink
 }
 
 // Dense form of SOFTTHRESH2, for use inside the ADMM loop (no sparse round trip).
-arma::mat SOFTTHRESHD(const arma::mat& Sig, const float& lambda, const bool& shrinkDiag = true) {
+arma::mat SOFTTHRESHD(const arma::mat& Sig, const double& lambda, const bool& shrinkDiag = true) {
     arma::mat A = symmatu(Sig);
     arma::mat M(abs(A)-lambda);
     M.elem(find(M < 0)).zeros();
