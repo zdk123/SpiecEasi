@@ -104,6 +104,23 @@ describe("R-update from one eigendecomposition", {
   }
 })
 
+describe("Path-changing options converge to the same optimum", {
+  # These options change the iterates, so they are checked against a tightly
+  # converged reference rather than against the baseline at the default tol.
+  cs  <- baseline$cases$rank_np
+  ref <- slr_fit_case(cs, opts=list(tol=1e-11, maxiter=1e6))
+  configs <- list(balance_mu   = list(balance.mu=TRUE),
+                  sparse_first = list(path.order='sparse_first'),
+                  both         = list(balance.mu=TRUE, path.order='sparse_first'))
+  for (nm in names(configs)) {
+    test_that(paste("reaches the reference solution:", nm), {
+      fit <- slr_fit_case(cs, opts=c(configs[[nm]], list(tol=1e-8, maxiter=1e5)))
+      err <- max(mapply(rel_err, fit$icov, ref$icov), mapply(rel_err, fit$resid, ref$resid))
+      expect_lt(err, 1e-3)
+    })
+  }
+})
+
 describe("SLR low-rank component", {
   test_that("L is symmetric PSD with rank at most r", {
     fit <- baseline$fits$rank_np

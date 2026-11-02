@@ -80,7 +80,10 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
   loglik <- vector('numeric', n)
   iter   <- vector('integer', n)
   path <- vector('list', n) ; icov <- vector('list', n) ; resid <- vector('list', n)
-  for (i in n:1) {
+  ## lambda is decreasing: 'dense_first' warm-starts from the smallest lambda,
+  ## 'sparse_first' from the largest (the easier, sparser end)
+  order <- if (identical(args$opts$path.order, 'sparse_first')) seq_len(n) else n:1
+  for (i in order) {
     est <- do.call('admm2', c(list(lambda=lambda[i]), args))
     tmp <- est$S
     icov [[i]] <- tmp
