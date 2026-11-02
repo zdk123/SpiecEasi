@@ -42,6 +42,16 @@ arma::sp_mat SOFTTHRESH2(arma::mat& Sig, const float& lambda, const bool& shrink
     return M % S;
 }
 
+// Dense form of SOFTTHRESH2, for use inside the ADMM loop (no sparse round trip).
+arma::mat SOFTTHRESHD(const arma::mat& Sig, const float& lambda, const bool& shrinkDiag = true) {
+    arma::mat A = symmatu(Sig);
+    arma::mat M(abs(A)-lambda);
+    M.elem(find(M < 0)).zeros();
+    if (!shrinkDiag)
+      M.diag() = A.diag();
+    return M % sign(A);
+}
+
 
 void svdPowSym(arma::mat& U, arma::vec& d, arma::mat& V, arma::mat& A, int k, int q) {
 //    int l = k;
@@ -281,11 +291,12 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
     arma::mat Lambda2 = Lambda.cols(n  , n*2-1);
     arma::mat Lambda3 = Lambda.cols(n*2, n*3-1);
     arma::mat R = Y.cols(0,n-1), L = Y.cols(n*2,n*3-1);
-    arma::sp_mat S(Y.cols(n,n*2-1));
+    arma::mat S = Y.cols(n,n*2-1);
     arma::mat RY(R), LY(L), SY(S);
     arma::mat RO(size(R)), SO(size(S)), LO(size(L));
     arma::mat RA(size(R)), SA(size(S)), LA(size(L)), TA(size(L));
-    arma::mat X(size(Y));
+    // squared Frobenius norm summed over the three blocks
+    auto sq = [](const arma::mat& M) { double v = norm(M, "fro"); return v*v; };
 //    arma::mat Y_old(Y);
     arma::mat K, K2, KI;
     int iter;
@@ -308,7 +319,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       }
 
       // update S
-      S = SOFTTHRESH2(SA, lambda*mu, shrinkDiag);
+      S = SOFTTHRESHD(SA, lambda*mu, shrinkDiag);
       if (iter == 0) {
         L = LA;
       } else {
@@ -316,10 +327,6 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
                         : eigPSDThresh2(LA, r, mu*beta);
 //        L = softSVT4(LA, r+1, mu*beta);
       }
-
-      X.cols(0  , n-1  ) = R;
-      X.cols(n  , n*2-1) = arma::mat(S);
-      X.cols(n*2, n*3-1) = L;
 
       RO = over_relax_par*R + (1-over_relax_par)*RY;
       SO = over_relax_par*S + (1-over_relax_par)*SY;
@@ -338,12 +345,9 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       Lambda2 = Lambda2 - (SO-SY)/mu;
       Lambda3 = Lambda3 - (LO-LY)/mu;
 
-      Y.cols(0  , n-1  ) = RY;
-      Y.cols(n  , n*2-1) = SY;
-      Y.cols(n*2, n*3-1) = LY;
-
-      r_norm(iter)  = norm(X - Y, "fro");
-      eps_pri(iter) = sqrt(3*n*n)*tol + tol*std::max(norm(X,"fro"), norm(Y,"fro"));
+      r_norm(iter)  = std::sqrt(sq(R - RY) + sq(S - SY) + sq(L - LY));
+      eps_pri(iter) = sqrt(3*n*n)*tol + tol*std::sqrt(std::max(sq(R) + sq(S) + sq(L),
+                                                               sq(RY) + sq(SY) + sq(LY)));
 
       if (r_norm(iter) < eps_pri(iter)) {
          break;
@@ -355,8 +359,11 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
     Lambda.cols(0  , n-1  ) = Lambda1;
     Lambda.cols(n  , n*2-1) = Lambda2;
     Lambda.cols(n*2, n*3-1) = Lambda3;
+    Y.cols(0  , n-1  ) = RY;
+    Y.cols(n  , n*2-1) = SY;
+    Y.cols(n*2, n*3-1) = LY;
 
-    return List::create(_["R"] = R,  _["S"] = S, _["L"] = L,
+    return List::create(_["R"] = R,  _["S"] = arma::sp_mat(S), _["L"] = L,
                         _["Y"] = Y,
                         _["Lambda"] = Lambda,
 //                        _["RA"] = RA, _["SA"] = SA, _["LA"] = LA,
