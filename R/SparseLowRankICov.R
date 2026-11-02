@@ -90,6 +90,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
     path [[i]] <- as(tmp, 'lsCMatrix')
     args$opts$Lambda <- est$Lambda
     args$opts$Y      <- est$Y
+    if (isTRUE(args$opts$balance.mu)) args$opts$mu <- est$mu
     if (is.null(args$opts$warm.tol)) args$opts$warm.tol <- args$opts$tol
     args$opts$tol <- args$opts$warm.tol
     z <- Matrix::rowSums(path[[i]])!=0 #1:p #
@@ -106,7 +107,7 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
   defopts <- list(mu=1, eta=1, muf=1e-4, maxiter=1000, newtol=1e-4, partial.eig=FALSE,
-                  fast.R=FALSE)
+                  fast.R=FALSE, balance.mu=FALSE)
   if (!missing(opts)) for (o in names(opts)) defopts[[ o ]] <- opts [[ o ]]
   if (missing(beta)) beta <- 0
   if (missing(r))       r <- 0
@@ -128,7 +129,7 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   ADMM(SigmaO=SigmaO, lambda=lambda, I=I, Lambda=Lambda, Y=Y, beta=beta, r=r, shrinkDiag=shrinkDiag,
        maxiter=opts$maxiter, mu=opts$mu, eta=opts$eta, newtol=opts$newtol, muf=opts$muf,
        tol=tol, over_relax_par=over_relax_par, partial_eig=opts$partial.eig,
-       fast_R=opts$fast.R)
+       fast_R=opts$fast.R, balance_mu=opts$balance.mu)
 }
 
 #' robust PCA

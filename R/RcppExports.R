@@ -18,7 +18,7 @@
 }
 
 #' @noRd
-ADMM <- function(SigmaO, lambda, I, Lambda, Y, beta = 0, r = 0L, mu = 0, eta = 4/5, muf = 1e-6, maxiter = 500L, newtol = 1e-5, tol = 1e-5, over_relax_par = 1.6, shrinkDiag = TRUE, partial_eig = FALSE, fast_R = FALSE) {
-    .Call('_SpiecEasi_ADMM', PACKAGE = 'SpiecEasi', SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag, partial_eig, fast_R)
+ADMM <- function(SigmaO, lambda, I, Lambda, Y, beta = 0, r = 0L, mu = 0, eta = 4/5, muf = 1e-6, maxiter = 500L, newtol = 1e-5, tol = 1e-5, over_relax_par = 1.6, shrinkDiag = TRUE, partial_eig = FALSE, fast_R = FALSE, balance_mu = FALSE) {
+    .Call('_SpiecEasi_ADMM', PACKAGE = 'SpiecEasi', SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag, partial_eig, fast_R, balance_mu)
 }
 

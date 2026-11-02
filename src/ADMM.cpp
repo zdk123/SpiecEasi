@@ -282,11 +282,15 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
           const double& eta=4/5, const double& muf=1e-6, const int&
           maxiter=500, const double& newtol=1e-5, const double& tol=1e-5,
           const double& over_relax_par=1.6, bool shrinkDiag=true,
-          bool partial_eig=false, bool fast_R=false) {
+          bool partial_eig=false, bool fast_R=false, bool balance_mu=false) {
 
     int n = SigmaO.n_rows;
     if (mu == 0) mu = n;
-    arma::vec r_norm(maxiter), eps_pri(maxiter);
+    // balance_mu: stop on primal AND dual residuals (Boyd et al. 3.3) and adapt mu
+    // by residual balancing (3.4.1), frozen after balance_iters so the changes stay summable.
+    const int balance_iters = 50;
+    const double balance_ratio = 10, balance_factor = 2;
+    arma::vec r_norm(maxiter), eps_pri(maxiter), s_norm(maxiter), eps_dual(maxiter);
     arma::mat Lambda1 = Lambda.cols(0  , n-1  );
     arma::mat Lambda2 = Lambda.cols(n  , n*2-1);
     arma::mat Lambda3 = Lambda.cols(n*2, n*3-1);
@@ -295,6 +299,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
     arma::mat RY(R), LY(L), SY(S);
     arma::mat RO(size(R)), SO(size(S)), LO(size(L));
     arma::mat RA(size(R)), SA(size(S)), LA(size(L)), TA(size(L));
+    arma::mat RYp, SYp, LYp;
     // squared Frobenius norm summed over the three blocks
     auto sq = [](const arma::mat& M) { double v = norm(M, "fro"); return v*v; };
 //    arma::mat Y_old(Y);
@@ -332,6 +337,9 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       SO = over_relax_par*S + (1-over_relax_par)*SY;
       LO = over_relax_par*L + (1-over_relax_par)*LY;
 
+      if (balance_mu) {
+        RYp = RY; SYp = SY; LYp = LY;
+      }
       RA = RO - mu*Lambda1;
       SA = SO - mu*Lambda2;
       LA = LO - mu*Lambda3;
@@ -349,10 +357,26 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       eps_pri(iter) = sqrt(3*n*n)*tol + tol*std::sqrt(std::max(sq(R) + sq(S) + sq(L),
                                                                sq(RY) + sq(SY) + sq(LY)));
 
-      if (r_norm(iter) < eps_pri(iter)) {
+      if (!balance_mu) {
+        if (r_norm(iter) < eps_pri(iter)) {
+           break;
+        }
+        mu = std::max(mu*eta, muf);
+        continue;
+      }
+
+      s_norm(iter)   = std::sqrt(sq(RY - RYp) + sq(SY - SYp) + sq(LY - LYp)) / mu;
+      eps_dual(iter) = sqrt(3*n*n)*tol + tol*std::sqrt(sq(Lambda1) + sq(Lambda2) + sq(Lambda3));
+      if (r_norm(iter) < eps_pri(iter) && s_norm(iter) < eps_dual(iter)) {
          break;
       }
-      mu = std::max(mu*eta, muf);
+      // mu is 1/rho: a large primal residual calls for a larger rho, i.e. a smaller mu
+      if (iter < balance_iters) {
+        if (r_norm(iter) > balance_ratio * s_norm(iter))
+          mu = std::max(mu / balance_factor, muf);
+        else if (s_norm(iter) > balance_ratio * r_norm(iter))
+          mu = mu * balance_factor;
+      }
 
     }
 
@@ -370,6 +394,8 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
                         _["iter"] = iter+1, _["beta"] = beta, _["mu"]   = mu,
                         _["history"] = List::create(
                           _["r_norm"]  =  r_norm,
-                          _["eps_pri"] = eps_pri)
+                          _["eps_pri"] = eps_pri,
+                          _["s_norm"]  = s_norm,
+                          _["eps_dual"] = eps_dual)
                         );
 }
