@@ -79,6 +79,30 @@ arma::mat softSVT2(arma::mat& M, int k, double beta=0) {
     return U*diagmat(tmpd)*V.t();
 }
 
+arma::mat eigPSDThresh2(arma::mat& M, int k, double beta=0) {
+    arma::mat A = symmatu(M);
+    A = 0.5 * (A + A.t());
+
+    arma::vec d;
+    arma::mat Q;
+    eig_sym(d, Q, A);
+
+    if (beta == 0) {
+      if (k <= 0) {
+        beta = std::numeric_limits<double>::infinity();
+      } else if (k < static_cast<int>(d.n_elem)) {
+        beta = std::max(d(d.n_elem - k - 1), 0.0);
+      } else {
+        beta = 0.0;
+      }
+    }
+
+    arma::vec tmpd = d - beta;
+    tmpd.elem(find(tmpd < 0)).zeros();
+    arma::mat L = Q * diagmat(tmpd) * Q.t();
+    return 0.5 * (L + L.t());
+}
+
 
 List SVD2(arma::mat& M) {
     arma::mat U, V;
@@ -185,7 +209,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
       if (iter == 0) {
         L = LA;
       } else {
-        L = softSVT2(LA, r, mu*beta);
+        L = eigPSDThresh2(LA, r, mu*beta);
 //        L = softSVT4(LA, r+1, mu*beta);
       }
 
