@@ -62,6 +62,48 @@ describe("Partial eigen L-update (dsyevr)", {
   }
 })
 
+describe("R-update from one eigendecomposition", {
+  # Analytic reference: K = Q diag(d) Q' with known Q and d, and the prox
+  # (sqrt(K^2 + 4 mu I) - K)/2 evaluated per eigenvalue without cancellation.
+  prox_ref <- function(d, Q, mu) {
+    s <- sqrt(d^2 + 4 * mu)
+    t <- ifelse(d >= 0, 2 * mu / (s + d), (s - d) / 2)
+    Q %*% diag(t) %*% t(Q)
+  }
+  basis <- function(p, seed) { set.seed(seed); qr.Q(qr(matrix(rnorm(p * p), p))) }
+
+  spectra <- list(
+    well = seq(-3, 3, length.out=40),
+    kappa_1e4 = c(10^seq(2, -2, length.out=20), -10^seq(-2, 2, length.out=20)),
+    kappa_1e8 = c(10^seq(4, -4, length.out=20), -10^seq(-4, 4, length.out=20)),
+    large_d   = c(seq(80, 120, length.out=20), -seq(80, 120, length.out=20))
+  )
+  for (nm in names(spectra)) for (mu in c(1, 1e-2, 1e-4)) {
+    test_that(sprintf("matches the analytic prox: %s, mu = %g", nm, mu), {
+      d <- spectra[[nm]]; Q <- basis(length(d), 7)
+      K <- Q %*% diag(d) %*% t(Q); K <- (K + t(K)) / 2
+      ref <- prox_ref(d, Q, mu)
+      new <- .Rupdate_new(K, mu)
+      old <- .Rupdate_old(K, mu)
+      err_new <- rel_err(new, ref); err_old <- rel_err(old, ref)
+      expect_lt(err_new, 1e-12)
+      expect_lte(err_new, max(err_old, 1e-14))
+      expect_gt(min(eigen(new, symmetric=TRUE, only.values=TRUE)$values), 0)
+    })
+  }
+
+  for (nm in names(baseline$cases)) {
+    test_that(paste("full fit with fast.R agrees with the baseline:", nm), {
+      fit <- slr_fit_case(baseline$cases[[nm]], opts=list(fast.R=TRUE))
+      ref <- baseline$fits[[nm]]
+      for (i in seq_along(ref$icov)) {
+        expect_lt(rel_err(fit$icov[[i]],  ref$icov[[i]]),  1e-6)
+        expect_lt(rel_err(fit$resid[[i]], ref$resid[[i]]), 1e-6)
+      }
+    })
+  }
+})
+
 describe("SLR low-rank component", {
   test_that("L is symmetric PSD with rank at most r", {
     fit <- baseline$fits$rank_np

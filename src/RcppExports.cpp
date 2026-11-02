@@ -11,6 +11,30 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// RupdateOldR
+arma::mat RupdateOldR(arma::mat K, double mu);
+RcppExport SEXP _SpiecEasi_RupdateOldR(SEXP KSEXP, SEXP muSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type K(KSEXP);
+    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
+    rcpp_result_gen = Rcpp::wrap(RupdateOldR(K, mu));
+    return rcpp_result_gen;
+END_RCPP
+}
+// RupdateNewR
+arma::mat RupdateNewR(arma::mat K, double mu);
+RcppExport SEXP _SpiecEasi_RupdateNewR(SEXP KSEXP, SEXP muSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type K(KSEXP);
+    Rcpp::traits::input_parameter< double >::type mu(muSEXP);
+    rcpp_result_gen = Rcpp::wrap(RupdateNewR(K, mu));
+    return rcpp_result_gen;
+END_RCPP
+}
 // eigPSDThresh2R
 arma::mat eigPSDThresh2R(arma::mat M, int k, double beta);
 RcppExport SEXP _SpiecEasi_eigPSDThresh2R(SEXP MSEXP, SEXP kSEXP, SEXP betaSEXP) {
@@ -38,8 +62,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // ADMM
-List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda, arma::mat& Y, double beta, int r, double mu, const double& eta, const double& muf, const int& maxiter, const double& newtol, const double& tol, const double& over_relax_par, bool shrinkDiag, bool partial_eig);
-RcppExport SEXP _SpiecEasi_ADMM(SEXP SigmaOSEXP, SEXP lambdaSEXP, SEXP ISEXP, SEXP LambdaSEXP, SEXP YSEXP, SEXP betaSEXP, SEXP rSEXP, SEXP muSEXP, SEXP etaSEXP, SEXP mufSEXP, SEXP maxiterSEXP, SEXP newtolSEXP, SEXP tolSEXP, SEXP over_relax_parSEXP, SEXP shrinkDiagSEXP, SEXP partial_eigSEXP) {
+List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda, arma::mat& Y, double beta, int r, double mu, const double& eta, const double& muf, const int& maxiter, const double& newtol, const double& tol, const double& over_relax_par, bool shrinkDiag, bool partial_eig, bool fast_R);
+RcppExport SEXP _SpiecEasi_ADMM(SEXP SigmaOSEXP, SEXP lambdaSEXP, SEXP ISEXP, SEXP LambdaSEXP, SEXP YSEXP, SEXP betaSEXP, SEXP rSEXP, SEXP muSEXP, SEXP etaSEXP, SEXP mufSEXP, SEXP maxiterSEXP, SEXP newtolSEXP, SEXP tolSEXP, SEXP over_relax_parSEXP, SEXP shrinkDiagSEXP, SEXP partial_eigSEXP, SEXP fast_RSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -59,15 +83,18 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const double& >::type over_relax_par(over_relax_parSEXP);
     Rcpp::traits::input_parameter< bool >::type shrinkDiag(shrinkDiagSEXP);
     Rcpp::traits::input_parameter< bool >::type partial_eig(partial_eigSEXP);
-    rcpp_result_gen = Rcpp::wrap(ADMM(SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag, partial_eig));
+    Rcpp::traits::input_parameter< bool >::type fast_R(fast_RSEXP);
+    rcpp_result_gen = Rcpp::wrap(ADMM(SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag, partial_eig, fast_R));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_SpiecEasi_RupdateOldR", (DL_FUNC) &_SpiecEasi_RupdateOldR, 2},
+    {"_SpiecEasi_RupdateNewR", (DL_FUNC) &_SpiecEasi_RupdateNewR, 2},
     {"_SpiecEasi_eigPSDThresh2R", (DL_FUNC) &_SpiecEasi_eigPSDThresh2R, 3},
     {"_SpiecEasi_eigPSDThreshPartialR", (DL_FUNC) &_SpiecEasi_eigPSDThreshPartialR, 3},
-    {"_SpiecEasi_ADMM", (DL_FUNC) &_SpiecEasi_ADMM, 16},
+    {"_SpiecEasi_ADMM", (DL_FUNC) &_SpiecEasi_ADMM, 17},
     {NULL, NULL, 0}
 };
 

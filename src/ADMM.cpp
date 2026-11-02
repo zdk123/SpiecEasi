@@ -158,6 +158,39 @@ arma::mat eigPSDThreshPartial(arma::mat& M, int k, double beta=0) {
     return 0.5 * (L + L.t());
 }
 
+// R-update prox, (sqrt(K^2 + 4 mu I) - K)/2, as originally computed.
+arma::mat Rprox2(const arma::mat& K, double mu, const arma::mat& I) {
+    arma::mat KI, K2 = K*K + 4*mu*I;
+    arma::sqrtmat_sympd(KI, K2);
+    return (KI-K)/2;
+}
+
+// Same prox from one eigendecomposition of K (K and K^2 + 4 mu I share
+// eigenvectors). Each eigenvalue uses the cancellation-free branch:
+// 2 mu / (sqrt(d^2 + 4 mu) + d) for d >= 0, (sqrt(d^2 + 4 mu) - d)/2 for d < 0.
+arma::mat RproxEig(const arma::mat& K, double mu) {
+    arma::mat A = 0.5 * (K + K.t());
+    arma::vec d;
+    arma::mat Q;
+    eig_sym(d, Q, A);
+    arma::vec s = sqrt(d % d + 4*mu);
+    arma::vec t(d.n_elem);
+    for (arma::uword i = 0; i < d.n_elem; i++)
+      t(i) = (d(i) >= 0) ? 2*mu / (s(i) + d(i)) : (s(i) - d(i)) / 2;
+    arma::mat R = Q * diagmat(t) * Q.t();
+    return 0.5 * (R + R.t());
+}
+
+// [[Rcpp::export(.Rupdate_old)]]
+arma::mat RupdateOldR(arma::mat K, double mu) {
+    return Rprox2(K, mu, arma::eye(K.n_rows, K.n_rows));
+}
+
+// [[Rcpp::export(.Rupdate_new)]]
+arma::mat RupdateNewR(arma::mat K, double mu) {
+    return RproxEig(K, mu);
+}
+
 // [[Rcpp::export(.eigPSDThresh2)]]
 arma::mat eigPSDThresh2R(arma::mat M, int k, double beta=0) {
     return eigPSDThresh2(M, k, beta);
@@ -239,7 +272,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
           const double& eta=4/5, const double& muf=1e-6, const int&
           maxiter=500, const double& newtol=1e-5, const double& tol=1e-5,
           const double& over_relax_par=1.6, bool shrinkDiag=true,
-          bool partial_eig=false) {
+          bool partial_eig=false, bool fast_R=false) {
 
     int n = SigmaO.n_rows;
     if (mu == 0) mu = n;
@@ -265,10 +298,14 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
 //      }
       // update R
       K  = mu*SigmaO - RA;
-      K2 = K*K + 4*mu*I;
-//      KI = sqrtmNewt2(K2, I, newtol);
-      arma::sqrtmat_sympd(KI, K2);
-      R  = (KI-K)/2;
+      if (fast_R) {
+        R = RproxEig(K, mu);
+      } else {
+        K2 = K*K + 4*mu*I;
+//        KI = sqrtmNewt2(K2, I, newtol);
+        arma::sqrtmat_sympd(KI, K2);
+        R  = (KI-K)/2;
+      }
 
       // update S
       S = SOFTTHRESH2(SA, lambda*mu, shrinkDiag);
