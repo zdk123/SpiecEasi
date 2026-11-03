@@ -83,8 +83,21 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
   ## lambda is decreasing: 'dense_first' warm-starts from the smallest lambda,
   ## 'sparse_first' from the largest (the easier, sparser end)
   order <- if (identical(args$opts$path.order, 'sparse_first')) seq_len(n) else n:1
+  ## init.states: per-lambda (Y, Lambda) to start from instead of the previous lambda
+  ## (e.g. a full-data fit, for subsample fits); init.first.only uses it for the first fit only
+  init <- args$opts$init.states
+  args$opts$init.states <- NULL
+  states <- if (isTRUE(args$opts$return.states)) vector('list', n) else NULL
   for (i in order) {
+    if (!is.null(init) && (i == order[1] || !isTRUE(args$opts$init.first.only))) {
+      args$opts$Y      <- init[[i]]$Y
+      args$opts$Lambda <- init[[i]]$Lambda
+    }
+    ## threshold.warm: apply the L threshold on the first step of a warm-started fit
+    args$opts$threshold.first <- isTRUE(args$opts$threshold.warm) && !is.null(args$opts$Y)
     est <- do.call('admm2', c(list(lambda=lambda[i]), args))
+    if (isTRUE(args$opts$anderson.carry)) args$opts$anderson.s0 <- est$anderson_s
+    if (!is.null(states)) states[[i]] <- list(Y=est$Y, Lambda=est$Lambda)
     tmp <- est$S
     icov [[i]] <- tmp
     resid[[i]] <- est$L
@@ -102,7 +115,8 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
     loglik[[i]] <- log(Matrix::det(R[z,z])) - sum(Matrix::diag(R[z,z] %*% SigmaO[z,z])) - (p-q)
 #    args$opts$eta <- max(.5, (p-(n-i))/p)
   }
-  list(icov=icov, path=path, resid=resid, lambda=lambda, loglik=loglik, iter=iter, data=data)
+  list(icov=icov, path=path, resid=resid, lambda=lambda, loglik=loglik, iter=iter, data=data,
+       states=states)
 }
 
 #' @useDynLib SpiecEasi
@@ -110,7 +124,8 @@ sparseLowRankiCov <- function(data, npn=FALSE, verbose=FALSE, cor=FALSE, ...) {
 admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   n  <- nrow(SigmaO)
   defopts <- list(mu=1, eta=1, muf=1e-4, maxiter=1000, newtol=1e-4, partial.eig=FALSE,
-                  fast.R=FALSE, balance.mu=FALSE, anderson=0)
+                  fast.R=FALSE, balance.mu=FALSE, anderson=0, threshold.first=FALSE,
+                  anderson.s0=0)
   if (!missing(opts)) for (o in names(opts)) defopts[[ o ]] <- opts [[ o ]]
   if (missing(beta)) beta <- 0
   if (missing(r))       r <- 0
@@ -123,16 +138,19 @@ admm2 <- function(SigmaO, lambda, beta, r, tol=1e-2, shrinkDiag=TRUE, opts) {
   if (is.null(opts[[ 'I' ]]))
     I <- diag(n)
   else I <- opts$I
+  ## ADMM updates Lambda and Y in place, so pass copies: a caller's warm-start
+  ## state must not change underneath it
   if (is.null(opts[[ 'Lambda' ]]))
     Lambda <- matrix(0, n, n*3)
-  else Lambda <- opts$Lambda
+  else Lambda <- opts$Lambda + 0
   if (is.null(opts[[ 'Y' ]]))
     Y <- cbind(I, I, matrix(0, n, n))
-  else Y <- opts$Y
+  else Y <- opts$Y + 0
   ADMM(SigmaO=SigmaO, lambda=lambda, I=I, Lambda=Lambda, Y=Y, beta=beta, r=r, shrinkDiag=shrinkDiag,
        maxiter=opts$maxiter, mu=opts$mu, eta=opts$eta, newtol=opts$newtol, muf=opts$muf,
        tol=tol, over_relax_par=over_relax_par, partial_eig=opts$partial.eig,
-       fast_R=opts$fast.R, balance_mu=opts$balance.mu, anderson=opts$anderson)
+       fast_R=opts$fast.R, balance_mu=opts$balance.mu, anderson=opts$anderson,
+       threshold_first=opts$threshold.first, anderson_s0=opts$anderson.s0)
 }
 
 #' robust PCA

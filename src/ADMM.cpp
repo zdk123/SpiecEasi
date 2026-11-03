@@ -329,7 +329,7 @@ static double dampingLambda(const arma::vec& d, const arma::vec& uf, double delt
 template <typename Step>
 int andersonDriver(Step& step, arma::mat& RY, arma::mat& SY, arma::mat& LY,
                    arma::mat& Lambda1, arma::mat& Lambda2, arma::mat& Lambda3,
-                   int m, int maxiter, bool threshold_first) {
+                   int m, int maxiter, bool threshold_first, double& s) {
     const double kappa = 25, alpha = 1.2;
     int it = 0;
     auto set_state = [&](const arma::vec& x) {
@@ -351,7 +351,7 @@ int andersonDriver(Step& step, arma::mat& RY, arma::mat& SY, arma::mat& LY,
     arma::vec f = gx - x;
     double rAcc = arma::norm(f);
     arma::mat dX, dF;
-    double s = 0;
+    // s: accepted-step counter driving the damping schedule; starts from the caller's value
 
     while (true) {
       arma::vec xn = gx;
@@ -398,7 +398,8 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
           maxiter=500, const double& newtol=1e-5, const double& tol=1e-5,
           const double& over_relax_par=1.6, bool shrinkDiag=true,
           bool partial_eig=false, bool fast_R=false, bool balance_mu=false,
-          bool threshold_first=false, int anderson=0) {
+          bool threshold_first=false, int anderson=0,
+          double anderson_s0=0) {
 
     int n = SigmaO.n_rows;
     if (mu == 0) mu = n;
@@ -478,9 +479,10 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
     };
 
     int iter;
+    double anderson_s = anderson_s0;
     if (anderson > 0) {
       iter = andersonDriver(step, RY, SY, LY, Lambda1, Lambda2, Lambda3, anderson,
-                            maxiter, threshold_first);
+                            maxiter, threshold_first, anderson_s);
     } else
     for (iter = 0; iter < maxiter; iter++) {
       bool converged = step(iter, iter > 0 || threshold_first);
@@ -520,6 +522,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
                         _["Lambda"] = Lambda,
 //                        _["RA"] = RA, _["SA"] = SA, _["LA"] = LA,
                         _["iter"] = iter+1, _["beta"] = beta, _["mu"]   = mu,
+                        _["anderson_s"] = anderson_s,
                         _["history"] = List::create(
                           _["r_norm"]  =  r_norm,
                           _["eps_pri"] = eps_pri,
