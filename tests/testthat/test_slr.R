@@ -111,7 +111,10 @@ describe("Path-changing options converge to the same optimum", {
   ref <- slr_fit_case(cs, opts=list(tol=1e-11, maxiter=1e6))
   configs <- list(balance_mu   = list(balance.mu=TRUE),
                   sparse_first = list(path.order='sparse_first'),
-                  both         = list(balance.mu=TRUE, path.order='sparse_first'))
+                  both         = list(balance.mu=TRUE, path.order='sparse_first'),
+                  anderson     = list(anderson=10),
+                  anderson_all = list(anderson=10, path.order='sparse_first',
+                                      partial.eig=TRUE, fast.R=TRUE))
   for (nm in names(configs)) {
     test_that(paste("reaches the reference solution:", nm), {
       fit <- slr_fit_case(cs, opts=c(configs[[nm]], list(tol=1e-8, maxiter=1e5)))
@@ -119,6 +122,43 @@ describe("Path-changing options converge to the same optimum", {
       expect_lt(err, 1e-3)
     })
   }
+})
+
+describe("Anderson acceleration", {
+  steps <- function(fit) sum(fit$iter)
+
+  test_that("needs no more ADMM steps than plain ADMM, for every case", {
+    for (nm in names(baseline$cases)) {
+      cs <- baseline$cases[[nm]]
+      plain <- slr_fit_case(cs, opts=list(tol=1e-6, maxiter=1e5))
+      acc   <- slr_fit_case(cs, opts=list(tol=1e-6, maxiter=1e5, anderson=10))
+      expect_lte(steps(acc), steps(plain))
+    }
+  })
+
+  test_that("is safeguarded when plain ADMM is badly tuned", {
+    # a poor fixed mu slows ADMM; the accelerated run must still reach the same
+    # solution, in no more steps
+    cs <- baseline$cases$rank_np
+    ref   <- slr_fit_case(cs, opts=list(tol=1e-11, maxiter=1e6))
+    plain <- slr_fit_case(cs, opts=list(mu=20, tol=1e-7, maxiter=1e5))
+    acc   <- slr_fit_case(cs, opts=list(mu=20, tol=1e-7, maxiter=1e5, anderson=10))
+    err <- max(mapply(rel_err, acc$icov, ref$icov), mapply(rel_err, acc$resid, ref$resid))
+    expect_lt(err, 1e-2)
+    expect_lte(steps(acc), steps(plain))
+  })
+
+  test_that("is deterministic", {
+    cs <- baseline$cases$rank_pn
+    a <- slr_fit_case(cs, opts=list(tol=1e-6, anderson=10))
+    b <- slr_fit_case(cs, opts=list(tol=1e-6, anderson=10))
+    expect_identical(a, b)
+  })
+
+  test_that("refuses an adaptive mu", {
+    cs <- baseline$cases$rank_np
+    expect_error(slr_fit_case(cs, opts=list(anderson=5, balance.mu=TRUE)), "fixed mu")
+  })
 })
 
 describe("SLR low-rank component", {

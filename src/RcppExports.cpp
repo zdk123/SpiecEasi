@@ -62,8 +62,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // ADMM
-List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda, arma::mat& Y, double beta, int r, double mu, const double& eta, const double& muf, const int& maxiter, const double& newtol, const double& tol, const double& over_relax_par, bool shrinkDiag, bool partial_eig, bool fast_R, bool balance_mu);
-RcppExport SEXP _SpiecEasi_ADMM(SEXP SigmaOSEXP, SEXP lambdaSEXP, SEXP ISEXP, SEXP LambdaSEXP, SEXP YSEXP, SEXP betaSEXP, SEXP rSEXP, SEXP muSEXP, SEXP etaSEXP, SEXP mufSEXP, SEXP maxiterSEXP, SEXP newtolSEXP, SEXP tolSEXP, SEXP over_relax_parSEXP, SEXP shrinkDiagSEXP, SEXP partial_eigSEXP, SEXP fast_RSEXP, SEXP balance_muSEXP) {
+List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I, arma::mat& Lambda, arma::mat& Y, double beta, int r, double mu, const double& eta, const double& muf, const int& maxiter, const double& newtol, const double& tol, const double& over_relax_par, bool shrinkDiag, bool partial_eig, bool fast_R, bool balance_mu, bool threshold_first, int anderson);
+RcppExport SEXP _SpiecEasi_ADMM(SEXP SigmaOSEXP, SEXP lambdaSEXP, SEXP ISEXP, SEXP LambdaSEXP, SEXP YSEXP, SEXP betaSEXP, SEXP rSEXP, SEXP muSEXP, SEXP etaSEXP, SEXP mufSEXP, SEXP maxiterSEXP, SEXP newtolSEXP, SEXP tolSEXP, SEXP over_relax_parSEXP, SEXP shrinkDiagSEXP, SEXP partial_eigSEXP, SEXP fast_RSEXP, SEXP balance_muSEXP, SEXP threshold_firstSEXP, SEXP andersonSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -85,7 +85,9 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< bool >::type partial_eig(partial_eigSEXP);
     Rcpp::traits::input_parameter< bool >::type fast_R(fast_RSEXP);
     Rcpp::traits::input_parameter< bool >::type balance_mu(balance_muSEXP);
-    rcpp_result_gen = Rcpp::wrap(ADMM(SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag, partial_eig, fast_R, balance_mu));
+    Rcpp::traits::input_parameter< bool >::type threshold_first(threshold_firstSEXP);
+    Rcpp::traits::input_parameter< int >::type anderson(andersonSEXP);
+    rcpp_result_gen = Rcpp::wrap(ADMM(SigmaO, lambda, I, Lambda, Y, beta, r, mu, eta, muf, maxiter, newtol, tol, over_relax_par, shrinkDiag, partial_eig, fast_R, balance_mu, threshold_first, anderson));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -95,7 +97,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_SpiecEasi_RupdateNewR", (DL_FUNC) &_SpiecEasi_RupdateNewR, 2},
     {"_SpiecEasi_eigPSDThresh2R", (DL_FUNC) &_SpiecEasi_eigPSDThresh2R, 3},
     {"_SpiecEasi_eigPSDThreshPartialR", (DL_FUNC) &_SpiecEasi_eigPSDThreshPartialR, 3},
-    {"_SpiecEasi_ADMM", (DL_FUNC) &_SpiecEasi_ADMM, 18},
+    {"_SpiecEasi_ADMM", (DL_FUNC) &_SpiecEasi_ADMM, 20},
     {NULL, NULL, 0}
 };
 
