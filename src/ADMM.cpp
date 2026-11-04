@@ -168,10 +168,14 @@ arma::mat eigPSDThreshPartial(arma::mat& M, int k, double beta=0) {
     return 0.5 * (L + L.t());
 }
 
+arma::mat RproxEig(const arma::mat& K, double mu);
+
 // R-update prox, (sqrt(K^2 + 4 mu I) - K)/2, as originally computed.
+// sqrtmat_sympd leaves KI empty when it fails (seen with MKL), so fall back
+// to the equivalent one-eig form.
 arma::mat Rprox2(const arma::mat& K, double mu, const arma::mat& I) {
     arma::mat KI, K2 = K*K + 4*mu*I;
-    arma::sqrtmat_sympd(KI, K2);
+    if (!arma::sqrtmat_sympd(KI, K2)) return RproxEig(K, mu);
     return (KI-K)/2;
 }
 
@@ -422,7 +426,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
     // squared Frobenius norm summed over the three blocks
     auto sq = [](const arma::mat& M) { double v = norm(M, "fro"); return v*v; };
 //    arma::mat Y_old(Y);
-    arma::mat K, K2, KI;
+    arma::mat K;
 
     // One ADMM iteration on the state (RY, SY, LY, Lambda1..3); records the
     // primal residual in slot `it` of the history.
@@ -433,14 +437,7 @@ List ADMM(const arma::mat& SigmaO, const double& lambda, arma::mat& I,
         LA = LY + mu*Lambda3;
       // update R
       K  = mu*SigmaO - RA;
-      if (fast_R) {
-        R = RproxEig(K, mu);
-      } else {
-        K2 = K*K + 4*mu*I;
-//        KI = sqrtmNewt2(K2, I, newtol);
-        arma::sqrtmat_sympd(KI, K2);
-        R  = (KI-K)/2;
-      }
+      R  = fast_R ? RproxEig(K, mu) : Rprox2(K, mu, I);
 
       // update S
       S = SOFTTHRESHD(SA, lambda*mu, shrinkDiag);
