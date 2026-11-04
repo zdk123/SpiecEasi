@@ -7,6 +7,6 @@
 pkgload::load_all(".", quiet=TRUE)
 source("tests/testthat/helper-slr.R")
 
-cases <- slr_baseline_cases()
+cases <- lapply(slr_baseline_cases(), function(cs) c(cs, list(X=slr_sim_data(cs$p, cs$n))))
 fits  <- lapply(cases, function(cs) slr_fit_case(cs))
 saveRDS(list(cases=cases, fits=fits), "tests/testthat/fixtures/slr_baseline.rds", version=2)

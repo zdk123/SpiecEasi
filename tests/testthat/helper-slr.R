@@ -19,8 +19,10 @@ slr_baseline_cases <- function() {
   )
 }
 
+## Fixture cases carry their data: rmvnorm goes through eigen/svd, so the simulated X
+## differs across LAPACK builds (eigenvector signs).
 slr_fit_case <- function(cs, opts=NULL) {
-  X <- slr_sim_data(cs$p, cs$n)
+  X <- if (!is.null(cs$X)) cs$X else slr_sim_data(cs$p, cs$n)
   args <- list(data=X, cor=TRUE, nlambda=cs$nlambda, lambda.min.ratio=1e-2,
                lambda.max=getMaxCov(cor(X)), opts=opts)
   if (!is.null(cs$r))    args$r    <- cs$r
